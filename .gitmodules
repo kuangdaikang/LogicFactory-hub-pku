@@ -1,0 +1,12 @@
+[submodule "toolkit/mockturtle"]
+	path = toolkit/mockturtle
+	url = git@github.com:Logic-Factory/mockturtle.git
+[submodule "toolkit/lorina"]
+	path = toolkit/lorina
+	url = git@github.com:Logic-Factory/lorina.git
+[submodule "toolkit/abc"]
+	path = toolkit/abc
+	url = git@github.com:Logic-Factory/abc.git
+[submodule "toolkit/yosys"]
+	path = toolkit/yosys
+	url = git@github.com:Logic-Factory/yosys.git
