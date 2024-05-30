@@ -1,0 +1,7 @@
+.vscode/
+tmp/
+build/
+data/
+
+gmon.out
+
