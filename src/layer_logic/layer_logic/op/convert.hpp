@@ -32,7 +32,44 @@ NtkDest convert( NtkSrc const& ntk_src )
                  "NtkDest is not an AIG, XAG, MIG, XMG, or GTG" );
   NtkDest ntk_dest;
 
-  // TODO:
+  // ntk_src.foreach_gate( [&]( auto const& g ) {
+  //   if ( ntk.is_and( g ) )
+  //   {
+  //     children = ntk_src.children( g );
+  //     // ntk_dest create and node
+  //     children_new = mapping( children ); // 使用 map 进行记录两个图之间节点的对应关系
+  //     auto s = nkt_dest.create_and( children_new );
+  //     mapping( s, g );
+  //   }
+  //   else if ( ntk.is_nand( g ) )
+  //   {
+  //     // ntk_dest create or node
+  //   }
+  //   else if ( ntk.is_or( g ) )
+  //   {
+  //     // ntk_dest create or node
+  //   }
+  //   else if ( ntk.is_nor( g ) )
+  //   {
+  //     // ntk_dest create or node
+  //   }
+  //   else if ( ntk.is_xor( g ) )
+  //   {
+  //     // ntk_dest create or node
+  //   }
+  //   else if ( ntk.is_xnor( g ) )
+  //   {
+  //     // ntk_dest create or node
+  //   }
+  //   else if ( ntk.is_maj( g ) )
+  //   {
+  //     // ntk_dest create or node
+  //   }
+  //   else
+  //   {
+  //     assert( false );
+  //   }
+  // } );
 }
 
 } // end namespace lf
