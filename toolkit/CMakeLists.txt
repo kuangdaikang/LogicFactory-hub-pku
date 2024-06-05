@@ -12,6 +12,9 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/yosys)
     )
 
     add_library(libyosys INTERFACE)
+    target_compile_definitions(libyosys INTERFACE
+        _YOSYS_
+    )
     set_target_properties(libyosys PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/yosys"
         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/yosys/lib/yosys/libyosys.so"
