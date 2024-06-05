@@ -1,10 +1,3 @@
-# # compile abc with CMakeLists.txt
-# if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/abc/CMakeLists.txt)
-# add_subdirectory(abc)
-# else()
-# message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/abc is missing!")
-# endif()
-
 # # compile yosys with Makefile
 # if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/yosys)
 # add_custom_target(
@@ -20,6 +13,13 @@
 # else()
 # message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/yosys is missing!")
 # endif()
+
+# compile abc with CMakeLists.txt
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/abc/CMakeLists.txt)
+    add_subdirectory(abc)
+else()
+    message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/abc is missing!")
+endif()
 
 # compile yosys with CMakeLists.txt
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mockturtle)

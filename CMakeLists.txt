@@ -4,13 +4,12 @@ project(LogicFactory VERSION 0.1 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99") # this is for ABC
+
 set(HOME ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(LF_BUILD_TEST "build with test" ON)
 option(LF_BUILD_APP "build with application" ON)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
