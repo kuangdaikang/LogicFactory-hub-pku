@@ -5,7 +5,9 @@ project(LogicFactory VERSION 0.1 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS ON)
 
-set(HOME ${CMAKE_CURRENT_SOURCE_DIR})
+set(HOME ${PROJECT_SOURCE_DIR})
+set(LF_SRC ${HOME}/src)
+set(LF_LIB ${HOME}/libs)
 
 option(LF_BUILD_TEST "build with test" ON)
 option(LF_BUILD_APP "build with application" ON)
@@ -28,20 +30,20 @@ else()
 endif()
 
 # add the third party
-add_subdirectory(3rd-party)
+add_subdirectory(${HOME}/3rd-party)
 
 # add the toolkit projects
-add_subdirectory(toolkit)
+add_subdirectory(${HOME}/toolkit)
 
 # add src folder
-add_subdirectory(src)
+add_subdirectory(${HOME}/src)
 
 # add test folder
 if(LF_BUILD_TEST)
-    add_subdirectory(test)
+    add_subdirectory(${HOME}/test)
 endif()
 
 # add application folder
 if(LF_BUILD_APP)
-    add_subdirectory(app)
+    add_subdirectory(${HOME}/app)
 endif()

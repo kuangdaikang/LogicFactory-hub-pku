@@ -5,5 +5,8 @@ target_link_libraries(lf_logic INTERFACE
     lorina
     kitty
     mockturtle
+    libabc
+    dl
+    readline
 )
 target_include_directories(lf_logic SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
