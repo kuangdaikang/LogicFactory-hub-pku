@@ -7,6 +7,7 @@
 [submodule "toolkit/yosys"]
 	path = toolkit/yosys
 	url = git@github.com:Logic-Factory/yosys.git
+	branch = main
 [submodule "toolkit/mockturtle"]
 	path = toolkit/mockturtle
 	url = git@github.com:Logic-Factory/mockturtle.git
