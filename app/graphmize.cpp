@@ -7,7 +7,8 @@
 
 int main( int argc, char** argv )
 {
-  std::string file = std::string( argv[1] );
+  std::string file_in = std::string( argv[1] );
+  std::string file_out = std::string( argv[2] );
 
   mockturtle::gtg_network gtg; // load into gtg
 
@@ -20,7 +21,7 @@ int main( int argc, char** argv )
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
 
-  auto rc = lorina::read_gtech( file, mockturtle::gtech_reader( gtg, ports ), &diag );
+  auto rc = lorina::read_gtech( file_in, mockturtle::gtech_reader( gtg, ports ), &diag );
 
   if ( rc != lorina::return_code::success )
   {
@@ -36,11 +37,11 @@ int main( int argc, char** argv )
   std::cout << "create mig ing\n";
   mig = lf::convert<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
 
-  lf::graphmize( gtg, "test.gtg.graphml" );
-  lf::graphmize( aig, "test.aig.graphml" );
-  lf::graphmize( xmg, "test.xmg.graphml" );
-  lf::graphmize( xag, "test.xag.graphml" );
-  lf::graphmize( mig, "test.mig.graphml" );
+  lf::graphmize( gtg, file_out + ".gtg.graphml" );
+  lf::graphmize( aig, file_out + ".aig.graphml" );
+  lf::graphmize( xmg, file_out + ".xmg.graphml" );
+  lf::graphmize( xag, file_out + ".xag.graphml" );
+  lf::graphmize( mig, file_out + ".mig.graphml" );
 
   std::cout << "success!\n";
   return 1;

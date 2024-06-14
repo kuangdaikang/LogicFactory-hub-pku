@@ -6,7 +6,8 @@
 
 int main( int argc, char** argv )
 {
-  std::string file = std::string( argv[1] );
+  std::string file_in = std::string( argv[1] );
+  std::string file_out = std::string( argv[2] );
 
   mockturtle::gtg_network gtg; // load into gtg
 
@@ -19,11 +20,12 @@ int main( int argc, char** argv )
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
 
-  auto rc = lorina::read_gtech( file, mockturtle::gtech_reader( gtg, ports ), &diag );
+  auto rc = lorina::read_gtech( file_in, mockturtle::gtech_reader( gtg, ports ), &diag );
 
   if ( rc != lorina::return_code::success )
   {
     std::cout << "parser wrong!" << std::endl;
+    return 0;
   }
 
   std::cout << "create aig ing\n";
@@ -35,11 +37,11 @@ int main( int argc, char** argv )
   std::cout << "create mig ing\n";
   mig = lf::convert<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
 
-  mockturtle::write_dot( gtg, "test.gtg.dot" );
-  mockturtle::write_dot( aig, "test.aig.dot" );
-  mockturtle::write_dot( xmg, "test.xmg.dot" );
-  mockturtle::write_dot( xag, "test.xag.dot" );
-  mockturtle::write_dot( mig, "test.mig.dot" );
+  mockturtle::write_dot( gtg, file_out + ".gtg.dot" );
+  mockturtle::write_dot( aig, file_out + ".aig.dot" );
+  mockturtle::write_dot( xmg, file_out + ".xmg.dot" );
+  mockturtle::write_dot( xag, file_out + ".xag.dot" );
+  mockturtle::write_dot( mig, file_out + ".mig.dot" );
 
   std::cout << "success!\n";
   return 1;
