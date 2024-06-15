@@ -11,6 +11,9 @@
 namespace lf
 {
 
+namespace logic
+{
+
 /**
  * @class Strash
  * @brief structure hash of the logic network
@@ -100,5 +103,7 @@ Ntk strash( Ntk const& ntk )
 
   return ntk_res;
 }
+
+} // end namespace logic
 
 } // namespace lf

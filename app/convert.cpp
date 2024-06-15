@@ -29,13 +29,13 @@ int main( int argc, char** argv )
   }
 
   std::cout << "create aig ing\n";
-  aig = lf::convert<mockturtle::aig_network, mockturtle::gtg_network>( gtg );
+  aig = lf::logic::convert<mockturtle::aig_network, mockturtle::gtg_network>( gtg );
   std::cout << "create xmg ing\n";
-  xmg = lf::convert<mockturtle::xmg_network, mockturtle::gtg_network>( gtg );
+  xmg = lf::logic::convert<mockturtle::xmg_network, mockturtle::gtg_network>( gtg );
   std::cout << "create xag ing\n";
-  xag = lf::convert<mockturtle::xag_network, mockturtle::gtg_network>( gtg );
+  xag = lf::logic::convert<mockturtle::xag_network, mockturtle::gtg_network>( gtg );
   std::cout << "create mig ing\n";
-  mig = lf::convert<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
+  mig = lf::logic::convert<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
 
   mockturtle::write_dot( gtg, file_out + ".gtg.dot" );
   mockturtle::write_dot( aig, file_out + ".aig.dot" );

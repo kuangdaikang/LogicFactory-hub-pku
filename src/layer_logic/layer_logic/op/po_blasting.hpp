@@ -12,6 +12,9 @@
 namespace lf
 {
 
+namespace logic
+{
+
 /**
  * @class po blasting
  * @brief split the given network into single-output sub-network
@@ -75,5 +78,7 @@ std::vector<Ntk> po_blasting( Ntk const& ntk_src )
   } );
   return po_ntks;
 }
+
+} // end namespace logic
 
 } // namespace lf

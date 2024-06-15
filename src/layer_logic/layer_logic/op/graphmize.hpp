@@ -9,6 +9,9 @@
 namespace lf
 {
 
+namespace logic
+{
+
 /**
  * @brief generate the graphml file for current network.
  *
@@ -204,5 +207,7 @@ void graphmize( Ntk const& ntk, const std::string& file )
   } );
   doc.save_file( file.c_str() );
 }
+
+} // end namespace logic
 
 } // end namespace lf

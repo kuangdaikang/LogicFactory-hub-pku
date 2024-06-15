@@ -29,19 +29,19 @@ int main( int argc, char** argv )
   }
 
   std::cout << "create aig ing\n";
-  aig = lf::convert<mockturtle::aig_network, mockturtle::gtg_network>( gtg );
+  aig = lf::logic::convert<mockturtle::aig_network, mockturtle::gtg_network>( gtg );
   std::cout << "create xmg ing\n";
-  xmg = lf::convert<mockturtle::xmg_network, mockturtle::gtg_network>( gtg );
+  xmg = lf::logic::convert<mockturtle::xmg_network, mockturtle::gtg_network>( gtg );
   std::cout << "create xag ing\n";
-  xag = lf::convert<mockturtle::xag_network, mockturtle::gtg_network>( gtg );
+  xag = lf::logic::convert<mockturtle::xag_network, mockturtle::gtg_network>( gtg );
   std::cout << "create mig ing\n";
-  mig = lf::convert<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
+  mig = lf::logic::convert<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
 
-  lf::graphmize( gtg, file_out + ".gtg.graphml" );
-  lf::graphmize( aig, file_out + ".aig.graphml" );
-  lf::graphmize( xmg, file_out + ".xmg.graphml" );
-  lf::graphmize( xag, file_out + ".xag.graphml" );
-  lf::graphmize( mig, file_out + ".mig.graphml" );
+  lf::logic::graphmize( gtg, file_out + ".gtg.graphml" );
+  lf::logic::graphmize( aig, file_out + ".aig.graphml" );
+  lf::logic::graphmize( xmg, file_out + ".xmg.graphml" );
+  lf::logic::graphmize( xag, file_out + ".xag.graphml" );
+  lf::logic::graphmize( mig, file_out + ".mig.graphml" );
 
   std::cout << "success!\n";
   return 1;

@@ -9,6 +9,9 @@
 namespace lf
 {
 
+namespace logic
+{
+
 /**
  * @brief Convert a network from one type to another.
  *
@@ -106,5 +109,7 @@ NtkDest convert( NtkSrc const& ntk_src )
   // return the dest network
   return ntk_dest;
 }
+
+} // end namespace logic
 
 } // end namespace lf
