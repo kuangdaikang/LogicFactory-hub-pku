@@ -16,3 +16,13 @@ target_link_libraries(graphmize
     mockturtle
     lf_logic
 )
+
+add_executable(logic_manager
+    ${PROJECT_SOURCE_DIR}/app/logic_manager.cpp
+)
+target_link_libraries(logic_manager
+    lorina
+    kitty
+    mockturtle
+    lf_logic
+)

@@ -1,5 +1,5 @@
 # compile yosys with Makefile
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/yosys)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/yosys/Makefile)
     add_custom_target(
         yosys ALL
 
@@ -26,21 +26,22 @@ endif()
 
 # compile abc with CMakeLists.txt
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/abc/CMakeLists.txt)
+    set(ABC_USE_NAMESPACE "babc")
     add_subdirectory(abc)
 else()
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/abc is missing!")
 endif()
 
 # compile mockturtle with CMakeLists.txt
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mockturtle)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mockturtle/CMakeLists.txt)
     add_subdirectory(mockturtle)
 else()
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/mockturtle is missing!")
 endif()
 
 # compile iEDA with CMakeLists.txt
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/iEDA)
-    add_subdirectory(iEDA)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/iEDA/CMakeLists.txt)
+    add_subdirectory(iEDA ${CMAKE_BINARY_DIR}/toolkit/iEDA)
 
     # binding the static library into the alias
     add_library(libidb INTERFACE)
