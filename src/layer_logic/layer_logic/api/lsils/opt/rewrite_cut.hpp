@@ -10,6 +10,9 @@ namespace lf
 namespace logic
 {
 
+namespace lsils
+{
+
 /**
  * @brief balance current network
  * @param ntk   network
@@ -22,7 +25,8 @@ namespace logic
  *  mockturtle::aig_network aig_balanced = sop_balance(aig);
  *
  */
-template<class Ntk, class RewritingFn, class NodeCostFn = unit_cost<Ntk>>
+// template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
+template<class Ntk, class NodeCostFn = mockturtle::unit_cost<Ntk>>
 void rewrite_cut( LogicManager& manager )
 {
   using NtkBase = typename Ntk::base_type;
@@ -57,6 +61,8 @@ void rewrite_cut( LogicManager& manager )
   // mockturtle::cut_rewriting_stats* pst = nullptr;
   // ntk = mockturtle::cut_rewriting( *ntk, rewriting_fn, ps, pst );
 }
+
+} // end namespace lsils
 
 } // end namespace logic
 

@@ -24,10 +24,39 @@ else()
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/yosys is missing!")
 endif()
 
+macro(MKDIR)
+	set(options)
+	set(oneValueArgs )
+	set(multiValueArgs TARGET_ROOT )
+	cmake_parse_arguments(MK "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+	foreach(WHICH_ROOT ${MK_TARGET_ROOT})
+		execute_process( COMMAND ${CMAKE_COMMAND} -E make_directory ${WHICH_ROOT})
+	endforeach()
+endmacro()
+
 # compile abc with CMakeLists.txt
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/abc/CMakeLists.txt)
-    set(ABC_USE_NAMESPACE "babc")
-    add_subdirectory(abc)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/abc/Makefile)
+    MKDIR(TARGET_ROOT ${CMAKE_BINARY_DIR}/toolkit/abc/bin)
+    MKDIR(TARGET_ROOT ${CMAKE_BINARY_DIR}/toolkit/abc/lib)
+    add_custom_target(
+        abc ALL
+        # COMMAND make -C "${CMAKE_CURRENT_SOURCE_DIR}/abc/" -f "${CMAKE_CURRENT_SOURCE_DIR}/abc/Makefile" ABC_USE_NAMESPACE=babc abc libabc.a
+        COMMAND make -C "${CMAKE_CURRENT_SOURCE_DIR}/abc/" -f "${CMAKE_CURRENT_SOURCE_DIR}/abc/Makefile" abc libabc.a
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/toolkit/abc
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/abc/abc ${CMAKE_BINARY_DIR}/toolkit/abc/bin/abc
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/abc/abc.rc ${CMAKE_BINARY_DIR}/toolkit/abc/bin/abc.rc
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/abc/libabc.a ${CMAKE_BINARY_DIR}/toolkit/abc/lib/libabc.a
+        COMMENT "Compile abc with given Makefile"
+    )
+    # add_library(lib_lf_abc STATIC IMPORTED)
+    # set_target_properties(lib_lf_abc PROPERTIES
+    #     IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/toolkit/abc/lib/libabc.a"
+    #     INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/abc/src/"
+    # )
+    # add_dependencies(lib_lf_abc abc)
+    # get_target_property(ABC_INCLUDE_DIRS lib_lf_abc INTERFACE_INCLUDE_DIRECTORIES)
+    # message(STATUS "lib_lf_abc include directories: ${ABC_INCLUDE_DIRS}")    
 else()
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/abc is missing!")
 endif()

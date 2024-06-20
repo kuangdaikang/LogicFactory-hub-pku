@@ -3,10 +3,11 @@
 #ifdef __cplusplus
 extern "C"
 {
-// #include "base/abc/abc.h"
-#include "base/abci/abc.c"
+#include "misc/util/abc_global.h"
+#include "base/abci/abc.h"
 }
 #endif
+
 
 #include "layer_logic/logic_manager.hpp"
 
@@ -24,10 +25,12 @@ namespace abc
 void rewrite( LogicManager& manager )
 {
   manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
-  auto ntk = manager.current();
-
-  // int argc, char **argv;
-  // return pabc::Abc_CommandRewrite( pAbc, argc, argv );
+  // Abc_Frame_t* ntk = manager.current().get(); // the the network from shared_ptr
+  // Abc_Frame_t* ntk;
+  
+  // int argc;
+  // char** argv;
+  // Abc_CommandRewrite( ntk, argc, argv );
 }
 
 } // namespace abc

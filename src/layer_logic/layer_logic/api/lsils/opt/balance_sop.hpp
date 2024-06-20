@@ -11,6 +11,9 @@ namespace lf
 namespace logic
 {
 
+namespace lsils
+{
+
 /**
  * @brief balance current network
  * @param ntk   network
@@ -59,6 +62,8 @@ void balance_sop( LogicManager& manager )
 
   // ntk = mockturtle::balancing<Ntk, Costfn>( *ntk, rebalancing_fn, ps, pst );
 }
+
+} // end namespace lsils
 
 } // end namespace logic
 

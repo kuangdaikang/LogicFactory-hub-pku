@@ -9,14 +9,10 @@
 #ifdef __cplusplus
 extern "C"
 {
-#include "base/abc/abc.h"
-#include "base/abci/abc.c"
 #include "misc/util/abc_global.h"
-#include "misc/util/utilSort.c"
+#include "base/main/abcapis.h"
 }
 #endif
-
-using namespace babc;
 
 #include <assert.h>
 #include <iostream>
@@ -187,9 +183,9 @@ public:
 
 private:
   E_ToolLogicType logic_type_prev_;
-  E_ToolLogicType logic_type_curr_;
+  E_ToolLogicType logic_type_curr_; 
 
-  std::variant<std::shared_ptr<pabc::Abc_Frame_t>,
+  std::variant<std::shared_ptr<Abc_Frame_t>,
                std::shared_ptr<mockturtle::aig_network>,
                std::shared_ptr<mockturtle::xag_network>,
                std::shared_ptr<mockturtle::mig_network>,
@@ -197,7 +193,7 @@ private:
                std::shared_ptr<mockturtle::gtg_network>>
       current_ntk_; // store the current network
 
-  std::shared_ptr<pabc::Abc_Frame_t> ntk_abc_aig_ = nullptr;
+  std::shared_ptr<Abc_Frame_t> ntk_abc_aig_ = nullptr;
   std::shared_ptr<mockturtle::aig_network> ntk_mt_aig_ = nullptr;
   std::shared_ptr<mockturtle::xag_network> ntk_mt_xag_ = nullptr;
   std::shared_ptr<mockturtle::mig_network> ntk_mt_mig_ = nullptr;
