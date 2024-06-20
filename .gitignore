@@ -1,7 +1,12 @@
 .vscode/
-tmp/
+
 build/
+debug/
+release/
+
 data/
+
+tmp/
 
 gmon.out
 
