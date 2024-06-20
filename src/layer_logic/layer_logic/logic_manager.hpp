@@ -9,6 +9,7 @@
 #ifdef __cplusplus
 extern "C"
 {
+#include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
 #include "base/main/abcapis.h"
 }
@@ -181,9 +182,52 @@ public:
                        current_ntk_ );
   }
 
+  template<typename Ntk>
+  void set_current( std::shared_ptr<Ntk> ntk_ptr )
+  {
+    if ( !ntk_ptr )
+    {
+      std::invalid_argument( "ntk_ptr is nullptr" );
+      return;
+    }
+
+    current_ntk_ = ntk_ptr;
+
+    using NtkBase = typename Ntk::base_type;
+    // Update specific network pointer based on the type of Ntk
+    if constexpr ( std::is_same_v<Ntk, Abc_Frame_t> )
+    {
+      ntk_abc_aig_ = ntk_ptr;
+    }
+    else if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
+    {
+      ntk_mt_aig_ = ntk_ptr;
+    }
+    else if constexpr ( std::is_same_v<NtkBase, mockturtle::xag_network> )
+    {
+      ntk_mt_xag_ = ntk_ptr;
+    }
+    else if constexpr ( std::is_same_v<NtkBase, mockturtle::mig_network> )
+    {
+      ntk_mt_mig_ = ntk_ptr;
+    }
+    else if constexpr ( std::is_same_v<NtkBase, mockturtle::xmg_network> )
+    {
+      ntk_mt_xmg_ = ntk_ptr;
+    }
+    else if constexpr ( std::is_same_v<NtkBase, mockturtle::gtg_network> )
+    {
+      ntk_mt_gtg_ = ntk_ptr;
+    }
+    else
+    {
+      assert( false );
+    }
+  }
+
 private:
   E_ToolLogicType logic_type_prev_;
-  E_ToolLogicType logic_type_curr_; 
+  E_ToolLogicType logic_type_curr_;
 
   std::variant<std::shared_ptr<Abc_Frame_t>,
                std::shared_ptr<mockturtle::aig_network>,

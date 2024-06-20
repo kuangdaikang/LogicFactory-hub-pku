@@ -5,6 +5,7 @@
 #include "layer_logic/logic_manager.hpp"
 
 #include <cstring>
+#include <memory>
 
 namespace lf
 {
@@ -117,19 +118,19 @@ bool read_gtech( std::string const& filename, LogicManager& manager )
 
   Ntk ntk;
 
-  auto ntk_pointer = manager.current();
-
-  // TODO: make the manager.current() pointer to ntk
-
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
+  mockturtle::read_verilog_params ports;
 
-  auto rc = lorina::read_aiger( filename, mockturtle::aiger_reader( ntk ), &diag );
+  lorina::return_code rc = lorina::read_gtech( filename, mockturtle::gtech_reader<Ntk>( ntk, ports ), &diag );
   if ( rc != lorina::return_code::success )
   {
     std::cout << "parser wrong!" << std::endl;
     return false;
   }
+
+  manager.set_current<Ntk>( std::make_shared<Ntk>( ntk ) );
+
   return true;
 }
 

@@ -1,8 +1,11 @@
 #pragma once
-#include "layer_logic/logic_manager.hpp"
 #include "lorina/lorina.hpp"
 #include "mockturtle/mockturtle.hpp"
+
+#include "layer_logic/logic_manager.hpp"
+
 #include <cstring>
+#include <memory>
 
 namespace lf
 {
@@ -110,17 +113,19 @@ bool read_aiger( std::string const& filename, LogicManager& manager )
     assert( false );
   }
 
-  auto ntk_pointer = manager.current();
+  Ntk ntk;
 
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
 
-  auto rc = lorina::read_aiger( filename, mockturtle::aiger_reader( *ntk_pointer ), &diag );
+  lorina::return_code rc = lorina::read_aiger( filename, mockturtle::aiger_reader( *ntk_pointer ), &diag );
   if ( rc != lorina::return_code::success )
   {
     std::cout << "parser wrong!" << std::endl;
     return false;
   }
+
+  manager.set_current<Ntk>( std::make_shared<Ntk>( ntk ) );
   return true;
 }
 
