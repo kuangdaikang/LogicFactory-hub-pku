@@ -1,8 +1,14 @@
+#pragma once
+
 #include "mockturtle/networks/aig.hpp"
 #include "mockturtle/networks/gtg.hpp"
 #include "mockturtle/networks/mig.hpp"
 #include "mockturtle/networks/xag.hpp"
 #include "mockturtle/networks/xmg.hpp"
+
+#include "misc/util/abc_namespaces.h"
+#include "misc/util/abc_global.h"
+#include "base/abc/abc.h"
 
 #include <unordered_map>
 
@@ -19,7 +25,7 @@ namespace logic
  * @return The converted network.
  */
 template<class NtkDest, class NtkSrc>
-NtkDest convert( NtkSrc const& ntk_src )
+NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
 {
   using NtkSrcBase = typename NtkSrc::base_type;
   using NtkDestBase = typename NtkDest::base_type;
@@ -107,6 +113,26 @@ NtkDest convert( NtkSrc const& ntk_src )
   } );
 
   // return the dest network
+  return ntk_dest;
+}
+
+/**
+ * @brief
+ */
+template<typename Ntk>
+babc::Abc_Ntk_t convert_lsils_2_abc( Ntk const& ntk )
+{
+  babc::Abc_Ntk_t ntk_dest;
+  return ntk_dest;
+}
+
+/**
+ * @brief
+ */
+template<typename Ntk>
+Ntk convert_abc_2_lsils( babc::Abc_Ntk_t* ntk )
+{
+  Ntk ntk_dest;
   return ntk_dest;
 }
 

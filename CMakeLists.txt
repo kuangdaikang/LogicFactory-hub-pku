@@ -13,9 +13,6 @@ set(LF_LIB ${HOME}/libs)
 option(LF_BUILD_TEST "build with test" ON)
 option(LF_BUILD_APP "build with application" ON)
 
-set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-
 set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
@@ -37,7 +34,6 @@ endif()
 add_subdirectory(${HOME}/3rd-party)
 
 # add the toolkit projects
-include_directories(${PROJECT_SOURCE_DIR}/toolkit/abc/src)
 add_subdirectory(${HOME}/toolkit)
 
 # add src folder

@@ -52,15 +52,15 @@ void balance_sop( LogicManager& manager )
   }
   else
   {
+    std::cerr << "Unhandled network type provided." << std::endl;
     assert( false );
   }
-  auto ntk = manager.current();
 
-  // mockturtle::rebalancing_function_t<Ntk> const& rebalancing_fn = mockturtle::sop_rebalancing<Ntk>;
-  // mockturtle::balancing_params const& ps = {};
-  // mockturtle::balancing_stats* pst = nullptr;
+  auto ntk = manager.current<Ntk>();
 
-  // ntk = mockturtle::balancing<Ntk, Costfn>( *ntk, rebalancing_fn, ps, pst );
+  Ntk new_ntk( std::move( *ntk ) );
+  new_ntk = mockturtle::balancing<Ntk, Costfn>( new_ntk );
+  manager.set_current<Ntk>( &new_ntk );
 }
 
 } // end namespace lsils

@@ -125,7 +125,7 @@ bool read_aiger( std::string const& filename, LogicManager& manager )
     return false;
   }
 
-  manager.set_current<Ntk>( std::make_shared<Ntk>( ntk ) );
+  manager.set_current<Ntk>( &ntk );
   return true;
 }
 

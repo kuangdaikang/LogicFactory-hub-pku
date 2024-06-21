@@ -54,7 +54,7 @@ void rewrite_cut( LogicManager& manager )
   {
     assert( false );
   }
-  auto ntk = manager.current();
+  auto ntk = manager.current<Ntk>();
 
   // RewritingFn const& rewriting_fn = {};
   // mockturtle::cut_rewriting_params const& ps = {};

@@ -5,7 +5,7 @@ target_link_libraries(lf_logic INTERFACE
     lorina
     kitty
     mockturtle
-    ${CMAKE_BINARY_DIR}/toolkit/abc/lib/libabc.a
+    libabc
     dl
     readline
 )

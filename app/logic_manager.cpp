@@ -11,8 +11,6 @@ int main( int argc, char** argv )
 
   lf::logic::LogicManager manager;
 
-  manager.update_logic( lf::logic::E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
-
   lf::logic::read_gtech<mockturtle::gtg_network>( file, manager );
 
   lf::logic::lsils::balance_sop<mockturtle::aig_network>( manager );
