@@ -219,31 +219,31 @@ public:
       throw std::invalid_argument( "ntk_ptr is nullptr" );
     }
 
+    // set the current network
     current_ntk_ = ntk_ptr;
 
-    using NtkBase = typename Ntk::base_type;
     // Update specific network pointer based on the type of Ntk
     if constexpr ( std::is_same_v<Ntk, babc::Abc_Frame_t> )
     {
       ntk_abc_aig_ = ntk_ptr;
     }
-    else if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::aig_network> )
     {
       ntk_mt_aig_ = ntk_ptr;
     }
-    else if constexpr ( std::is_same_v<NtkBase, mockturtle::xag_network> )
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::xag_network> )
     {
       ntk_mt_xag_ = ntk_ptr;
     }
-    else if constexpr ( std::is_same_v<NtkBase, mockturtle::mig_network> )
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::mig_network> )
     {
       ntk_mt_mig_ = ntk_ptr;
     }
-    else if constexpr ( std::is_same_v<NtkBase, mockturtle::xmg_network> )
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::xmg_network> )
     {
       ntk_mt_xmg_ = ntk_ptr;
     }
-    else if constexpr ( std::is_same_v<NtkBase, mockturtle::gtg_network> )
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::gtg_network> )
     {
       ntk_mt_gtg_ = ntk_ptr;
     }
