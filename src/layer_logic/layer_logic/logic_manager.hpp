@@ -1,11 +1,8 @@
 #pragma once
 #include "layer_logic/op/convert.hpp"
 
-#include "mockturtle/networks/aig.hpp"
-#include "mockturtle/networks/gtg.hpp"
-#include "mockturtle/networks/mig.hpp"
-#include "mockturtle/networks/xag.hpp"
-#include "mockturtle/networks/xmg.hpp"
+#include "lorina/lorina.hpp"
+#include "mockturtle/mockturtle.hpp"
 
 #include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
@@ -47,8 +44,8 @@ class LogicManager
 {
 public:
   LogicManager()
-      : logic_type_prev_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG ),
-        logic_type_curr_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG ),
+      : logic_type_prev_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG ),
+        logic_type_curr_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG ),
         ntk_abc_aig_( babc::Abc_FrameGetGlobalFrame() )
   {
   }
@@ -56,6 +53,32 @@ public:
   LogicManager( const LogicManager& ) = delete;
   LogicManager& operator=( const LogicManager& ) = delete;
   ~LogicManager() = default;
+
+  /**
+   * @brief set the current logic type, and transform the data strcuture to the current logic type
+   * @param logic_type
+   * @code
+   *  LogicManager manager;
+   *  manager.read_gtech("../file.gtech")
+   */
+  template<class Ntk = mockturtle::gtg_network>
+  bool read_gtech( std::string const& filename )
+  {
+    Ntk ntk;
+
+    lorina::text_diagnostics consumer;
+    lorina::diagnostic_engine diag( &consumer );
+    mockturtle::read_verilog_params ports;
+
+    lorina::return_code rc = lorina::read_gtech( filename, mockturtle::gtech_reader<Ntk>( ntk, ports ), &diag );
+    if ( rc != lorina::return_code::success )
+    {
+      std::cout << "parser wrong!" << std::endl;
+      return false;
+    }
+    set_current<Ntk>( ntk );
+    return true;
+  }
 
   /**
    * @brief set the current logic type, and transform the data strcuture to the current logic type
@@ -103,27 +126,27 @@ public:
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::aig_network>( *ntk_mt_aig_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::aig_network>( ntk_mt_aig_ );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::xag_network>( *ntk_mt_xag_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::xag_network>( ntk_mt_xag_ );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::mig_network>( *ntk_mt_mig_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::mig_network>( ntk_mt_mig_ );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::xmg_network>( *ntk_mt_xmg_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::xmg_network>( ntk_mt_xmg_ );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::gtg_network>( *ntk_mt_gtg_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::gtg_network>( ntk_mt_gtg_ );
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:
@@ -154,31 +177,31 @@ public:
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG:
       {
         auto tNtk3 = lf::logic::convert_lsils_internal<mockturtle::aig_network, NtkIR>( ntk );
-        ntk_mt_aig_ = &tNtk3;
+        ntk_mt_aig_ = tNtk3;
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG:
       {
         auto tNtk4 = lf::logic::convert_lsils_internal<mockturtle::xag_network, NtkIR>( ntk );
-        ntk_mt_xag_ = &tNtk4;
+        ntk_mt_xag_ = tNtk4;
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG:
       {
         auto tNtk5 = lf::logic::convert_lsils_internal<mockturtle::mig_network, NtkIR>( ntk );
-        ntk_mt_mig_ = &tNtk5;
+        ntk_mt_mig_ = tNtk5;
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG:
       {
         auto tNtk6 = lf::logic::convert_lsils_internal<mockturtle::xmg_network, NtkIR>( ntk );
-        ntk_mt_xmg_ = &tNtk6;
+        ntk_mt_xmg_ = tNtk6;
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
         auto tNtk7 = lf::logic::convert_lsils_internal<mockturtle::gtg_network, NtkIR>( ntk );
-        ntk_mt_gtg_ = &tNtk7;
+        ntk_mt_gtg_ = tNtk7;
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:
@@ -200,52 +223,63 @@ public:
    * @return ntk
    */
   template<typename Ntk>
-  Ntk* current()
+  Ntk current()
   {
-    auto ptr = std::get_if<Ntk*>( &current_ntk_ );
-    if ( !ptr )
+    if constexpr ( std::is_same_v<Ntk, babc::Abc_Frame_t*> )
     {
-      std::cerr << "Requested network type is not currently stored." << std::endl;
-      return nullptr;
-    }
-    return *ptr;
-  }
-
-  template<typename Ntk>
-  void set_current( Ntk* ntk_ptr )
-  {
-    if ( !ntk_ptr )
-    {
-      throw std::invalid_argument( "ntk_ptr is nullptr" );
-    }
-
-    // set the current network
-    current_ntk_ = ntk_ptr;
-
-    // Update specific network pointer based on the type of Ntk
-    if constexpr ( std::is_same_v<Ntk, babc::Abc_Frame_t> )
-    {
-      ntk_abc_aig_ = ntk_ptr;
+      return ntk_abc_aig_;
     }
     else if constexpr ( std::is_same_v<Ntk, mockturtle::aig_network> )
     {
-      ntk_mt_aig_ = ntk_ptr;
+      return ntk_mt_aig_;
     }
     else if constexpr ( std::is_same_v<Ntk, mockturtle::xag_network> )
     {
-      ntk_mt_xag_ = ntk_ptr;
+      return ntk_mt_xag_;
     }
     else if constexpr ( std::is_same_v<Ntk, mockturtle::mig_network> )
     {
-      ntk_mt_mig_ = ntk_ptr;
+      return ntk_mt_mig_;
     }
     else if constexpr ( std::is_same_v<Ntk, mockturtle::xmg_network> )
     {
-      ntk_mt_xmg_ = ntk_ptr;
+      return ntk_mt_xmg_;
     }
     else if constexpr ( std::is_same_v<Ntk, mockturtle::gtg_network> )
     {
-      ntk_mt_gtg_ = ntk_ptr;
+      return ntk_mt_gtg_;
+    }
+    else
+    {
+      std::cerr << "Unhandled network type provided." << std::endl;
+      assert( false );
+      return nullptr;
+    }
+  }
+
+  template<typename Ntk>
+  void set_current( Ntk ntk )
+  {
+    // Update specific network pointer based on the type of Ntk
+    if constexpr ( std::is_same_v<Ntk, mockturtle::aig_network> )
+    {
+      ntk_mt_aig_ = ntk;
+    }
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::xag_network> )
+    {
+      ntk_mt_xag_ = ntk;
+    }
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::mig_network> )
+    {
+      ntk_mt_mig_ = ntk;
+    }
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::xmg_network> )
+    {
+      ntk_mt_xmg_ = ntk;
+    }
+    else if constexpr ( std::is_same_v<Ntk, mockturtle::gtg_network> )
+    {
+      ntk_mt_gtg_ = ntk;
     }
     else
     {
@@ -258,20 +292,12 @@ private:
   E_ToolLogicType logic_type_prev_;
   E_ToolLogicType logic_type_curr_;
 
-  std::variant<babc::Abc_Frame_t*,
-               mockturtle::aig_network*,
-               mockturtle::xag_network*,
-               mockturtle::mig_network*,
-               mockturtle::xmg_network*,
-               mockturtle::gtg_network*>
-      current_ntk_; // store the current network
-
   babc::Abc_Frame_t* ntk_abc_aig_ = nullptr;
-  mockturtle::aig_network* ntk_mt_aig_ = nullptr;
-  mockturtle::xag_network* ntk_mt_xag_ = nullptr;
-  mockturtle::mig_network* ntk_mt_mig_ = nullptr;
-  mockturtle::xmg_network* ntk_mt_xmg_ = nullptr;
-  mockturtle::gtg_network* ntk_mt_gtg_ = nullptr;
+  mockturtle::aig_network ntk_mt_aig_;
+  mockturtle::xag_network ntk_mt_xag_;
+  mockturtle::mig_network ntk_mt_mig_;
+  mockturtle::xmg_network ntk_mt_xmg_;
+  mockturtle::gtg_network ntk_mt_gtg_;
 };
 
 } // end namespace logic

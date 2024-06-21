@@ -20,12 +20,10 @@ namespace abc
 void rewrite( LogicManager& manager )
 {
   manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
-  auto ntk_ptr = manager.current<babc::Abc_Frame_t>(); // the the network from shared_ptr
+  auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
   int argc;
   char** argv;
   babc::Abc_CommandRewrite( ntk_ptr, argc, argv );
-  // update the
-  manager.set_current<babc::Abc_Frame_t>( ntk_ptr );
 }
 
 } // namespace abc

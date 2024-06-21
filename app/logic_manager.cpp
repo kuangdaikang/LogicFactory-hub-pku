@@ -11,7 +11,12 @@ int main( int argc, char** argv )
 
   lf::logic::LogicManager manager;
 
-  lf::logic::read_gtech<mockturtle::gtg_network>( file, manager );
+  manager.read_gtech( file );
+
+  auto ntk = manager.current<mockturtle::gtg_network>();
+  mockturtle::gtg_network tmp_ntk( ntk );
+
+  mockturtle::write_dot<mockturtle::gtg_network>( tmp_ntk, file + ".gtg.dot" );
 
   lf::logic::lsils::balance_sop<mockturtle::aig_network>( manager );
   lf::logic::abc::rewrite( manager );

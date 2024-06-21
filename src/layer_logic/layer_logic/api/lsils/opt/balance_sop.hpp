@@ -57,10 +57,10 @@ void balance_sop( LogicManager& manager )
   }
 
   auto ntk = manager.current<Ntk>();
+  mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig.dot" );
 
-  Ntk new_ntk( std::move( *ntk ) );
-  new_ntk = mockturtle::balancing<Ntk, Costfn>( new_ntk );
-  manager.set_current<Ntk>( &new_ntk );
+  Ntk ntk_new = mockturtle::balancing<Ntk, Costfn>( ntk );
+  manager.set_current<Ntk>( ntk_new );
 }
 
 } // end namespace lsils

@@ -3,6 +3,7 @@
 #include "layer_logic/logic_manager.hpp"
 
 #include "mockturtle/algorithms/cut_rewriting.hpp"
+#include "mockturtle/algorithms/node_resynthesis/xag_npn.hpp"
 
 namespace lf
 {
@@ -54,12 +55,11 @@ void rewrite_cut( LogicManager& manager )
   {
     assert( false );
   }
+
   auto ntk = manager.current<Ntk>();
 
-  // RewritingFn const& rewriting_fn = {};
-  // mockturtle::cut_rewriting_params const& ps = {};
-  // mockturtle::cut_rewriting_stats* pst = nullptr;
-  // ntk = mockturtle::cut_rewriting( *ntk, rewriting_fn, ps, pst );
+  Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk );
+  manager.set_current<Ntk>( ntk_new );
 }
 
 } // end namespace lsils
