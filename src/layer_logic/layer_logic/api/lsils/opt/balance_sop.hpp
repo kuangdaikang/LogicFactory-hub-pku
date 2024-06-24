@@ -26,7 +26,57 @@ namespace lsils
  *  mockturtle::aig_network aig_balanced = sop_balance(aig);
  *
  */
-template<class Ntk, class Costfn = mockturtle::unit_cost<Ntk>>
+template<class Ntk>
+void balance( LogicManager& manager )
+{
+  using NtkBase = typename Ntk::base_type;
+  if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
+  {
+    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
+  }
+  else if constexpr ( std::is_same_v<NtkBase, mockturtle::xag_network> )
+  {
+    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG );
+  }
+  else if constexpr ( std::is_same_v<NtkBase, mockturtle::mig_network> )
+  {
+    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG );
+  }
+  else if constexpr ( std::is_same_v<NtkBase, mockturtle::xmg_network> )
+  {
+    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG );
+  }
+  else if constexpr ( std::is_same_v<NtkBase, mockturtle::gtg_network> )
+  {
+    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG );
+  }
+  else
+  {
+    std::cerr << "Unhandled network type provided." << std::endl;
+    assert( false );
+  }
+
+  auto ntk = manager.current<Ntk>();
+  // mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig.balance.dot" );
+
+  mockturtle::sop_rebalancing<Ntk> rebalance;
+  Ntk ntk_new = mockturtle::balancing<Ntk>( ntk, rebalance );
+  manager.set_current<Ntk>( ntk_new );
+}
+
+/**
+ * @brief balance current network
+ * @param ntk   network
+ * @param rebalancing_fn function
+ * @param ps    params
+ * @param pst   stats
+ * @code
+ *  mockturtle::aig_network aig;
+ *  // ...
+ *  mockturtle::aig_network aig_balanced = sop_balance(aig);
+ *
+ */
+template<class Ntk>
 void balance_sop( LogicManager& manager )
 {
   using NtkBase = typename Ntk::base_type;
@@ -57,9 +107,9 @@ void balance_sop( LogicManager& manager )
   }
 
   auto ntk = manager.current<Ntk>();
-  mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig.dot" );
+  // mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig.sop_balance.dot" );
 
-  Ntk ntk_new = mockturtle::balancing<Ntk, Costfn>( ntk );
+  Ntk ntk_new = mockturtle::sop_balancing<Ntk>( ntk );
   manager.set_current<Ntk>( ntk_new );
 }
 

@@ -18,10 +18,9 @@ int main( int argc, char** argv )
 
   mockturtle::write_dot<mockturtle::gtg_network>( tmp_ntk, file + ".gtg.dot" );
 
+  lf::logic::lsils::balance<mockturtle::aig_network>( manager );
   lf::logic::lsils::balance_sop<mockturtle::aig_network>( manager );
-  lf::logic::abc::rewrite( manager );
   lf::logic::lsils::rewrite_cut<mockturtle::aig_network>( manager );
   lf::logic::abc::rewrite( manager );
-  lf::logic::lsils::balance_sop<mockturtle::aig_network>( manager );
   return 1;
 }

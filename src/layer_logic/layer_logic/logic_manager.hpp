@@ -147,6 +147,7 @@ public:
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::gtg_network>( ntk_mt_gtg_ );
+        mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig1.dot" );
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:
@@ -176,32 +177,29 @@ public:
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG:
       {
-        auto tNtk3 = lf::logic::convert_lsils_internal<mockturtle::aig_network, NtkIR>( ntk );
-        ntk_mt_aig_ = tNtk3;
+        ntk_mt_aig_ = lf::logic::convert_lsils_internal<mockturtle::aig_network, NtkIR>( ntk );
+        mockturtle::write_dot<mockturtle::aig_network>( ntk_mt_aig_, "b11_comb.gtech.v.aig2.dot" );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG:
       {
-        auto tNtk4 = lf::logic::convert_lsils_internal<mockturtle::xag_network, NtkIR>( ntk );
-        ntk_mt_xag_ = tNtk4;
+        ntk_mt_xag_ = lf::logic::convert_lsils_internal<mockturtle::xag_network, NtkIR>( ntk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG:
       {
-        auto tNtk5 = lf::logic::convert_lsils_internal<mockturtle::mig_network, NtkIR>( ntk );
-        ntk_mt_mig_ = tNtk5;
+        ntk_mt_mig_ = lf::logic::convert_lsils_internal<mockturtle::mig_network, NtkIR>( ntk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG:
       {
-        auto tNtk6 = lf::logic::convert_lsils_internal<mockturtle::xmg_network, NtkIR>( ntk );
-        ntk_mt_xmg_ = tNtk6;
+        ntk_mt_xmg_ = lf::logic::convert_lsils_internal<mockturtle::xmg_network, NtkIR>( ntk );
+
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
-        auto tNtk7 = lf::logic::convert_lsils_internal<mockturtle::gtg_network, NtkIR>( ntk );
-        ntk_mt_gtg_ = tNtk7;
+        ntk_mt_gtg_ = lf::logic::convert_lsils_internal<mockturtle::gtg_network, NtkIR>( ntk );
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:

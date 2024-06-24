@@ -27,7 +27,7 @@ namespace lsils
  *
  */
 // template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
-template<class Ntk, class NodeCostFn = mockturtle::unit_cost<Ntk>>
+template<class Ntk>
 void rewrite_cut( LogicManager& manager )
 {
   using NtkBase = typename Ntk::base_type;
@@ -57,6 +57,7 @@ void rewrite_cut( LogicManager& manager )
   }
 
   auto ntk = manager.current<Ntk>();
+  // mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig.rewrite.dot" );
 
   Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk );
   manager.set_current<Ntk>( ntk_new );
