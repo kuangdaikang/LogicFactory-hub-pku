@@ -45,14 +45,24 @@ class LogicManager
 public:
   LogicManager()
       : logic_type_prev_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG ),
-        logic_type_curr_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG ),
-        ntk_abc_aig_( babc::Abc_FrameGetGlobalFrame() )
+        logic_type_curr_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG )
   {
   }
 
   LogicManager( const LogicManager& ) = delete;
   LogicManager& operator=( const LogicManager& ) = delete;
   ~LogicManager() = default;
+
+  void start()
+  {
+    babc::Abc_Start();
+    ntk_abc_aig_ = babc::Abc_FrameGetGlobalFrame();
+  }
+
+  void stop()
+  {
+    babc::Abc_Stop();
+  }
 
   /**
    * @brief set the current logic type, and transform the data strcuture to the current logic type
@@ -165,13 +175,13 @@ public:
       {
       case E_ToolLogicType::E_LOGIC_ABC_AIG:
       {
-        *pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
+        pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
         babc::Abc_FrameSetCurrentNetwork( ntk_abc_aig_, pNtk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_ABC_GIA:
       {
-        *pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
+        pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
         babc::Abc_FrameSetCurrentNetwork( ntk_abc_aig_, pNtk );
         break;
       }

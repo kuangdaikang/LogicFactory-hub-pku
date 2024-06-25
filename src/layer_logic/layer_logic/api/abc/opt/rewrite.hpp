@@ -7,6 +7,7 @@
 #include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
 #include "base/abci/abc.h"
+#include "base/io/ioAbc.h"
 
 namespace lf
 {
@@ -23,7 +24,10 @@ void rewrite( LogicManager& manager )
   auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
   int argc;
   char** argv;
+  babc::Abc_CommandPrintStats( ntk_ptr, argc, argv );
   babc::Abc_CommandRewrite( ntk_ptr, argc, argv );
+  babc::Abc_CommandPrintStats( ntk_ptr, argc, argv );
+  babc::Io_Write( babc::Abc_FrameReadNtk( ntk_ptr ), "test.rewrite.aig", babc::IO_FILE_AIGER );
 }
 
 } // namespace abc
