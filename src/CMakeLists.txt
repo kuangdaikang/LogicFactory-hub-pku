@@ -12,3 +12,6 @@ add_subdirectory(layer_phys)
 
 # formal layer synthesis (formal verification)
 add_subdirectory(layer_formal)
+
+# utility
+add_subdirectory(utility)

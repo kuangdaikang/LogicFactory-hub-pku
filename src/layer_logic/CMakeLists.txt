@@ -8,5 +8,6 @@ target_link_libraries(lf_logic INTERFACE
     libabc
     dl
     readline
+    lf_utility
 )
 target_include_directories(lf_logic SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
