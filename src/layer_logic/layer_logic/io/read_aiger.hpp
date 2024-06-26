@@ -85,7 +85,7 @@ Ntk read_aiger( std::string const& filename )
  * @return true/ false
  */
 template<class Ntk = mockturtle::aig_network>
-bool read_aiger( std::string const& filename, LogicManager& manager )
+bool read_aiger( LogicManager& manager, std::string const& filename )
 {
   using NtkBase = typename Ntk::base_type;
   if constexpr ( std::is_same_v < NtkBase, mockturtle::aig_network )
@@ -118,14 +118,14 @@ bool read_aiger( std::string const& filename, LogicManager& manager )
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
 
-  lorina::return_code rc = lorina::read_aiger( filename, mockturtle::aiger_reader( *ntk_pointer ), &diag );
+  lorina::return_code rc = lorina::read_aiger( filename, mockturtle::aiger_reader( ntk ), &diag );
   if ( rc != lorina::return_code::success )
   {
     std::cout << "parser wrong!" << std::endl;
     return false;
   }
 
-  manager.set_current<Ntk>( &ntk );
+  manager.set_current<Ntk>( ntk );
   return true;
 }
 

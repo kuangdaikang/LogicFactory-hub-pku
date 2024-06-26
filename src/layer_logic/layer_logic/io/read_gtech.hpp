@@ -88,7 +88,7 @@ Ntk read_gtech( std::string const& filename )
  * @return true/ false
  */
 template<class Ntk = mockturtle::gtg_network>
-bool read_gtech( std::string const& filename, LogicManager& manager )
+bool read_gtech( LogicManager& manager, std::string const& filename )
 {
   using NtkBase = typename Ntk::base_type;
   if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
@@ -129,7 +129,7 @@ bool read_gtech( std::string const& filename, LogicManager& manager )
     return false;
   }
 
-  manager.set_current<Ntk>( &ntk );
+  manager.set_current<Ntk>( ntk );
 
   return true;
 }
