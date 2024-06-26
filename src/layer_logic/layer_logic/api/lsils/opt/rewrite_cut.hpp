@@ -57,9 +57,11 @@ void rewrite_cut( LogicManager& manager )
   }
 
   auto ntk = manager.current<Ntk>();
-  // mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig.rewrite.dot" );
 
-  Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk );
+  mockturtle::xag_npn_resynthesis<Ntk> npn_resyn;
+  mockturtle::cut_rewriting_params ps;
+  ps.cut_enumeration_ps.cut_size = 4u;
+  Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk, npn_resyn, ps );
   manager.set_current<Ntk>( ntk_new );
 }
 

@@ -137,7 +137,8 @@ babc::Abc_Ntk_t* convert_lsils_2_abc( Ntk const& ntk_src )
 
   babc::Vec_Ptr_t* vNodes;
   babc::Abc_Ntk_t* pNtk;
-  babc::Abc_Obj_t *pObj, *pNode0, *pNode1;
+  babc::Abc_Obj_t *pObj, *pNode0, *pNode1, *pConst1;
+
   std::unordered_map<SNode, DNode> old_2_new;
 
   pNtk = babc::Abc_NtkAlloc( babc::ABC_NTK_STRASH, babc::ABC_FUNC_AIG, 1 );
@@ -146,21 +147,30 @@ babc::Abc_Ntk_t* convert_lsils_2_abc( Ntk const& ntk_src )
   pNtk->nConstrs = 0;
 
   vNodes = babc::Vec_PtrAlloc( 1 + ntk_src.num_pis() + ntk_src.num_gates() );
-  babc::Vec_PtrPush( vNodes, babc::Abc_ObjNot( babc::Abc_AigConst1( pNtk ) ) ); // constant 0
 
   // constant
+  pConst1 = babc::Abc_AigConst1( pNtk );
+  assert( pConst1->Id == 0 );
+  babc::Vec_PtrPush( vNodes, babc::Abc_ObjNot( pConst1 ) ); // constant 0
+
   auto c_zero = ntk_src.get_node( ntk_src.get_constant( false ) );
   auto c_one = ntk_src.get_node( ntk_src.get_constant( true ) );
-  old_2_new[c_one] = babc::Abc_AigConst1( pNtk );
+  old_2_new[c_one] = pConst1;
   if ( c_zero != c_one )
   {
-    old_2_new[c_zero] = babc::Abc_ObjNot( babc::Abc_AigConst1( pNtk ) );
+    old_2_new[c_zero] = babc::Abc_ObjNot( pConst1 );
   }
 
   // primary inputs
   ntk_src.foreach_pi( [&]( auto const& pi ) {
-    old_2_new[pi] = babc::Abc_NtkCreatePi( pNtk );
-    babc::Vec_PtrPush( vNodes, old_2_new[pi] );
+    pObj = babc::Abc_NtkCreatePi( pNtk );
+    old_2_new[pi] = pObj;
+    babc::Vec_PtrPush( vNodes, pObj );
+  } );
+
+  // primary outputs
+  ntk_src.foreach_po( [&]( auto const& po, int index ) {
+    pObj = babc::Abc_NtkCreatePo( pNtk );
   } );
 
   // internal gates
@@ -221,11 +231,7 @@ babc::Abc_Ntk_t* convert_lsils_2_abc( Ntk const& ntk_src )
     }
   } );
 
-  // primary outputs
-  ntk_src.foreach_po( [&]( auto const& po, int index ) {
-    pObj = babc::Abc_NtkCreatePo( pNtk );
-  } );
-
+  // add fanin of the output nodes
   ntk_src.foreach_po( [&]( auto const& po, int index ) {
     auto pDriver = old_2_new[ntk_src.get_node( po )];
     auto pPo = babc::Abc_NtkPo( pNtk, index );

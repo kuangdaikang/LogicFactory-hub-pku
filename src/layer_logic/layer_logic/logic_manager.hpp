@@ -111,7 +111,6 @@ public:
     // condition1: same logic type
     if ( logic_type_prev_ == logic_type_curr_ )
     {
-      // TODO: just save the pointer is fine
       return;
     }
     // condition2: different logic type
@@ -157,7 +156,6 @@ public:
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::gtg_network>( ntk_mt_gtg_ );
-        mockturtle::write_dot<mockturtle::aig_network>( ntk, "b11_comb.gtech.v.aig1.dot" );
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:
@@ -188,7 +186,6 @@ public:
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG:
       {
         ntk_mt_aig_ = lf::logic::convert_lsils_internal<mockturtle::aig_network, NtkIR>( ntk );
-        mockturtle::write_dot<mockturtle::aig_network>( ntk_mt_aig_, "b11_comb.gtech.v.aig2.dot" );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG:
