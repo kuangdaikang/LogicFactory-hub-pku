@@ -1,14 +1,6 @@
 #pragma once
 
-/////////////////////////////////////////////
-//  abc header
-/////////////////////////////////////////////
-#include "misc/util/abc_namespaces.h"
-#include "misc/util/abc_global.h"
-#include "base/main/abcapis.h"
-#include "base/abc/abc.h"
-#include "base/main/main.h"
-
+#include "layer_logic/api/abc/frame.hpp"
 #include "layer_logic/api/lsils/frame.hpp"
 
 #include "layer_logic/misc/convert.hpp"
