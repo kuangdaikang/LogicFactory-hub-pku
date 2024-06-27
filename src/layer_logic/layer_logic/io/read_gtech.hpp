@@ -87,7 +87,7 @@ Ntk read_gtech( std::string const& filename )
  * @param ntk
  * @return true/ false
  */
-template<class Ntk = mockturtle::gtg_network>
+template<class Ntk = lsils::gtg_seq_network>
 bool read_gtech( LogicManager& manager, std::string const& filename )
 {
   using NtkBase = typename Ntk::base_type;

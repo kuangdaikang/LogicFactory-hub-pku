@@ -2,8 +2,10 @@
 
 #include "layer_logic/logic_manager.hpp"
 
-#include "mockturtle/algorithms/cut_rewriting.hpp"
-#include "mockturtle/algorithms/node_resynthesis/xag_npn.hpp"
+#include "mockturtle/algorithms/balancing.hpp"
+#include "mockturtle/algorithms/balancing/sop_balancing.hpp"
+#include "mockturtle/algorithms/balancing/utils.hpp"
+#include "mockturtle/utils/cost_functions.hpp"
 
 namespace lf
 {
@@ -26,42 +28,39 @@ namespace lsils
  *  mockturtle::aig_network aig_balanced = sop_balance(aig);
  *
  */
-// template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
 template<class Ntk>
-void rewrite_cut( LogicManager& manager )
+void balance_sop( LogicManager& manager )
 {
-  using NtkBase = typename Ntk::base_type;
-  if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
+  if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
   {
     manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
   }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::xag_network> )
+  else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
   {
     manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG );
   }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::mig_network> )
+  else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
   {
     manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG );
   }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::xmg_network> )
+  else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
   {
     manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG );
   }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::gtg_network> )
+  else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
   {
     manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG );
   }
   else
   {
+    std::cerr << "Unhandled network type provided." << std::endl;
     assert( false );
   }
 
   auto ntk = manager.current<Ntk>();
 
-  mockturtle::xag_npn_resynthesis<Ntk> npn_resyn;
-  mockturtle::cut_rewriting_params ps;
-  ps.cut_enumeration_ps.cut_size = 4u;
-  Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk, npn_resyn, ps );
+  mockturtle::sop_rebalancing<Ntk> rebalance;
+  Ntk ntk_new = mockturtle::balancing<Ntk>( ntk, rebalance );
   manager.set_current<Ntk>( ntk_new );
 }
 

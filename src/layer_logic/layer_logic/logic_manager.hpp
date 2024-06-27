@@ -1,19 +1,99 @@
 #pragma once
-#include "layer_logic/op/convert.hpp"
 
-#include "lorina/lorina.hpp"
-#include "mockturtle/mockturtle.hpp"
-
+/////////////////////////////////////////////
+//  abc header
+/////////////////////////////////////////////
 #include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
 #include "base/main/abcapis.h"
 #include "base/abc/abc.h"
 #include "base/main/main.h"
 
+/////////////////////////////////////////////
+//  misc functions
+/////////////////////////////////////////////
+#include "layer_logic/op/convert.hpp"
+
+#include "mockturtle/networks/aig.hpp"
+#include "mockturtle/networks/xag.hpp"
+#include "mockturtle/networks/mig.hpp"
+#include "mockturtle/networks/xmg.hpp"
+#include "mockturtle/networks/gtg.hpp"
+#include "mockturtle/networks/klut.hpp"
+
+#include "mockturtle/networks/sequential.hpp"
+#include "mockturtle/views/binding_view.hpp"
+#include "mockturtle/views/mapping_view.hpp"
+#include "mockturtle/io/genlib_reader.hpp"
+
+#include <vector>
 #include <assert.h>
 #include <iostream>
 #include <memory>
-#include <variant>
+
+namespace lf
+{
+
+namespace logic
+{
+
+namespace lsils
+{
+///////////////////////////////////////////////////////////
+//  combinational
+///////////////////////////////////////////////////////////
+using aig_comb_network = mockturtle::aig_network;
+using xag_comb_network = mockturtle::xag_network;
+using mig_comb_network = mockturtle::mig_network;
+using xmg_comb_network = mockturtle::xmg_network;
+using gtg_comb_network = mockturtle::gtg_network;
+
+using klut_comb_network = mockturtle::klut_network;
+using blut_comb_network = mockturtle::binding_view<klut_comb_network>;
+
+///////////////////////////////////////////////////////////
+//  sequential
+///////////////////////////////////////////////////////////
+using aig_seq_network = mockturtle::sequential<aig_comb_network>;
+using xag_seq_network = mockturtle::sequential<xag_comb_network>;
+using mig_seq_network = mockturtle::sequential<mig_comb_network>;
+using xmg_seq_network = mockturtle::sequential<xmg_comb_network>;
+using gtg_seq_network = mockturtle::sequential<gtg_comb_network>;
+
+using klut_seq_network = mockturtle::sequential<klut_comb_network>;
+using blut_seq_network = mockturtle::binding_view<klut_seq_network>;
+
+///////////////////////////////////////////////////////////
+//  library
+///////////////////////////////////////////////////////////
+using lib_gates = std::vector<mockturtle::gate>;
+
+/**
+ * @brief struct Lsils_Frame_t
+ *  it stores all the networks and the libraries
+ */
+struct Lsils_Frame_t
+{
+  // technology-independent network
+  aig_seq_network curr_aig;
+  xag_seq_network curr_xag;
+  mig_seq_network curr_mig;
+  xmg_seq_network curr_xmg;
+  gtg_seq_network curr_gtg;
+
+  // technology-dependent netlist
+  blut_seq_network netlist_asic;
+  klut_seq_network netlist_fpga;
+
+  // technology-dependent library
+  lib_gates gates;
+};
+
+} // namespace lsils
+
+} // namespace logic
+
+} // namespace lf
 
 namespace lf
 {
@@ -56,38 +136,12 @@ public:
   void start()
   {
     babc::Abc_Start();
-    ntk_abc_aig_ = babc::Abc_FrameGetGlobalFrame();
+    frame_abc_ = babc::Abc_FrameGetGlobalFrame();
   }
 
   void stop()
   {
     babc::Abc_Stop();
-  }
-
-  /**
-   * @brief set the current logic type, and transform the data strcuture to the current logic type
-   * @param logic_type
-   * @code
-   *  LogicManager manager;
-   *  manager.read_gtech("../file.gtech")
-   */
-  template<class Ntk = mockturtle::gtg_network>
-  bool read_gtech( std::string const& filename )
-  {
-    Ntk ntk;
-
-    lorina::text_diagnostics consumer;
-    lorina::diagnostic_engine diag( &consumer );
-    mockturtle::read_verilog_params ports;
-
-    lorina::return_code rc = lorina::read_gtech( filename, mockturtle::gtech_reader<Ntk>( ntk, ports ), &diag );
-    if ( rc != lorina::return_code::success )
-    {
-      std::cout << "parser wrong!" << std::endl;
-      return false;
-    }
-    set_current<Ntk>( ntk );
-    return true;
   }
 
   /**
@@ -116,9 +170,9 @@ public:
     // condition2: different logic type
     else
     {
-      using NtkIR = mockturtle::aig_network;
+      using NtkIR = lsils::aig_seq_network;
       NtkIR ntk;
-      babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( ntk_abc_aig_ );
+      babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame_abc_ );
 
       // step1:  previous logic-based data structure -> IR
       switch ( logic_type_prev_ )
@@ -135,27 +189,27 @@ public:
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::aig_network>( ntk_mt_aig_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::aig_seq_network>( frame_lsils_.curr_aig );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::xag_network>( ntk_mt_xag_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xag_seq_network>( frame_lsils_.curr_xag );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::mig_network>( ntk_mt_mig_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::mig_seq_network>( frame_lsils_.curr_mig );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::xmg_network>( ntk_mt_xmg_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xmg_seq_network>( frame_lsils_.curr_xmg );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
-        ntk = lf::logic::convert_lsils_internal<NtkIR, mockturtle::gtg_network>( ntk_mt_gtg_ );
+        ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::gtg_seq_network>( frame_lsils_.curr_gtg );
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:
@@ -174,39 +228,39 @@ public:
       case E_ToolLogicType::E_LOGIC_ABC_AIG:
       {
         pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
-        babc::Abc_FrameSetCurrentNetwork( ntk_abc_aig_, pNtk );
+        babc::Abc_FrameSetCurrentNetwork( frame_abc_, pNtk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_ABC_GIA:
       {
         pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
-        babc::Abc_FrameSetCurrentNetwork( ntk_abc_aig_, pNtk );
+        babc::Abc_FrameSetCurrentNetwork( frame_abc_, pNtk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG:
       {
-        ntk_mt_aig_ = lf::logic::convert_lsils_internal<mockturtle::aig_network, NtkIR>( ntk );
+        frame_lsils_.curr_aig = lf::logic::convert_lsils_internal<lsils::aig_seq_network, NtkIR>( ntk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG:
       {
-        ntk_mt_xag_ = lf::logic::convert_lsils_internal<mockturtle::xag_network, NtkIR>( ntk );
+        frame_lsils_.curr_xag = lf::logic::convert_lsils_internal<lsils::xag_seq_network, NtkIR>( ntk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG:
       {
-        ntk_mt_mig_ = lf::logic::convert_lsils_internal<mockturtle::mig_network, NtkIR>( ntk );
+        frame_lsils_.curr_mig = lf::logic::convert_lsils_internal<lsils::mig_seq_network, NtkIR>( ntk );
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG:
       {
-        ntk_mt_xmg_ = lf::logic::convert_lsils_internal<mockturtle::xmg_network, NtkIR>( ntk );
+        frame_lsils_.curr_xmg = lf::logic::convert_lsils_internal<lsils::xmg_seq_network, NtkIR>( ntk );
 
         break;
       }
       case E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG:
       {
-        ntk_mt_gtg_ = lf::logic::convert_lsils_internal<mockturtle::gtg_network, NtkIR>( ntk );
+        frame_lsils_.curr_gtg = lf::logic::convert_lsils_internal<lsils::gtg_seq_network, NtkIR>( ntk );
         break;
       }
       // case E_ToolLogicType::E_LOGIC_IMAP_AIG:
@@ -224,85 +278,97 @@ public:
 
   /**
    * @brief get the current network for the given type
-   * @tparam Ntk current network type
+   * @tparam T current network type
    * @return ntk
    */
-  template<typename Ntk>
-  Ntk current()
+  template<typename T>
+  T current()
   {
-    if constexpr ( std::is_same_v<Ntk, babc::Abc_Frame_t*> )
+    if constexpr ( std::is_same_v<T, babc::Abc_Frame_t*> )
     {
-      return ntk_abc_aig_;
+      return frame_abc_;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::aig_network> )
+    else if constexpr ( std::is_same_v<T, lsils::Lsils_Frame_t> )
     {
-      return ntk_mt_aig_;
+      return frame_lsils_;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::xag_network> )
+    else if constexpr ( std::is_same_v<T, lsils::aig_seq_network> )
     {
-      return ntk_mt_xag_;
+      return frame_lsils_.curr_aig;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::mig_network> )
+    else if constexpr ( std::is_same_v<T, lsils::xag_seq_network> )
     {
-      return ntk_mt_mig_;
+      return frame_lsils_.curr_xag;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::xmg_network> )
+    else if constexpr ( std::is_same_v<T, lsils::mig_seq_network> )
     {
-      return ntk_mt_xmg_;
+      return frame_lsils_.curr_mig;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::gtg_network> )
+    else if constexpr ( std::is_same_v<T, lsils::xmg_seq_network> )
     {
-      return ntk_mt_gtg_;
+      return frame_lsils_.curr_xmg;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::gtg_seq_network> )
+    {
+      return frame_lsils_.curr_gtg;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::lib_gates> )
+    {
+      return frame_lsils_.gates;
     }
     else
     {
-      std::cerr << "Unhandled network type provided." << std::endl;
+      std::cerr << "Unhandled current type provided." << std::endl;
       assert( false );
       return nullptr;
     }
   }
 
-  template<typename Ntk>
-  void set_current( Ntk ntk )
+  template<typename T>
+  void set_current( T obj )
   {
-    // Update specific network pointer based on the type of Ntk
-    if constexpr ( std::is_same_v<Ntk, mockturtle::aig_network> )
+    // Update specific network pointer based on the type of T
+    if constexpr ( std::is_same_v<T, lsils::Lsils_Frame_t> )
     {
-      ntk_mt_aig_ = ntk;
+      frame_lsils_ = obj;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::xag_network> )
+    else if constexpr ( std::is_same_v<T, lsils::aig_seq_network> )
     {
-      ntk_mt_xag_ = ntk;
+      frame_lsils_.curr_aig = obj;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::mig_network> )
+    else if constexpr ( std::is_same_v<T, lsils::xag_seq_network> )
     {
-      ntk_mt_mig_ = ntk;
+      frame_lsils_.curr_xag = obj;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::xmg_network> )
+    else if constexpr ( std::is_same_v<T, lsils::mig_seq_network> )
     {
-      ntk_mt_xmg_ = ntk;
+      frame_lsils_.curr_mig = obj;
     }
-    else if constexpr ( std::is_same_v<Ntk, mockturtle::gtg_network> )
+    else if constexpr ( std::is_same_v<T, lsils::xmg_seq_network> )
     {
-      ntk_mt_gtg_ = ntk;
+      frame_lsils_.curr_xmg = obj;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::gtg_seq_network> )
+    {
+      frame_lsils_.curr_gtg = obj;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::lib_gates> )
+    {
+      frame_lsils_.gates = obj;
     }
     else
     {
-      std::cerr << "Unhandled network type provided." << std::endl;
+      std::cerr << "Unhandled current type provided." << std::endl;
       assert( false );
     }
   }
 
 private:
+  babc::Abc_Frame_t* frame_abc_ = nullptr;
+  lsils::Lsils_Frame_t frame_lsils_;
+
   E_ToolLogicType logic_type_prev_;
   E_ToolLogicType logic_type_curr_;
-
-  babc::Abc_Frame_t* ntk_abc_aig_ = nullptr;
-  mockturtle::aig_network ntk_mt_aig_;
-  mockturtle::xag_network ntk_mt_xag_;
-  mockturtle::mig_network ntk_mt_mig_;
-  mockturtle::xmg_network ntk_mt_xmg_;
-  mockturtle::gtg_network ntk_mt_gtg_;
 };
 
 } // end namespace logic

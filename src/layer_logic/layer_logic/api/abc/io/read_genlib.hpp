@@ -23,15 +23,15 @@ namespace abc
 
 void read_genlib( LogicManager& manager, std::string file )
 {
-  manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
-  auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
-
   if ( !lf::utility::endsWith( file, ".genlib" ) )
   {
-    std::cerr << "Unmatched liberty suffix type." << std::endl;
+    std::cerr << "Unmatched genlib suffix type." << std::endl;
     assert( false );
     return;
   }
+
+  manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
+  auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
   char** argv = ABC_ALLOC( char*, argc + 1 );
