@@ -1,7 +1,7 @@
 #include "lorina/lorina.hpp"
 #include "mockturtle/mockturtle.hpp"
 
-#include "layer_logic/op/convert.hpp"
+#include "layer_logic/misc/convert.hpp"
 
 #include <iostream>
 

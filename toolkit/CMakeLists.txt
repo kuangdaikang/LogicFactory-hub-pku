@@ -42,60 +42,60 @@ else()
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/mockturtle is missing!")
 endif()
 
-# ######################################################################
-# # compile iEDA with CMakeLists.txt
-# ######################################################################
-# if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/iEDA/CMakeLists.txt)
-#     add_subdirectory(iEDA ${CMAKE_BINARY_DIR}/toolkit/iEDA)
+######################################################################
+# compile iEDA with CMakeLists.txt
+######################################################################
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/iEDA/CMakeLists.txt)
+    add_subdirectory(iEDA ${CMAKE_BINARY_DIR}/toolkit/iEDA)
 
-#     # binding the static library into the alias
-#     add_library(libidb INTERFACE)
-#         set_target_properties(libidb PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libidb.a"
-#     )
+    # binding the static library into the alias
+    add_library(libidb INTERFACE)
+        set_target_properties(libidb PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libidb.a"
+    )
 
-#     add_library(libidm INTERFACE)
-#         set_target_properties(libidm PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libidm.a"
-#     )
+    add_library(libidm INTERFACE)
+        set_target_properties(libidm PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libidm.a"
+    )
 
-#     add_library(libista INTERFACE)
-#         set_target_properties(libista PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ista.a"
-#     )
+    add_library(libista INTERFACE)
+        set_target_properties(libista PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ista.a"
+    )
 
-#     add_library(libino INTERFACE)
-#         set_target_properties(libino PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ino.a"
-#     )
+    add_library(libino INTERFACE)
+        set_target_properties(libino PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ino.a"
+    )
 
-#     add_library(libifp INTERFACE)
-#         set_target_properties(libifp PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ifp.a"
-#     )
+    add_library(libifp INTERFACE)
+        set_target_properties(libifp PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ifp.a"
+    )
 
-#     add_library(libicts INTERFACE)
-#         set_target_properties(libicts PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_icts.a"
-#     )
+    add_library(libicts INTERFACE)
+        set_target_properties(libicts PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_icts.a"
+    )
 
-#     add_library(libipl INTERFACE)
-#         set_target_properties(libipl PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ipl.a"
-#     )
+    add_library(libipl INTERFACE)
+        set_target_properties(libipl PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_ipl.a"
+    )
 
-#     add_library(libirt INTERFACE)
-#         set_target_properties(libirt PROPERTIES
-#         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
-#         INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_irt.a"
-#     )
-# else()
-#     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/iEDA is missing!")
-# endif()
+    add_library(libirt INTERFACE)
+        set_target_properties(libirt PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/iEDA/src/"
+        INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/toolkit/lib/libtool_api_irt.a"
+    )
+else()
+    message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/iEDA is missing!")
+endif()

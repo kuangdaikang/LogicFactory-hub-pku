@@ -1,3 +1,5 @@
+#pragma once
+
 #include "mockturtle/networks/aig.hpp"
 #include "mockturtle/networks/gtg.hpp"
 #include "mockturtle/networks/mig.hpp"

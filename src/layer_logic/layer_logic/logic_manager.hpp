@@ -12,7 +12,7 @@
 /////////////////////////////////////////////
 //  misc functions
 /////////////////////////////////////////////
-#include "layer_logic/op/convert.hpp"
+#include "layer_logic/misc/convert.hpp"
 
 #include "mockturtle/networks/aig.hpp"
 #include "mockturtle/networks/xag.hpp"
