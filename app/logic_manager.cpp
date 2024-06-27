@@ -8,10 +8,10 @@
 #include "layer_logic/api/lsils/opt/balance.hpp"
 #include "layer_logic/api/lsils/opt/rewrite.hpp"
 
-// #include "layer_logic/api/abc/map/map_asic.hpp"
-// #include "layer_logic/api/abc/map/map_fpga.hpp"
-// #include "layer_logic/api/lsils/map/map_asic.hpp"
-// #include "layer_logic/api/lsils/map/map_fpga.hpp"
+#include "layer_logic/api/abc/map/map_asic.hpp"
+#include "layer_logic/api/abc/map/map_fpga.hpp"
+#include "layer_logic/api/lsils/map/map_asic.hpp"
+#include "layer_logic/api/lsils/map/map_fpga.hpp"
 
 int main( int argc, char** argv )
 {
@@ -35,6 +35,12 @@ int main( int argc, char** argv )
   lf::logic::lsils::rewrite_cut<lf::logic::lsils::aig_seq_network>( manager );
 
   mockturtle::write_dot<lf::logic::lsils::aig_seq_network>( manager.current<lf::logic::lsils::aig_seq_network>(), file + ".aig.stop.dot" );
+
+  // lf::logic::abc::map_asic( manager );
+  // lf::logic::abc::map_fpga( manager );
+
+  lf::logic::lsils::map_asic( manager );
+  lf::logic::lsils::map_fpga( manager );
 
   manager.stop();
 

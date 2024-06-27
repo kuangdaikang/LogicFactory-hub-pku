@@ -25,6 +25,7 @@
 #include "mockturtle/views/binding_view.hpp"
 #include "mockturtle/views/mapping_view.hpp"
 #include "mockturtle/io/genlib_reader.hpp"
+#include "mockturtle/utils/tech_library.hpp"
 
 #include <vector>
 #include <assert.h>
@@ -67,6 +68,7 @@ using blut_seq_network = mockturtle::binding_view<klut_seq_network>;
 //  library
 ///////////////////////////////////////////////////////////
 using lib_gates = std::vector<mockturtle::gate>;
+using lib_techlib_np = mockturtle::tech_library<6u, mockturtle::classification_type::np_configurations>;
 
 /**
  * @brief struct Lsils_Frame_t
@@ -312,6 +314,14 @@ public:
     {
       return frame_lsils_.curr_gtg;
     }
+    else if constexpr ( std::is_same_v<T, lsils::blut_seq_network> )
+    {
+      return frame_lsils_.netlist_asic;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::klut_seq_network> )
+    {
+      return frame_lsils_.netlist_fpga;
+    }
     else if constexpr ( std::is_same_v<T, lsils::lib_gates> )
     {
       return frame_lsils_.gates;
@@ -351,6 +361,14 @@ public:
     else if constexpr ( std::is_same_v<T, lsils::gtg_seq_network> )
     {
       frame_lsils_.curr_gtg = obj;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::blut_seq_network> )
+    {
+      frame_lsils_.netlist_asic = obj;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::klut_seq_network> )
+    {
+      frame_lsils_.netlist_fpga = obj;
     }
     else if constexpr ( std::is_same_v<T, lsils::lib_gates> )
     {
