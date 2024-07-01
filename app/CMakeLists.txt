@@ -18,3 +18,10 @@ add_executable(logic_manager
 target_link_libraries(logic_manager
     lf_logic
 )
+
+add_executable(arch_manager
+    ${PROJECT_SOURCE_DIR}/app/arch_manager.cpp
+)
+target_link_libraries(arch_manager
+    lf_arch
+)
