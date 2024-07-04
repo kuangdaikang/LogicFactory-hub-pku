@@ -16,12 +16,12 @@ namespace arch
 namespace yosys
 {
 
-void read_verilog( ArchManager& manager, std::string file )
+void read_aiger( ArchManager& manager, std::string file )
 {
-  std::string script = "read_verilog ";
-  if ( !lf::utility::endsWith( file, ".v" ) )
+  std::string script = "read_aiger ";
+  if ( !lf::utility::endsWith( file, ".aig" ) )
   {
-    std::cerr << "Unmatched verilog suffix type." << std::endl;
+    std::cerr << "Unmatched aig suffix type." << std::endl;
     assert( false );
     return;
   }

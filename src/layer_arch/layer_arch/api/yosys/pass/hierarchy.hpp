@@ -16,18 +16,16 @@ namespace arch
 namespace yosys
 {
 
-void read_verilog( ArchManager& manager, std::string file )
+void hierarchy( ArchManager& manager, std::string top_name = "" )
 {
-  std::string script = "read_verilog ";
-  if ( !lf::utility::endsWith( file, ".v" ) )
+  std::string script = "hierarchy -check ";
+  if ( top_name != "" )
   {
-    std::cerr << "Unmatched verilog suffix type." << std::endl;
-    assert( false );
-    return;
+    script += "-top " + top_name;
   }
   else
   {
-    script += file;
+    script += "-auto-top";
   }
   auto frame = manager.current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );

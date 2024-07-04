@@ -16,19 +16,9 @@ namespace arch
 namespace yosys
 {
 
-void read_verilog( ArchManager& manager, std::string file )
+void aigmap( ArchManager& manager )
 {
-  std::string script = "read_verilog ";
-  if ( !lf::utility::endsWith( file, ".v" ) )
-  {
-    std::cerr << "Unmatched verilog suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-  else
-  {
-    script += file;
-  }
+  std::string script = "aigmap";
   auto frame = manager.current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }

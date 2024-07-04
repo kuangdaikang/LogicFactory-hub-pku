@@ -7,6 +7,8 @@
 #include "mockturtle/networks/gtg.hpp"
 #include "mockturtle/networks/klut.hpp"
 
+#include "mockturtle/io/gtech_reader.hpp"
+
 #include "mockturtle/networks/sequential.hpp"
 #include "mockturtle/views/binding_view.hpp"
 #include "mockturtle/views/mapping_view.hpp"
