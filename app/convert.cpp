@@ -10,12 +10,12 @@ int main( int argc, char** argv )
   std::string file_in = std::string( argv[1] );
   std::string file_out = std::string( argv[2] );
 
-  mockturtle::gtg_network gtg; // load into gtg
+  mockturtle::sequential<mockturtle::gtg_network> gtg; // load into gtg
 
-  mockturtle::aig_network aig;
-  mockturtle::xmg_network xmg;
-  mockturtle::xag_network xag;
-  mockturtle::mig_network mig;
+  mockturtle::sequential<mockturtle::aig_network> aig;
+  mockturtle::sequential<mockturtle::xmg_network> xmg;
+  mockturtle::sequential<mockturtle::xag_network> xag;
+  mockturtle::sequential<mockturtle::mig_network> mig;
 
   mockturtle::read_verilog_params ports;
   lorina::text_diagnostics consumer;
@@ -30,13 +30,13 @@ int main( int argc, char** argv )
   }
 
   std::cout << "create aig ing\n";
-  aig = lf::logic::convert_lsils_internal<mockturtle::aig_network, mockturtle::gtg_network>( gtg );
+  aig = lf::logic::convert_lsils_internal<mockturtle::sequential<mockturtle::aig_network>, mockturtle::sequential<mockturtle::gtg_network>>( gtg );
   std::cout << "create xmg ing\n";
-  xmg = lf::logic::convert_lsils_internal<mockturtle::xmg_network, mockturtle::gtg_network>( gtg );
+  xmg = lf::logic::convert_lsils_internal<mockturtle::sequential<mockturtle::xmg_network>, mockturtle::sequential<mockturtle::gtg_network>>( gtg );
   std::cout << "create xag ing\n";
-  xag = lf::logic::convert_lsils_internal<mockturtle::xag_network, mockturtle::gtg_network>( gtg );
+  xag = lf::logic::convert_lsils_internal<mockturtle::sequential<mockturtle::xag_network>, mockturtle::sequential<mockturtle::gtg_network>>( gtg );
   std::cout << "create mig ing\n";
-  mig = lf::logic::convert_lsils_internal<mockturtle::mig_network, mockturtle::gtg_network>( gtg );
+  mig = lf::logic::convert_lsils_internal<mockturtle::sequential<mockturtle::mig_network>, mockturtle::sequential<mockturtle::gtg_network>>( gtg );
 
   mockturtle::write_dot( gtg, file_out + ".gtg.dot" );
   mockturtle::write_dot( aig, file_out + ".aig.dot" );
