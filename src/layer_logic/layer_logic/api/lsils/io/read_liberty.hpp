@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "layer_logic/logic_manager.hpp"
 
 namespace lf
