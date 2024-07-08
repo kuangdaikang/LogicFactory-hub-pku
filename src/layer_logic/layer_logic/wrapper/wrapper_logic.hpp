@@ -22,7 +22,7 @@ namespace logic
 using namespace Yosys;
 using namespace Yosys::RTLIL;
 
-struct WrapperArch
+struct WrapperYosysLogic
 {
 private:
   using GateFn = lorina::detail::Func<
@@ -537,7 +537,7 @@ public:
     reader.on_endmodule();
   }
 
-  WrapperArch( RTLIL::Design* design, mockturtle::gtg_network& ntk, mockturtle::read_verilog_params& ports )
+  WrapperYosysLogic( RTLIL::Design* design, mockturtle::gtg_network& ntk, mockturtle::read_verilog_params& ports )
       : reader( mockturtle::gtech_reader<mockturtle::gtg_network>( ntk, ports ) ), design( design ),
         on_action( PackedFns( GateFn( [&]( const std::vector<std::pair<std::string, bool>>& inputs,
                                            const std::string output,
@@ -657,9 +657,9 @@ public:
   }
 };
 
-void wrapper_arch( RTLIL::Design* design, mockturtle::gtg_network& ntk, mockturtle::read_verilog_params& ports )
+void wrapper_yosys_logic( RTLIL::Design* design, mockturtle::gtg_network& ntk, mockturtle::read_verilog_params& ports )
 {
-  WrapperArch worker( design, ntk, ports );
+  WrapperYosysLogic worker( design, ntk, ports );
 }
 
 } // namespace logic
