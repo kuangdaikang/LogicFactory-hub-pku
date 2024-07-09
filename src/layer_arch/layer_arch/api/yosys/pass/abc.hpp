@@ -16,9 +16,9 @@ namespace arch
 namespace yosys
 {
 
-void abc( ArchManager& manager, std::string genlib )
+void abc( ArchManager& manager, std::string param )
 {
-  std::string script = "abc -genlib " + genlib;
+  std::string script = "abc " + param;
   auto frame = manager.current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }
