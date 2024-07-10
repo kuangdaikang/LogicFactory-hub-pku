@@ -1,3 +1,13 @@
+include_directories(/workspace/LogicFactory/toolkit/iEDA/src)
+
+add_executable(gen_verilog
+    ${PROJECT_SOURCE_DIR}/app/gen_verilog.cpp
+)
+target_link_libraries(gen_verilog
+    lf_arch
+    lf_utility
+)
+
 add_executable(convert
     ${PROJECT_SOURCE_DIR}/app/convert.cpp
 )
@@ -33,3 +43,12 @@ target_link_libraries(wrapper_arch_logic
     lf_arch
     lf_logic
 )
+
+add_executable(wrapper_logic_netlist
+    ${PROJECT_SOURCE_DIR}/app/wrapper_logic_netlist.cpp
+)
+target_link_libraries(wrapper_logic_netlist
+    lf_logic
+    lf_netlist
+)
+
