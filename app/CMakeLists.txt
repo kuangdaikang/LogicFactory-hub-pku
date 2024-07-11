@@ -50,5 +50,11 @@ add_executable(wrapper_logic_netlist
 target_link_libraries(wrapper_logic_netlist
     lf_logic
     lf_netlist
+    ista-engine
+    ifp_api
+    ipdn_api
+    ipl-api
+    eval_source
+    irt_interface
 )
 
