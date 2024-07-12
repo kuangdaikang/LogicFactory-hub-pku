@@ -3,9 +3,12 @@ add_library(lf_netlist INTERFACE)
 target_link_libraries(lf_netlist INTERFACE
     lf_logic
     lf_3rd_json
-    idm
-    IdbBuilder
-    def_service
-    lef_service
+    ista-engine
+    ifp_api
+    ipdn_api
+    ipl-api
+    icts_api
+    eval_source
+    irt_interface
 )
 target_include_directories(lf_netlist SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

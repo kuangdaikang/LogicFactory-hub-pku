@@ -1,5 +1,6 @@
 #pragma once
 
+#include "platform/data_manager/idm.h"
 #include "layer_netlist/api/ieda/config.hpp"
 
 #include "nlohmann/json.hpp"
@@ -35,9 +36,8 @@ enum class E_ToolNetlistAsicType
 class NetlistAsicManager
 {
 public:
-  NetlistAsicManager( const std::string& config_file )
-      : config_file_( config_file ),
-        netlist_step_prev_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init ),
+  NetlistAsicManager()
+      : netlist_step_prev_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init ),
         netlist_step_curr_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init )
   {
   }
@@ -48,11 +48,18 @@ public:
 
   void start()
   {
-    parse_config();
   }
 
   void stop()
   {
+  }
+
+  /**
+   * @brief
+   */
+  void init_config( const std::string& config_input, const std::string& config_output )
+  {
+    parse_config( config_input, config_output );
   }
 
   /**
@@ -64,13 +71,15 @@ public:
     netlist_step_curr_ = step;
   }
 
+  lf::netlist::ieda::ConfigiEDA* get_config_ieda() const { return config_ieda_; }
+
 private:
-  void parse_config()
+  void parse_config( const std::string& config_input, const std::string& config_output )
   {
     switch ( netlist_step_curr_ )
     {
     case E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init:
-      parse_ieda();
+      parse_ieda( config_input, config_output );
       break;
     default:
       assert( false );
@@ -78,40 +87,51 @@ private:
     }
   }
 
-  void parse_ieda()
+  void parse_ieda( const std::string& config_input, const std::string& config_output )
   {
-    assert( lf::utility::endsWith( config_file_, ".json" ) );
+    assert( lf::utility::endsWith( config_input, ".json" ) );
+    assert( lf::utility::endsWith( config_output, ".json" ) );
     config_ieda_ = new lf::netlist::ieda::ConfigiEDA();
-    std::ifstream config_stream( config_file_ );
-    nlohmann::json data = nlohmann::json::parse( config_stream );
+    std::ifstream config_input_stream( config_input );
+    nlohmann::json data_input = nlohmann::json::parse( config_input_stream );
 
-    assert( data.contains( "design" ) );
-    assert( data.contains( "liberty" ) );
-    assert( data.contains( "clef" ) );
-    assert( data.contains( "tlef" ) );
-    assert( data.contains( "sdc" ) );
+    assert( data_input.contains( "design" ) );
+    assert( data_input.contains( "top_module" ) );
+    assert( data_input.contains( "liberty" ) );
+    assert( data_input.contains( "clef" ) );
+    assert( data_input.contains( "tlef" ) );
+    assert( data_input.contains( "sdc" ) );
 
     std::string verilog_file;
+    std::string top_module;
     std::vector<std::string> lib_files;
     std::vector<std::string> lef_files;
     std::string tlef_file;
     std::string sdc_file;
 
-    data.at( "design" ).get_to( verilog_file );
-    data.at( "liberty" ).get_to( lib_files );
-    data.at( "clef" ).get_to( lef_files );
-    data.at( "tlef" ).get_to( tlef_file );
-    data.at( "sdc" ).get_to( sdc_file );
+    data_input.at( "design" ).get_to( verilog_file );
+    data_input.at( "top_module" ).get_to( top_module );
+    data_input.at( "liberty" ).get_to( lib_files );
+    data_input.at( "clef" ).get_to( lef_files );
+    data_input.at( "tlef" ).get_to( tlef_file );
+    data_input.at( "sdc" ).get_to( sdc_file );
 
     config_ieda_->set_verilog_file( verilog_file );
+    config_ieda_->set_top_module( top_module );
     config_ieda_->set_lib_files( lib_files );
     config_ieda_->set_lef_files( lef_files );
     config_ieda_->set_tlef_file( tlef_file );
     config_ieda_->set_sdc_file( sdc_file );
+
+    std::ifstream config_output_stream( config_output );
+    nlohmann::json data_output = nlohmann::json::parse( config_output_stream );
+
+    std::string workspace;
+    data_input.at( "workspace" ).get_to( workspace );
+    config_ieda_->set_workspace( workspace );
   }
 
 private:
-  std::string config_file_ = "";
   lf::netlist::ieda::ConfigiEDA* config_ieda_ = nullptr;
 
   E_ToolNetlistAsicType netlist_step_prev_;
