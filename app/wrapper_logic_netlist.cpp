@@ -13,6 +13,9 @@
 // iPL
 #include "operation/iPL/api/PLAPI.hh"
 
+// iCTS
+#include "operation/iCTS/api/CTSAPI.hh"
+
 // iRT
 #include "operation/iRT/interface/RTInterface.hpp"
 
@@ -43,7 +46,15 @@ int main( int argc, char** argv )
       "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_sram_1rw1r_44x64_8_TT_1p8V_25C.lib",
       "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_sram_1rw1r_80x64_8_TT_1p8V_25C.lib" };
 
-  const char* sdc_file = "/workspace/LogicFactory/toolkit/iEDA/scripts/foundry/sky130/sdc/default.sdc";
+  std::vector<std::string> lib_files_str = {
+      "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_dummy_io.lib",
+      "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_fd_sc_hs__tt_025C_1v80.lib",
+      "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_sram_1rw1r_128x256_8_TT_1p8V_25C.lib",
+      "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_sram_1rw1r_64x256_8_TT_1p8V_25C.lib",
+      "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_sram_1rw1r_44x64_8_TT_1p8V_25C.lib",
+      "/workspace/LogicFactory/techlib/foundry/sky130/lib/sky130_sram_1rw1r_80x64_8_TT_1p8V_25C.lib" };
+
+  const char* sdc_file = "/workspace/LogicFactory/techlib/sdc/default.sdc";
 
   // load tlef file first
   std::vector<std::string> lef_service_files = {
@@ -95,39 +106,20 @@ int main( int argc, char** argv )
   //////////////////////////////////
   // idb
   //////////////////////////////////
-  // read lef
+  dmInst->get_config().set_lib_paths( lib_files_str );
   dmInst->get_config().set_lef_paths( lef_service_files );
+  dmInst->get_config().set_verilog_path( tmp_verilog );
+  dmInst->get_config().set_output_path( output_folder );
+  dmInst->get_config().set_sdc_path( sdc_file );
+
+  // read lef
   dmInst->readLef( lef_service_files );
 
   // read verilog
-  dmInst->get_config().set_verilog_path( tmp_verilog );
-  bool is_ok = dmInst->readVerilog( tmp_verilog, "top_module" );
+  dmInst->readVerilog( tmp_verilog, "top_module" );
 
   // save verilog
-  dmInst->get_config().set_output_path( output_folder );
   dmInst->saveVerilog( "/workspace/LogicFactory/tmp/b1_comb.idb.v" );
-
-  //////////////////////////////////
-  // sta
-  //////////////////////////////////
-  const char* sta_workspace = "/workspace/LogicFactory/tmp/";
-  // sta analysis
-  ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
-  ista_manager->set_design_work_space( sta_workspace );
-  ista_manager->readLiberty( lib_files );
-
-  auto ista_adapter = std::make_unique<ista::TimingIDBAdapter>( ista_manager->get_ista() );
-  ista_adapter->set_idb( dmInst->get_idb_builder() );
-  ista_adapter->convertDBToTimingNetlist();
-
-  ista_manager->set_db_adapter( std::move( ista_adapter ) );
-  ista_manager->readSdc( sdc_file );
-
-  ista_manager->initRcTree();
-  ista_manager->buildGraph();
-  ista_manager->updateTiming();
-
-  ista_manager->reportTiming();
 
   //////////////////////////////////
   // floorplan
@@ -172,6 +164,30 @@ int main( int argc, char** argv )
   // save def
   dmInst->saveDef( "/workspace/LogicFactory/tmp/ifp.def" );
 
+  dmInst->get_idb_design()->set_units( dmInst->get_idb_layout()->get_units() );
+
+  //   //////////////////////////////////
+  //   // sta
+  //   //////////////////////////////////
+  //   const char* sta_workspace = "/workspace/LogicFactory/tmp/";
+  //   // sta analysis
+  //   ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
+  //   ista_manager->set_design_work_space( sta_workspace );
+  //   ista_manager->readLiberty( lib_files );
+
+  //   auto ista_adapter = std::make_unique<ista::TimingIDBAdapter>( ista_manager->get_ista() );
+  //   ista_adapter->set_idb( dmInst->get_idb_builder() );
+  //   ista_adapter->convertDBToTimingNetlist();
+
+  //   ista_manager->set_db_adapter( std::move( ista_adapter ) );
+  //   ista_manager->readSdc( sdc_file );
+
+  //   ista_manager->initRcTree();
+  //   ista_manager->buildGraph();
+  //   ista_manager->updateTiming();
+
+  //   ista_manager->reportTiming();
+
   //////////////////////////////////
   // placement
   //////////////////////////////////
@@ -180,6 +196,14 @@ int main( int argc, char** argv )
   iPLAPIInst.initTimingEval();
   iPLAPIInst.runFlow();
   dmInst->saveDef( "/workspace/LogicFactory/tmp/ipl.def" );
+
+  //////////////////////////////////
+  // cts
+  //////////////////////////////////
+  std::string cts_config = "/workspace/LogicFactory/toolkit/iEDA/scripts/design/sky130_gcd/iEDA_config/cts_default_config.json";
+  CTSAPIInst.init( cts_config, "/workspace/LogicFactory/tmp" );
+  CTSAPIInst.runCTS();
+  dmInst->saveDef( "/workspace/LogicFactory/tmp/icts.def" );
 
   //////////////////////////////////
   // routing
@@ -192,6 +216,7 @@ int main( int argc, char** argv )
   RTI.initRT( config_map );
   RTI.runRT();
   dmInst->saveDef( "/workspace/LogicFactory/tmp/irt.def" );
+  dmInst->saveGDSII( "/workspace/LogicFactory/tmp/irt.gds" );
 
   logic_manager.stop();
   return 0;
