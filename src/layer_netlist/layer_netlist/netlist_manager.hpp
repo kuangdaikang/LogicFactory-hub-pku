@@ -1,9 +1,13 @@
 #pragma once
 
-#include "layer_logic/logic_manager.hpp"
+#include "layer_netlist/api/ieda/config.hpp"
 
-#include "idm.h"
-#include "builder.h"
+#include "nlohmann/json.hpp"
+
+#include "utility/string.hpp"
+
+#include <fstream>
+#include <assert.h>
 
 namespace lf
 {
@@ -31,9 +35,8 @@ enum class E_ToolNetlistAsicType
 class NetlistAsicManager
 {
 public:
-  NetlistAsicManager( lf::logic::LogicManager const& logic_manager )
-      : logic_manager_( logic_manager ),
-        idb_builder_( nullptr ),
+  NetlistAsicManager( const std::string& config_file )
+      : config_file_( config_file ),
         netlist_step_prev_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init ),
         netlist_step_curr_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init )
   {
@@ -45,7 +48,7 @@ public:
 
   void start()
   {
-    idb_builder_ = dmInst->get_idb_builder();
+    parse_config();
   }
 
   void stop()
@@ -53,56 +56,67 @@ public:
   }
 
   /**
-   * @brief
+   * @brief update current step for the netlist manager
    */
-  void update_netlist( E_ToolNetlistAsicType netlist_step )
+  void update_step( E_ToolNetlistAsicType step )
   {
     netlist_step_prev_ = netlist_step_curr_;
-    netlist_step_curr_ = netlist_step;
-  }
-
-  /**
-   * @brief
-   */
-  template<typename T>
-  T current()
-  {
-    if constexpr ( std::is_same_v<T, idb::IdbBuilder*> )
-    {
-      return idb_builder_;
-    }
-    else
-    {
-      std::cerr << "Unhandled current type provided." << std::endl;
-      assert( false );
-      return nullptr;
-    }
-  }
-
-  /**
-   * @brief
-   */
-  template<typename T>
-  void set_current( T obj )
-  {
-    if constexpr ( std::is_same_v<T, idb::IdbBuilder*> )
-    {
-      idb_builder_ = obj;
-    }
-    else
-    {
-      std::cerr << "Unhandled current type provided." << std::endl;
-      assert( false );
-      return nullptr;
-    }
+    netlist_step_curr_ = step;
   }
 
 private:
-  const lf::logic::LogicManager& logic_manager_;
+  void parse_config()
+  {
+    switch ( netlist_step_curr_ )
+    {
+    case E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init:
+      parse_ieda();
+      break;
+    default:
+      assert( false );
+      break;
+    }
+  }
 
-  idb::IdbBuilder* idb_builder_ = nullptr;
+  void parse_ieda()
+  {
+    assert( lf::utility::endsWith( config_file_, ".json" ) );
+    config_ieda_ = new lf::netlist::ieda::ConfigiEDA();
+    std::ifstream config_stream( config_file_ );
+    nlohmann::json data = nlohmann::json::parse( config_stream );
+
+    assert( data.contains( "design" ) );
+    assert( data.contains( "liberty" ) );
+    assert( data.contains( "clef" ) );
+    assert( data.contains( "tlef" ) );
+    assert( data.contains( "sdc" ) );
+
+    std::string verilog_file;
+    std::vector<std::string> lib_files;
+    std::vector<std::string> lef_files;
+    std::string tlef_file;
+    std::string sdc_file;
+
+    data.at( "design" ).get_to( verilog_file );
+    data.at( "liberty" ).get_to( lib_files );
+    data.at( "clef" ).get_to( lef_files );
+    data.at( "tlef" ).get_to( tlef_file );
+    data.at( "sdc" ).get_to( sdc_file );
+
+    config_ieda_->set_verilog_file( verilog_file );
+    config_ieda_->set_lib_files( lib_files );
+    config_ieda_->set_lef_files( lef_files );
+    config_ieda_->set_tlef_file( tlef_file );
+    config_ieda_->set_sdc_file( sdc_file );
+  }
+
+private:
+  std::string config_file_ = "";
+  lf::netlist::ieda::ConfigiEDA* config_ieda_ = nullptr;
+
   E_ToolNetlistAsicType netlist_step_prev_;
   E_ToolNetlistAsicType netlist_step_curr_;
+
 }; // class NelistAsicManager
 
 enum class E_ToolNetlistFpgaType

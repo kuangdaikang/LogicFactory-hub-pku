@@ -36,6 +36,13 @@ target_link_libraries(arch_manager
     lf_arch
 )
 
+add_executable(netlist_manager
+    ${PROJECT_SOURCE_DIR}/app/netlist_manager.cpp
+)
+target_link_libraries(netlist_manager
+    lf_netlist
+)
+
 add_executable(wrapper_arch_logic
     ${PROJECT_SOURCE_DIR}/app/wrapper_arch_logic.cpp
 )
@@ -54,6 +61,7 @@ target_link_libraries(wrapper_logic_netlist
     ifp_api
     ipdn_api
     ipl-api
+    icts_api
     eval_source
     irt_interface
 )
