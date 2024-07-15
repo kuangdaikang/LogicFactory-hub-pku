@@ -269,7 +269,7 @@ void init_pdn( const std::string& file )
   nlohmann::json json_config;
   file_stream >> json_config;
 
-  assert( json_config.contains( "ioPins" ) );
+  assert( json_config.contains( "io_pins" ) );
   assert( json_config.contains( "global_connections" ) );
   assert( json_config.contains( "grids" ) );
   assert( json_config.contains( "stripes" ) );
@@ -299,10 +299,22 @@ void init_pdn( const std::string& file )
     GridConfig config;
     config.primary_power = data["primary_power"].get<std::string>();
     config.primary_ground = data["primary_ground"].get<std::string>();
-    config.layer = data["layer"].get<int32_t>();
-    config.width = data["width"].get<int32_t>();
-    config.offset = data["offset"].get<int32_t>();
+    config.layer = data["layer"].get<std::string>();
+    config.width = data["width"].get<double_t>();
+    config.offset = data["offset"].get<double_t>();
     config_pdn.grids.push_back( config );
+  }
+
+  for ( const auto& data : json_config["stripes"] )
+  {
+    StripeConfig config;
+    config.primary_power = data["primary_power"].get<std::string>();
+    config.primary_ground = data["primary_ground"].get<std::string>();
+    config.layer = data["layer"].get<std::string>();
+    config.width = data["width"].get<double_t>();
+    config.pitch = data["pitch"].get<double_t>();
+    config.offset = data["offset"].get<double_t>();
+    config_pdn.stripes.push_back( config );
   }
 
   config_pdn.connected_layerList = json_config["connected_layerList"].get<std::vector<std::string>>();
@@ -325,7 +337,7 @@ void init_pdn( const std::string& file )
 
   for ( auto stripe : config_pdn.stripes )
   {
-    pdnApiInst->createStripe( stripe.primary_power, stripe.primary_ground, stripe.layer, stripe.width, stripe.width, stripe.offset );
+    pdnApiInst->createStripe( stripe.primary_power, stripe.primary_ground, stripe.layer, stripe.width, stripe.pitch, stripe.offset );
   }
 
   pdnApiInst->connectLayerList( config_pdn.connected_layerList );

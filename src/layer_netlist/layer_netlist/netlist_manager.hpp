@@ -143,9 +143,10 @@ private:
 
     std::ifstream config_output_stream( config_output );
     nlohmann::json data_output = nlohmann::json::parse( config_output_stream );
+    assert( data_output.contains( "workspace" ) );
 
     std::string workspace;
-    data_input.at( "workspace" ).get_to( workspace );
+    data_output.at( "workspace" ).get_to( workspace );
     config_ieda_->set_workspace( workspace );
   }
 

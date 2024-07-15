@@ -14,7 +14,7 @@ namespace ieda
 //  STA
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void init_sta( const std::string& file = "" )
+void init_sta( ista::TimingEngine* ista_manager )
 {
 }
 
@@ -26,7 +26,7 @@ struct ProfileSTA
   std::vector<double> timings;
 };
 
-ProfileSTA eval_sta()
+ProfileSTA eval_sta( ista::TimingEngine* ista_manager )
 {
   ProfileSTA profile;
 
@@ -48,18 +48,19 @@ ProfileSTA run_sta( lf::netlist::NetlistAsicManager& manager )
   std::string sdc_file = manager.get_config_ieda()->get_sdc_file();
   std::string workspace_sta = manager.get_config_ieda()->get_workspace_sta();
 
-  init_sta();
-
   ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
-  ista_manager->set_design_work_space( workspace_sta );
+
+  init_sta( ista_manager );
+
+  ista_manager->set_design_work_space( workspace_sta.c_str() );
   ista_manager->readLiberty( lib_files );
-  ista_manager->readDesign( verilog_file );
-  ista_manager->readSdc( sdc_file );
+  ista_manager->readDesign( verilog_file.c_str() );
+  ista_manager->readSdc( sdc_file.c_str() );
   ista_manager->initRcTree();
   ista_manager->buildGraph();
   ista_manager->updateTiming();
 
-  return eval_sta();
+  return eval_sta( ista_manager );
 }
 
 } // namespace ieda

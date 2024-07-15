@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utility/file.hpp"
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -88,17 +90,48 @@ public:
 
   std::string get_config_routing_file() const { return config_routing_file_; }
 
-  std::string get_workspace() const { return workspace_ + "/" + timestamp_ + "/"; }
+  std::string get_workspace() const
+  {
+    std::string workspace = workspace_ + "/" + timestamp_ + "/";
+    lf::utility::createDirectory( workspace );
+    return workspace;
+  }
 
-  std::string get_workspace_sta() const { return get_workspace() + "/sta/"; }
+  std::string get_workspace_sta() const
+  {
 
-  std::string get_workspace_fp() const { return get_workspace() + "/fp/"; }
+    std::string workspace = get_workspace() + "/sta/";
+    lf::utility::createDirectory( workspace );
+    return workspace;
+  }
 
-  std::string get_workspace_pl() const { return get_workspace() + "/pl/"; }
+  std::string get_workspace_fp() const
+  {
+    std::string workspace = get_workspace() + "/fp/";
+    lf::utility::createDirectory( workspace );
+    return workspace;
+  }
 
-  std::string get_workspace_cts() const { return get_workspace() + "/cts/"; }
+  std::string get_workspace_pl() const
+  {
+    std::string workspace = get_workspace() + "/pl/";
+    lf::utility::createDirectory( workspace );
+    return workspace;
+  }
 
-  std::string get_workspace_rt() const { return get_workspace() + "/rt/"; }
+  std::string get_workspace_cts() const
+  {
+    std::string workspace = get_workspace() + "/cts/";
+    lf::utility::createDirectory( workspace );
+    return workspace;
+  }
+
+  std::string get_workspace_rt() const
+  {
+    std::string workspace = get_workspace() + "/rt/";
+    lf::utility::createDirectory( workspace );
+    return workspace;
+  }
 
 private:
   ///////////////////////////

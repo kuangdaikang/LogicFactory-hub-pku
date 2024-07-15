@@ -8,7 +8,7 @@ target_link_libraries(lf_netlist INTERFACE
     ipdn_api
     ipl-api
     icts_api
-    eval_source
     irt_interface
+    eval_source
 )
 target_include_directories(lf_netlist SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

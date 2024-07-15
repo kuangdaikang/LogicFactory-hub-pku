@@ -30,14 +30,15 @@ void run_init( lf::netlist::NetlistAsicManager& manager )
   dmInst->get_config().set_output_path( workspace );
 
   // read tech_lef / cell_lef, and tech_lef must before cell_lef
-  dmInst->readLef( tlef_file );
-  dmInst->readLef( lef_files );
+  dmInst->readLef( { tlef_file }, true );
+  dmInst->readLef( lef_files, false );
 
   // read verilog
   dmInst->readVerilog( verilog_file, top_module );
 
   // sync the unit of layout for dbu = -1 bugs
   dmInst->get_idb_design()->set_units( dmInst->get_idb_layout()->get_units() );
+  dmInst->saveVerilog( workspace + "/init.v" );
 }
 
 } // namespace ieda
