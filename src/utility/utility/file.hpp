@@ -5,6 +5,8 @@
 #include <vector>
 #include <cstring>
 
+#include <system_error>
+
 namespace lf
 {
 
@@ -49,6 +51,32 @@ std::vector<std::string> glob( const std::string& folder, const std::string& suf
   }
   return res;
 }
+
+/**
+ * @brief create a directory
+ */
+bool createDirectory( const std::string& path )
+{
+  try
+  {
+    if ( std::filesystem::create_directories( path ) )
+    {
+    }
+    else
+    {
+      std::cout << "Directories already exist or failed to create." << std::endl;
+    }
+  }
+  catch ( const std::filesystem::filesystem_error& e )
+  {
+    std::cerr << "Error: " << e.what() << " | Path: " << e.path1() << std::endl;
+    if ( e.code() == std::make_error_code( std::errc::no_such_file_or_directory ) )
+    {
+      std::cerr << "Check if the intermediate directories exist or if the path is correct." << std::endl;
+    }
+  }
+}
+
 } // namespace utility
 
 } // namespace lf
