@@ -60,7 +60,7 @@
             "primary_ground": "VSS",
             "layer": "met4",
             "width": 1.60,
-            "spacing": 27.14,
+            "pitch": 27.14,
             "offset": 13.57
         },
         {
@@ -68,7 +68,7 @@
             "primary_ground": "VSS",
             "layer": "met5",
             "width": 1.60,
-            "spacing": 27.20,
+            "pitch": 27.20,
             "offset": 13.60
         }
     ],
