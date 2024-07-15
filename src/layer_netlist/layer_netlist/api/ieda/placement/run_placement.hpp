@@ -11,36 +11,52 @@ namespace netlist
 namespace ieda
 {
 
+///////////////////////////////////////////////////////////////////////////////////////
+//  PLACEMENT
+///////////////////////////////////////////////////////////////////////////////////////
+void init_placement( const std::string& file )
+{
+  if ( !lf::utility::endsWith( file, ".json" ) )
+  {
+    std::cerr << "config is not end with .json!" << std::endl;
+    assert( false );
+  }
+
+  iPLAPIInst.initAPI( file, dmInst->get_idb_builder() );
+  iPLAPIInst.initTimingEval();
+  iPLAPIInst.runFlow();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//  EVALUATION
+///////////////////////////////////////////////////////////////////////////////////////
 struct ProfilePlacement
 {
   std::vector<double> areas;
 };
 
-ProfilePlacement run_floorplan( lf::netlist::NetlistAsicManager& manager )
+ProfilePlacement eval_placement()
 {
-
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_place );
-
   ProfilePlacement profile;
 
-  std::string verilog_file = manager.get_config_ieda()->get_verilog_file();
-  std::string top_module = manager.get_config_ieda()->get_top_module();
-  std::vector<std::string> lib_files = manager.get_config_ieda()->get_lib_files();
-  std::vector<std::string> lef_files = manager.get_config_ieda()->get_lef_files();
-  std::string tlef_file = manager.get_config_ieda()->get_tlef_file();
-  std::string sdc_file = manager.get_config_ieda()->get_sdc_file();
+  return profile;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//  FLOW
+///////////////////////////////////////////////////////////////////////////////////////
+ProfilePlacement run_placement( lf::netlist::NetlistAsicManager& manager )
+{
+  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_place );
+
   std::string workspace = manager.get_config_ieda()->get_workspace_pl();
+  std::string placement_config_file = manager.get_config_ieda()->get_config_placement_file();
 
-  // TODO: config the path
-  std::string pl_config = "/workspace/LogicFactory/toolkit/iEDA/scripts/design/sky130_gcd/iEDA_config/pl_default_config.json";
+  init_placement( placement_config_file );
 
-  iPLAPIInst.initAPI( pl_config, dmInst->get_idb_builder() );
-  iPLAPIInst.initTimingEval();
-  iPLAPIInst.runFlow();
   dmInst->saveDef( workspace + "/ipl.def" );
 
-  // TODO: get the timing related information
-  return profile;
+  return eval_placement();
 }
 
 } // namespace ieda

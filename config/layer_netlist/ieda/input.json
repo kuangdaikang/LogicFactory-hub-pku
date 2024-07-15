@@ -42,5 +42,12 @@
         "/workspace/LogicFactory/techlib/foundry/sky130/lef/sky130_sram_1rw1r_80x64_8.lef"
     ],
     "def": "",
-    "sdc": "/workspace/LogicFactory/techlib/sdc/default.sdc"
+    "sdc": "/workspace/LogicFactory/techlib/sdc/default.sdc",
+    "flow": {
+        "floorplan": "/workspace/LogicFactory/config/layer_netlist/ieda/flow/floorplan.json",
+        "pdn": "/workspace/LogicFactory/config/layer_netlist/ieda/flow/pdn.json",
+        "placement": "/workspace/LogicFactory/config/layer_netlist/ieda/flow/placement.json",
+        "cts": "/workspace/LogicFactory/config/layer_netlist/ieda/flow/cts.json",
+        "routing": "/workspace/LogicFactory/config/layer_netlist/ieda/flow/routing.json"
+    }
 }

@@ -1,0 +1,71 @@
+{
+    "die": {
+        "xMin": 0.0,
+        "yMin": 0.0,
+        "xMax": 149.96,
+        "yMax": 150.128
+    },
+    "core": {
+        "xMin": 9.996,
+        "yMin": 10.08,
+        "xMax": 139.964,
+        "yMax": 140.048,
+        "xUnit": "unit",
+        "yUnit": "unit",
+        "site": "unit"
+    },
+    "tracks": [
+        {
+            "layer": "li1",
+            "xPitch": 240,
+            "yPitch": 480,
+            "xOffset": 185,
+            "yOffset": 370
+        },
+        {
+            "layer": "met1",
+            "xPitch": 185,
+            "yPitch": 370,
+            "xOffset": 185,
+            "yOffset": 370
+        },
+        {
+            "layer": "met2",
+            "xPitch": 240,
+            "yPitch": 480,
+            "xOffset": 240,
+            "yOffset": 480
+        },
+        {
+            "layer": "met3",
+            "xPitch": 370,
+            "yPitch": 740,
+            "xOffset": 370,
+            "yOffset": 740
+        },
+        {
+            "layer": "met4",
+            "xPitch": 480,
+            "yPitch": 960,
+            "xOffset": 480,
+            "yOffset": 960
+        },
+        {
+            "layer": "met5",
+            "xPitch": 185,
+            "yPitch": 3330,
+            "xOffset": 185,
+            "yOffset": 3330
+        }
+    ],
+    "pins": {
+        "layer": "met4",
+        "xSpacing": 2000,
+        "ySpacing": 2000
+    },
+    "tapCells": {
+        "density": 14.0,
+        "tapCellType": "sky130_fd_sc_hs__tap_1",
+        "fillCellType": "sky130_fd_sc_hs__fill_1"
+    }
+}

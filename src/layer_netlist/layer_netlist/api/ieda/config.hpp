@@ -48,6 +48,21 @@ public:
   void set_sdc_file( const std::string& file ) { sdc_file_ = file; }
   void set_sdc_file( const char* file ) { sdc_file_ = file; }
 
+  void set_config_floorplan_file( const std::string& filePath ) { config_floorplan_file_ = filePath; }
+  void set_config_floorplan_file( const char* filePath ) { config_floorplan_file_ = filePath; }
+
+  void set_config_pdn_file( const std::string& filePath ) { config_pdn_file_ = filePath; }
+  void set_config_pdn_file( const char* filePath ) { config_pdn_file_ = filePath; }
+
+  void set_config_placement_file( const std::string& filePath ) { config_placement_file_ = filePath; }
+  void set_config_placement_file( const char* filePath ) { config_placement_file_ = filePath; }
+
+  void set_config_cts_file( const std::string& filePath ) { config_cts_file_ = filePath; }
+  void set_config_cts_file( const char* filePath ) { config_cts_file_ = filePath; }
+
+  void set_config_routing_file( const std::string& filePath ) { config_routing_file_ = filePath; }
+  void set_config_routing_file( const char* filePath ) { config_routing_file_ = filePath; }
+
   void set_workspace( const std::string& file ) { workspace_ = file; }
   void set_workspace( const char* file ) { workspace_ = file; }
 
@@ -62,6 +77,16 @@ public:
   std::string get_top_module() const { return top_module_; }
 
   std::string get_sdc_file() const { return sdc_file_; }
+
+  std::string get_config_floorplan_file() const { return config_floorplan_file_; }
+
+  std::string get_config_pdn_file() const { return config_pdn_file_; }
+
+  std::string get_config_placement_file() const { return config_placement_file_; }
+
+  std::string get_config_cts_file() const { return config_cts_file_; }
+
+  std::string get_config_routing_file() const { return config_routing_file_; }
 
   std::string get_workspace() const { return workspace_ + "/" + timestamp_ + "/"; }
 
@@ -85,6 +110,12 @@ private:
   std::string verilog_file_;
   std::string top_module_;
   std::string sdc_file_;
+
+  std::string config_floorplan_file_;
+  std::string config_pdn_file_;
+  std::string config_placement_file_;
+  std::string config_cts_file_;
+  std::string config_routing_file_;
 
   ///////////////////////////
   //    output

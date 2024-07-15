@@ -101,6 +101,7 @@ private:
     assert( data_input.contains( "clef" ) );
     assert( data_input.contains( "tlef" ) );
     assert( data_input.contains( "sdc" ) );
+    assert( data_input.contains( "flow" ) );
 
     std::string verilog_file;
     std::string top_module;
@@ -109,12 +110,23 @@ private:
     std::string tlef_file;
     std::string sdc_file;
 
+    std::string config_floorplan_file;
+    std::string config_pdn_file;
+    std::string config_placement_file;
+    std::string config_cts_file;
+    std::string config_routing_file;
+
     data_input.at( "design" ).get_to( verilog_file );
     data_input.at( "top_module" ).get_to( top_module );
     data_input.at( "liberty" ).get_to( lib_files );
     data_input.at( "clef" ).get_to( lef_files );
     data_input.at( "tlef" ).get_to( tlef_file );
     data_input.at( "sdc" ).get_to( sdc_file );
+    data_input.at( "flow" ).at( "floorplan" ).get_to( config_floorplan_file );
+    data_input.at( "flow" ).at( "pdn" ).get_to( config_pdn_file );
+    data_input.at( "flow" ).at( "placement" ).get_to( config_placement_file );
+    data_input.at( "flow" ).at( "cts" ).get_to( config_cts_file );
+    data_input.at( "flow" ).at( "routing" ).get_to( config_routing_file );
 
     config_ieda_->set_verilog_file( verilog_file );
     config_ieda_->set_top_module( top_module );
@@ -122,6 +134,12 @@ private:
     config_ieda_->set_lef_files( lef_files );
     config_ieda_->set_tlef_file( tlef_file );
     config_ieda_->set_sdc_file( sdc_file );
+
+    config_ieda_->set_config_floorplan_file( config_floorplan_file );
+    config_ieda_->set_config_pdn_file( config_pdn_file );
+    config_ieda_->set_config_placement_file( config_placement_file );
+    config_ieda_->set_config_cts_file( config_cts_file );
+    config_ieda_->set_config_routing_file( config_routing_file );
 
     std::ifstream config_output_stream( config_output );
     nlohmann::json data_output = nlohmann::json::parse( config_output_stream );

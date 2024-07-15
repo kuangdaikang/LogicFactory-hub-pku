@@ -1,0 +1,81 @@
+{
+    "io_pins": [
+        {
+            "pin_name": "",
+            "net_name": "VDD",
+            "direction": "INOUT",
+            "is_power": 1
+        },
+        {
+            "pin_name": "",
+            "net_name": "VSS",
+            "direction": "INOUT",
+            "is_power": 0
+        }
+    ],
+    "global_connections": [
+        {
+            "net_name": "VDD",
+            "connect_to": "VPWR",
+            "is_power": 1
+        },
+        {
+            "net_name": "VDD",
+            "connect_to": "VPB",
+            "is_power": 1
+        },
+        {
+            "net_name": "VDD",
+            "connect_to": "vdd",
+            "is_power": 1
+        },
+        {
+            "net_name": "VSS",
+            "connect_to": "VGND",
+            "is_power": 0
+        },
+        {
+            "net_name": "VSS",
+            "connect_to": "VNB",
+            "is_power": 0
+        },
+        {
+            "net_name": "VSS",
+            "connect_to": "gnd",
+            "is_power": 0
+        }
+    ],
+    "grids": [
+        {
+            "primary_power": "VDD",
+            "primary_ground": "VSS",
+            "layer": "met1",
+            "width": 0.48,
+            "offset": 0.0
+        }
+    ],
+    "stripes": [
+        {
+            "primary_power": "VDD",
+            "primary_ground": "VSS",
+            "layer": "met4",
+            "width": 1.60,
+            "spacing": 27.14,
+            "offset": 13.57
+        },
+        {
+            "primary_power": "VDD",
+            "primary_ground": "VSS",
+            "layer": "met5",
+            "width": 1.60,
+            "spacing": 27.20,
+            "offset": 13.60
+        }
+    ],
+    "connected_layerList": [
+        "met1",
+        "met4",
+        "met4",
+        "met5"
+    ]
+}

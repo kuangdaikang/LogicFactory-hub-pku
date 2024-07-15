@@ -1,0 +1,6 @@
+{
+    "temp_directory_path": "/tmp/workspace_lf/rt/",
+    "bottom_routing_layer": "met1",
+    "top_routing_layer": "met4",
+    "thread_number": 64
+}
