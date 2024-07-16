@@ -11,4 +11,7 @@ add_subdirectory(layer_netlist)
 add_subdirectory(layer_formal)
 
 # utility
+add_subdirectory(platform)
+
+# utility
 add_subdirectory(utility)
