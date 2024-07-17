@@ -16,7 +16,7 @@ namespace arch
 namespace yosys
 {
 
-void read_liberty( ArchManager& manager, std::string file )
+void read_liberty( std::string file )
 {
   std::string script = "read_liberty ";
   if ( !lf::utility::endsWith( file, ".lib" ) )
@@ -29,7 +29,7 @@ void read_liberty( ArchManager& manager, std::string file )
   {
     script += file;
   }
-  auto frame = manager.current<Yosys::RTLIL::Design*>();
+  auto frame = lfAmINST->current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }
 

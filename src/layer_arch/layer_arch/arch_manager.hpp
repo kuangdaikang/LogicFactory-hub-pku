@@ -1,6 +1,8 @@
 #pragma once
 #include "kernel/yosys.h"
 
+#define lfAmINST lf::arch::ArchManager::get_instance()
+
 namespace lf
 {
 namespace arch
@@ -15,10 +17,13 @@ enum class E_ToolArchType
 class ArchManager
 {
 public:
-  ArchManager()
-      : type_prev_( E_ToolArchType::E_ARCH_YOSYS ),
-        type_curr_( E_ToolArchType::E_ARCH_YOSYS )
+  static ArchManager* get_instance()
   {
+    if ( instance_ == nullptr )
+    {
+      instance_ = new ArchManager;
+    }
+    return instance_;
   }
 
   void start()
@@ -44,11 +49,21 @@ public:
   }
 
 private:
+  ArchManager() = default;
+  ~ArchManager() = default;
+  ArchManager( const ArchManager& ) = delete;
+  ArchManager& operator=( const ArchManager& ) = delete;
+
+private:
+  static ArchManager* instance_;
+
   Yosys::RTLIL::Design* frame_yosys_;
-  E_ToolArchType type_prev_;
-  E_ToolArchType type_curr_;
+  E_ToolArchType type_prev_ = { E_ToolArchType::E_ARCH_YOSYS };
+  E_ToolArchType type_curr_ = { E_ToolArchType::E_ARCH_YOSYS };
 
 }; // class ArchManager
+
+ArchManager* ArchManager::instance_ = nullptr;
 
 } // namespace arch
 

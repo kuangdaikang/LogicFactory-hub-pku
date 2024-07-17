@@ -16,7 +16,7 @@ namespace arch
 namespace yosys
 {
 
-void write_verilog( ArchManager& manager, std::string file )
+void write_verilog( std::string file )
 {
   std::string script = "write_verilog ";
   if ( !lf::utility::endsWith( file, ".v" ) )
@@ -29,7 +29,7 @@ void write_verilog( ArchManager& manager, std::string file )
   {
     script += file;
   }
-  auto frame = manager.current<Yosys::RTLIL::Design*>();
+  auto frame = lfAmINST->current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }
 

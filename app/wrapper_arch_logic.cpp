@@ -32,17 +32,16 @@ void profile( Yosys::RTLIL::Design* design )
 int main( int argc, char** argv )
 {
   std::string file = std::string( argv[1] );
-  lf::arch::ArchManager manager_arch;
-  manager_arch.start();
+  lfAmINST->start();
 
-  //   lf::arch::yosys::read_verilog( manager_arch, file );
-  lf::arch::yosys::read_aiger( manager_arch, file );
+  //   lf::arch::yosys::read_verilog(  file );
+  lf::arch::yosys::read_aiger( file );
 
-  lf::arch::yosys::hierarchy( manager_arch );
-  lf::arch::yosys::opt( manager_arch );
-  lf::arch::yosys::aigmap( manager_arch );
+  lf::arch::yosys::hierarchy();
+  lf::arch::yosys::opt();
+  lf::arch::yosys::aigmap();
 
-  Yosys::RTLIL::Design* frame_yosys = manager_arch.current<Yosys::RTLIL::Design*>();
+  Yosys::RTLIL::Design* frame_yosys = lfAmINST->current<Yosys::RTLIL::Design*>();
 
   mockturtle::gtg_network gtg = lf::logic::to_lsils_wrapper( frame_yosys );
   mockturtle::write_dot( gtg, "test_arch.gtg.dot" );

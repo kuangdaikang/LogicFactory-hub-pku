@@ -16,10 +16,10 @@ namespace arch
 namespace yosys
 {
 
-void abc( ArchManager& manager, std::string param )
+void abc( std::string param )
 {
   std::string script = "abc " + param;
-  auto frame = manager.current<Yosys::RTLIL::Design*>();
+  auto frame = lfAmINST->current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }
 

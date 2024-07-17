@@ -16,7 +16,7 @@ namespace arch
 namespace yosys
 {
 
-void hierarchy( ArchManager& manager, std::string top_name = "" )
+void hierarchy( std::string top_name = "" )
 {
   std::string script = "hierarchy -check ";
   if ( top_name != "" )
@@ -27,7 +27,7 @@ void hierarchy( ArchManager& manager, std::string top_name = "" )
   {
     script += "-auto-top";
   }
-  auto frame = manager.current<Yosys::RTLIL::Design*>();
+  auto frame = lfAmINST->current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }
 

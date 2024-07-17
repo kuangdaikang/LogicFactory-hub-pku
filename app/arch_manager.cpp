@@ -4,10 +4,9 @@
 int main( int argc, char** argv )
 {
   std::string file = std::string( argv[1] );
-  lf::arch::ArchManager manager;
-  manager.start();
+  lfAmINST->start();
 
-  lf::arch::yosys::read_verilog( manager, file );
+  lf::arch::yosys::read_verilog( file );
 
   return 1;
 }

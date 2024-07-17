@@ -16,10 +16,10 @@ namespace arch
 namespace yosys
 {
 
-void aigmap( ArchManager& manager )
+void aigmap()
 {
   std::string script = "aigmap";
-  auto frame = manager.current<Yosys::RTLIL::Design*>();
+  auto frame = lfAmINST->current<Yosys::RTLIL::Design*>();
   Yosys::run_pass( script, frame );
 }
 

@@ -13,19 +13,18 @@ int main( int argc, char** argv )
   std::string liberty = std::string( argv[3] );
   std::string verilog = std::string( argv[4] );
 
-  lf::arch::ArchManager manager;
-  manager.start();
+  lfAmINST->start();
 
   // read aiger
-  lf::arch::yosys::read_aiger( manager, aiger );
+  lf::arch::yosys::read_aiger( aiger );
 
   // run pass
-  lf::arch::yosys::hierarchy( manager );
+  lf::arch::yosys::hierarchy();
 
-  lf::arch::yosys::abc( manager, " -exe " + abc + " -liberty " + liberty );
+  lf::arch::yosys::abc( " -exe " + abc + " -liberty " + liberty );
 
-  lf::arch::yosys::write_verilog( manager, verilog );
+  lf::arch::yosys::write_verilog( verilog );
 
-  manager.stop();
+  lfAmINST->stop();
   return 1;
 }
