@@ -12,19 +12,17 @@ int main( int argc, char** argv )
   std::string config_input = std::string( argv[1] );
   std::string config_output = std::string( argv[2] );
 
-  lf::netlist::NetlistAsicManager netlist_manager;
-  netlist_manager.start();
+  lfNamINST->start();
+  lfNamINST->init_config( config_input, config_output );
 
-  netlist_manager.init_config( config_input, config_output );
+  lf::netlist::ieda::run_init();
+  lf::netlist::ieda::run_floorplan();
+  lf::netlist::ieda::run_placement();
+  lf::netlist::ieda::run_sta();
+  lf::netlist::ieda::run_cts();
+  lf::netlist::ieda::run_routing();
 
-  lf::netlist::ieda::run_init( netlist_manager );
-  lf::netlist::ieda::run_floorplan( netlist_manager );
-  lf::netlist::ieda::run_placement( netlist_manager );
-  lf::netlist::ieda::run_sta( netlist_manager );
-  lf::netlist::ieda::run_cts( netlist_manager );
-  lf::netlist::ieda::run_routing( netlist_manager );
-
-  netlist_manager.stop();
+  lfNamINST->stop();
 
   return 1;
 }

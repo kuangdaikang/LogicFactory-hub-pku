@@ -98,12 +98,12 @@ ProfileRouting eval_routing()
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfileRouting run_routing( lf::netlist::NetlistAsicManager& manager )
+ProfileRouting run_routing( )
 {
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_route );
+  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_route );
 
-  std::string workspace = manager.get_config_ieda()->get_workspace_rt();
-  std::string routing_config_file = manager.get_config_ieda()->get_config_routing_file();
+  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_rt();
+  std::string routing_config_file = lfNamINST->get_config_ieda()->get_config_routing_file();
 
   init_routing( routing_config_file );
 

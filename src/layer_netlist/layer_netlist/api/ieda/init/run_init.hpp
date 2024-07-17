@@ -9,18 +9,18 @@ namespace netlist
 namespace ieda
 {
 
-void run_init( lf::netlist::NetlistAsicManager& manager )
+void run_init()
 {
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init );
+  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init );
 
-  std::string verilog_file = manager.get_config_ieda()->get_verilog_file();
-  std::string top_module = manager.get_config_ieda()->get_top_module();
-  std::vector<std::string> lib_files = manager.get_config_ieda()->get_lib_files();
-  std::vector<std::string> lef_files = manager.get_config_ieda()->get_lef_files();
-  std::string tlef_file = manager.get_config_ieda()->get_tlef_file();
-  std::string sdc_file = manager.get_config_ieda()->get_sdc_file();
+  std::string verilog_file = lfNamINST->get_config_ieda()->get_verilog_file();
+  std::string top_module = lfNamINST->get_config_ieda()->get_top_module();
+  std::vector<std::string> lib_files = lfNamINST->get_config_ieda()->get_lib_files();
+  std::vector<std::string> lef_files = lfNamINST->get_config_ieda()->get_lef_files();
+  std::string tlef_file = lfNamINST->get_config_ieda()->get_tlef_file();
+  std::string sdc_file = lfNamINST->get_config_ieda()->get_sdc_file();
 
-  std::string workspace = manager.get_config_ieda()->get_workspace();
+  std::string workspace = lfNamINST->get_config_ieda()->get_workspace();
 
   dmInst->get_config().set_verilog_path( verilog_file );
   dmInst->get_config().set_lib_paths( lib_files );

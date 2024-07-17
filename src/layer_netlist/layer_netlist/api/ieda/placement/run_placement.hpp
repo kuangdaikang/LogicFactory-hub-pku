@@ -45,12 +45,12 @@ ProfilePlacement eval_placement()
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfilePlacement run_placement( lf::netlist::NetlistAsicManager& manager )
+ProfilePlacement run_placement()
 {
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_place );
+  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_place );
 
-  std::string workspace = manager.get_config_ieda()->get_workspace_pl();
-  std::string placement_config_file = manager.get_config_ieda()->get_config_placement_file();
+  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_pl();
+  std::string placement_config_file = lfNamINST->get_config_ieda()->get_config_placement_file();
 
   std::ifstream file_stream( placement_config_file );
   if ( !file_stream.is_open() )

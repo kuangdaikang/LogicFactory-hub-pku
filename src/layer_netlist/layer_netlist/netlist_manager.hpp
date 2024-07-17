@@ -10,6 +10,8 @@
 #include <fstream>
 #include <assert.h>
 
+#define lfNamINST lf::netlist::NetlistAsicManager::get_instance()
+
 namespace lf
 {
 
@@ -36,15 +38,14 @@ enum class E_ToolNetlistAsicType
 class NetlistAsicManager
 {
 public:
-  NetlistAsicManager()
-      : netlist_step_prev_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init ),
-        netlist_step_curr_( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init )
+  static NetlistAsicManager* get_instance()
   {
+    if ( instance_ == nullptr )
+    {
+      instance_ = new NetlistAsicManager;
+    }
+    return instance_;
   }
-
-  NetlistAsicManager( const NetlistAsicManager& ) = delete;
-  NetlistAsicManager& operator=( const NetlistAsicManager& ) = delete;
-  ~NetlistAsicManager() = default;
 
   void start()
   {
@@ -150,13 +151,21 @@ private:
     config_ieda_->set_workspace( workspace );
   }
 
+  NetlistAsicManager() = default;
+  ~NetlistAsicManager() = default;
+  NetlistAsicManager( const NetlistAsicManager& ) = delete;
+  NetlistAsicManager& operator=( const NetlistAsicManager& ) = delete;
+
 private:
+  static NetlistAsicManager* instance_;
   lf::netlist::ieda::ConfigiEDA* config_ieda_ = nullptr;
 
-  E_ToolNetlistAsicType netlist_step_prev_;
-  E_ToolNetlistAsicType netlist_step_curr_;
+  E_ToolNetlistAsicType netlist_step_prev_ = { E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init };
+  E_ToolNetlistAsicType netlist_step_curr_ = { E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init };
 
 }; // class NelistAsicManager
+
+NetlistAsicManager* NetlistAsicManager::instance_ = nullptr;
 
 enum class E_ToolNetlistFpgaType
 {

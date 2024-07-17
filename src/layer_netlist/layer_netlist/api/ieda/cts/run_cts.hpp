@@ -32,13 +32,13 @@ ProfileCts eval_cts()
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfileCts run_cts( lf::netlist::NetlistAsicManager& manager )
+ProfileCts run_cts(  )
 {
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_cts );
+  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_cts );
 
-  std::string workspace = manager.get_config_ieda()->get_workspace_cts();
+  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_cts();
 
-  std::string config_cts_file = manager.get_config_ieda()->get_config_cts_file();
+  std::string config_cts_file = lfNamINST->get_config_ieda()->get_config_cts_file();
 
   init_cts( config_cts_file, workspace );
 

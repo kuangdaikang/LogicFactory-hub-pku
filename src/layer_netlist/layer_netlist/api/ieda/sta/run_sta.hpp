@@ -23,6 +23,7 @@ void init_sta( ista::TimingEngine* ista_manager )
 ///////////////////////////////////////////////////////////////////////////////////////
 struct ProfileSTA
 {
+  // TODO: get the profiles of current design
   std::vector<double> timings;
 };
 
@@ -36,17 +37,17 @@ ProfileSTA eval_sta( ista::TimingEngine* ista_manager )
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfileSTA run_sta( lf::netlist::NetlistAsicManager& manager )
+ProfileSTA run_sta( )
 {
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_sta );
+  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_sta );
 
-  std::string verilog_file = manager.get_config_ieda()->get_verilog_file();
-  std::string top_module = manager.get_config_ieda()->get_top_module();
-  std::vector<std::string> lib_files = manager.get_config_ieda()->get_lib_files();
-  std::vector<std::string> lef_files = manager.get_config_ieda()->get_lef_files();
-  std::string tlef_file = manager.get_config_ieda()->get_tlef_file();
-  std::string sdc_file = manager.get_config_ieda()->get_sdc_file();
-  std::string workspace_sta = manager.get_config_ieda()->get_workspace_sta();
+  std::string verilog_file = lfNamINST->get_config_ieda()->get_verilog_file();
+  std::string top_module = lfNamINST->get_config_ieda()->get_top_module();
+  std::vector<std::string> lib_files = lfNamINST->get_config_ieda()->get_lib_files();
+  std::vector<std::string> lef_files = lfNamINST->get_config_ieda()->get_lef_files();
+  std::string tlef_file = lfNamINST->get_config_ieda()->get_tlef_file();
+  std::string sdc_file = lfNamINST->get_config_ieda()->get_sdc_file();
+  std::string workspace_sta = lfNamINST->get_config_ieda()->get_workspace_sta();
 
   ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
 

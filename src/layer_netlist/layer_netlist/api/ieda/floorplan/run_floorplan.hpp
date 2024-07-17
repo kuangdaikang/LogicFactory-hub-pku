@@ -364,13 +364,13 @@ ProfileFloorplan eval_floorplan()
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfileFloorplan run_floorplan( lf::netlist::NetlistAsicManager& manager )
+ProfileFloorplan run_floorplan()
 {
-  manager.update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_fp );
+  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_fp );
 
-  std::string workspace = manager.get_config_ieda()->get_workspace_fp();
-  std::string floorplan_config_file = manager.get_config_ieda()->get_config_floorplan_file();
-  std::string pdn_config_file = manager.get_config_ieda()->get_config_pdn_file();
+  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_fp();
+  std::string floorplan_config_file = lfNamINST->get_config_ieda()->get_config_floorplan_file();
+  std::string pdn_config_file = lfNamINST->get_config_ieda()->get_config_pdn_file();
 
   init_floorplan( floorplan_config_file );
   init_pdn( pdn_config_file );
