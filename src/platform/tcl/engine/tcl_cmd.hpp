@@ -129,6 +129,10 @@ private:
 class TclCmds
 {
 public:
+  TclCmds() = default;
+  ~TclCmds() = default;
+
+public:
   static void addTclCmd( std::unique_ptr<TclCmd> cmd )
   {
     TclScript::getOrCreateInstance()->createCmd( cmd->get_cmd_name(), CmdProc, cmd.get() );
@@ -148,6 +152,8 @@ public:
 private:
   static std::unordered_map<const char*, std::unique_ptr<TclCmd>> _cmds;
 }; // class TclCmds
+
+std::unordered_map<const char*, std::unique_ptr<TclCmd>> TclCmds::_cmds;
 
 bool containWildcard( const char* pattern )
 {

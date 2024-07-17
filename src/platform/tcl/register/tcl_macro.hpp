@@ -1,3 +1,4 @@
+#pragma once
 
 #define LF_MACOR_REGISTER_TCL_CMD( type, name )    \
   do                                               \
