@@ -17,10 +17,10 @@ namespace logic
 namespace abc
 {
 
-void map_asic( LogicManager& manager )
+void map_asic()
 {
-  manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
-  auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
+  lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
+  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
   int argc = 0;
   char** argv = nullptr;
   babc::Abc_CommandMap( ntk_ptr, argc, argv );

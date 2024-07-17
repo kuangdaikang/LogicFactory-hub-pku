@@ -29,7 +29,7 @@ namespace lsils
  *
  */
 // template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
-void read_genlib( LogicManager& manager, std::string file )
+void read_genlib( std::string file )
 {
   if ( !lf::utility::endsWith( file, ".genlib" ) )
   {
@@ -41,7 +41,7 @@ void read_genlib( LogicManager& manager, std::string file )
   std::ifstream in( file );
   lib_gates gates;
   lorina::read_genlib( in, mockturtle::genlib_reader( gates ) );
-  manager.set_current<lib_gates>( gates );
+  lfLmINST->set_current<lib_gates>( gates );
 }
 
 } // end namespace lsils

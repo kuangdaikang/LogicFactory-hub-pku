@@ -21,7 +21,7 @@ namespace logic
 namespace abc
 {
 
-void read_liberty( LogicManager& manager, std::string file )
+void read_liberty( std::string file )
 {
   if ( !lf::utility::endsWith( file, ".lib" ) )
   {
@@ -30,8 +30,8 @@ void read_liberty( LogicManager& manager, std::string file )
     return;
   }
 
-  manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
-  auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
+  lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
+  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
   char** argv = ABC_ALLOC( char*, argc + 1 );

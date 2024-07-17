@@ -18,31 +18,30 @@ int main( int argc, char** argv )
   std::string file = std::string( argv[1] );
   std::string genlib = std::string( argv[2] );
 
-  lf::logic::LogicManager manager;
-  manager.start();
+  lfLmINST->start();
 
-  lf::logic::read_gtech( manager, file );
-  lf::logic::read_genlib( manager, genlib );
+  lf::logic::read_gtech( file );
+  lf::logic::read_genlib( genlib );
 
-  mockturtle::write_dot<lf::logic::lsils::gtg_seq_network>( manager.current<lf::logic::lsils::gtg_seq_network>(), file + ".gtg.start.dot" );
+  mockturtle::write_dot<lf::logic::lsils::gtg_seq_network>( lfLmINST->current<lf::logic::lsils::gtg_seq_network>(), file + ".gtg.start.dot" );
 
-  lf::logic::lsils::balance_sop<lf::logic::lsils::aig_seq_network>( manager );
-  lf::logic::abc::rewrite( manager );
-  lf::logic::lsils::rewrite_cut<lf::logic::lsils::aig_seq_network>( manager );
-  lf::logic::abc::rewrite( manager );
-  lf::logic::lsils::balance_sop<lf::logic::lsils::aig_seq_network>( manager );
-  lf::logic::abc::rewrite( manager );
-  lf::logic::lsils::rewrite_cut<lf::logic::lsils::aig_seq_network>( manager );
+  lf::logic::lsils::balance_sop<lf::logic::lsils::aig_seq_network>();
+  lf::logic::abc::rewrite();
+  lf::logic::lsils::rewrite_cut<lf::logic::lsils::aig_seq_network>();
+  lf::logic::abc::rewrite();
+  lf::logic::lsils::balance_sop<lf::logic::lsils::aig_seq_network>();
+  lf::logic::abc::rewrite();
+  lf::logic::lsils::rewrite_cut<lf::logic::lsils::aig_seq_network>();
 
-  mockturtle::write_dot<lf::logic::lsils::aig_seq_network>( manager.current<lf::logic::lsils::aig_seq_network>(), file + ".aig.stop.dot" );
+  mockturtle::write_dot<lf::logic::lsils::aig_seq_network>( lfLmINST->current<lf::logic::lsils::aig_seq_network>(), file + ".aig.stop.dot" );
 
-  // lf::logic::abc::map_asic( manager );
-  // lf::logic::abc::map_fpga( manager );
+  // lf::logic::abc::map_asic(  );
+  // lf::logic::abc::map_fpga(  );
 
-  lf::logic::lsils::map_asic( manager );
-  lf::logic::lsils::map_fpga( manager );
+  lf::logic::lsils::map_asic();
+  lf::logic::lsils::map_fpga();
 
-  manager.stop();
+  lfLmINST->stop();
 
   return 1;
 }

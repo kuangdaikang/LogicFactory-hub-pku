@@ -24,7 +24,7 @@ namespace lsils
  *
  */
 // template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
-void read_liberty( LogicManager& manager, std::string file )
+void read_liberty( std::string file )
 {
   if ( !lf::utility::endsWith( file, ".lib" ) )
   {

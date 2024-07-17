@@ -29,27 +29,27 @@ namespace lsils
  *
  */
 template<class Ntk>
-void balance_sop( LogicManager& manager )
+void balance_sop()
 {
   if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
   }
   else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG );
   }
   else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG );
   }
   else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG );
   }
   else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG );
   }
   else
   {
@@ -57,11 +57,11 @@ void balance_sop( LogicManager& manager )
     assert( false );
   }
 
-  auto ntk = manager.current<Ntk>();
+  auto ntk = lfLmINST->current<Ntk>();
 
   mockturtle::sop_rebalancing<Ntk> rebalance;
   Ntk ntk_new = mockturtle::balancing<Ntk>( ntk, rebalance );
-  manager.set_current<Ntk>( ntk_new );
+  lfLmINST->set_current<Ntk>( ntk_new );
 }
 
 } // end namespace lsils

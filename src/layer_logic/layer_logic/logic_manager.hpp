@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <iostream>
 
+#define lfLmINST lf::logic::LogicManager::get_instance()
+
 namespace lf
 {
 
@@ -36,15 +38,14 @@ enum class E_ToolLogicType
 class LogicManager
 {
 public:
-  LogicManager()
-      : logic_type_prev_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG ),
-        logic_type_curr_( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG )
+  static LogicManager* get_instance()
   {
+    if ( instance_ == nullptr )
+    {
+      instance_ = new LogicManager;
+    }
+    return instance_;
   }
-
-  LogicManager( const LogicManager& ) = delete;
-  LogicManager& operator=( const LogicManager& ) = delete;
-  ~LogicManager() = default;
 
   void start()
   {
@@ -293,12 +294,22 @@ public:
   }
 
 private:
+  LogicManager() = default;
+  ~LogicManager() = default;
+  LogicManager( const LogicManager& ) = delete;
+  LogicManager& operator=( const LogicManager& ) = delete;
+
+private:
+  static LogicManager* instance_;
+
   babc::Abc_Frame_t* frame_abc_ = nullptr;
   lsils::Lsils_Frame_t frame_lsils_;
 
-  E_ToolLogicType logic_type_prev_;
-  E_ToolLogicType logic_type_curr_;
-};
+  E_ToolLogicType logic_type_prev_ = { E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG };
+  E_ToolLogicType logic_type_curr_ = { E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG };
+}; // class LogicManager
+
+LogicManager* LogicManager::instance_ = nullptr;
 
 } // end namespace logic
 

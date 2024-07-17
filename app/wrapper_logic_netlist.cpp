@@ -91,17 +91,16 @@ int main( int argc, char** argv )
   std::string tmp_verilog = "/workspace/LogicFactory/tmp/lf_" + lf::utility::genRandomName( 8 ) + "_abc.v";
 
   /// logic technology mapping file
-  lf::logic::LogicManager logic_manager;
-  logic_manager.start();
+  lfLmINST->start();
 
-  lf::logic::read_aiger( logic_manager, aiger );
-  lf::logic::read_liberty( logic_manager, liberty );
+  lf::logic::read_aiger( aiger );
+  lf::logic::read_liberty( liberty );
 
-  logic_manager.update_logic( lf::logic::E_ToolLogicType::E_LOGIC_ABC_AIG ); // convert the aig to ABC frame
+  lfLmINST->update_logic( lf::logic::E_ToolLogicType::E_LOGIC_ABC_AIG ); // convert the aig to ABC frame
 
   // technology mapping
-  lf::logic::abc::map_asic( logic_manager );
-  lf::logic::abc::write_verilog( logic_manager, tmp_verilog );
+  lf::logic::abc::map_asic();
+  lf::logic::abc::write_verilog( tmp_verilog );
 
   //////////////////////////////////
   // idb
@@ -218,6 +217,6 @@ int main( int argc, char** argv )
   dmInst->saveDef( "/workspace/LogicFactory/tmp/irt.def" );
   dmInst->saveGDSII( "/workspace/LogicFactory/tmp/irt.gds" );
 
-  logic_manager.stop();
+  lfLmINST->stop();
   return 0;
 }

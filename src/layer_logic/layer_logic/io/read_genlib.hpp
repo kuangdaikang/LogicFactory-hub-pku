@@ -14,10 +14,10 @@ namespace logic
 /**
  * @brief common interface of the read genlib
  */
-void read_genlib( LogicManager& manager, std::string file )
+void read_genlib( std::string file )
 {
-  lf::logic::abc::read_genlib( manager, file );
-  lf::logic::lsils::read_genlib( manager, file );
+  lf::logic::abc::read_genlib( file );
+  lf::logic::lsils::read_genlib( file );
 }
 
 } // namespace logic

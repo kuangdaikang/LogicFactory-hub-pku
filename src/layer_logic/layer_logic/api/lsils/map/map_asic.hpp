@@ -26,27 +26,27 @@ namespace lsils
  */
 // template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
 template<class Ntk = aig_seq_network>
-void map_asic( LogicManager& manager )
+void map_asic()
 {
   if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_AIG );
   }
   else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XAG );
   }
   else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_MIG );
   }
   else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_XMG );
   }
   else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
   {
-    manager.update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG );
+    lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_MOCKTURTLE_GTG );
   }
   else
   {
@@ -54,14 +54,14 @@ void map_asic( LogicManager& manager )
     assert( false );
   }
 
-  auto ntk = manager.current<Ntk>();
-  auto gates = manager.current<lib_gates>();
+  auto ntk = lfLmINST->current<Ntk>();
+  auto gates = lfLmINST->current<lib_gates>();
 
   lib_techlib_np techlib( gates );
 
   blut_seq_network netlist_asic = mockturtle::seq_map<Ntk, 6u, mockturtle::cut_enumeration_tech_map_cut, 6u, mockturtle::classification_type::np_configurations>( ntk, techlib );
 
-  manager.set_current<blut_seq_network>( netlist_asic );
+  lfLmINST->set_current<blut_seq_network>( netlist_asic );
 }
 
 } // end namespace lsils

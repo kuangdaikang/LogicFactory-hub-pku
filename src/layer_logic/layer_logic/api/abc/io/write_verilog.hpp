@@ -21,7 +21,7 @@ namespace logic
 namespace abc
 {
 
-void write_verilog( LogicManager& manager, std::string file )
+void write_verilog( std::string file )
 {
   if ( !lf::utility::endsWith( file, ".v" ) )
   {
@@ -30,8 +30,8 @@ void write_verilog( LogicManager& manager, std::string file )
     return;
   }
 
-  manager.update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
-  auto ntk_ptr = manager.current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
+  lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
+  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
   char** argv = ABC_ALLOC( char*, argc + 1 );
