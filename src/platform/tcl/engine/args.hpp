@@ -14,7 +14,13 @@ namespace tcl
  */
 char* copyCharStar( const char* orig )
 {
+  if ( orig == nullptr )
+    return nullptr;
+
   char* copy_str = new char[strlen( orig ) + 1];
+  if ( copy_str == nullptr )
+    return nullptr;
+
   strcpy( copy_str, orig );
   return copy_str;
 }
