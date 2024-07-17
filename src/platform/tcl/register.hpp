@@ -1,6 +1,5 @@
 #pragma once
 
-#include "engine/tcl_macro.hpp"
 #include "register/arch/tcl_register_yosys.hpp"
 #include "register/logic/tcl_register_abc.hpp"
 #include "register/logic/tcl_register_lsils.hpp"
@@ -14,6 +13,7 @@ namespace tcl
 
 int registerCmds()
 {
+  registerCmdiEDA();
 }
 
 } // namespace tcl

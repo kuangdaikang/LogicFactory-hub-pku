@@ -66,3 +66,9 @@ target_link_libraries(wrapper_logic_netlist
     irt_interface
 )
 
+add_executable(logicfactory
+    ${PROJECT_SOURCE_DIR}/app/logicfactory.cpp
+)
+target_link_libraries(logicfactory
+lf_platform
+)
