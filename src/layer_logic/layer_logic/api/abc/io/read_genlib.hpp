@@ -2,15 +2,15 @@
 
 #include "layer_logic/logic_manager.hpp"
 
-#include <cstdio>
-#include <string>
-
 #include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
 #include "base/io/io.h"
 #include "misc/extra/extra.h"
 
 #include "utility/string.hpp"
+
+#include <cstdio>
+#include <string>
 
 namespace lf
 {
@@ -21,7 +21,14 @@ namespace logic
 namespace abc
 {
 
-void read_genlib( std::string file )
+/**
+ * @brief Reads a genlib file into the current logic network.
+ * @example
+ *  read_genlib [filename]
+ *
+ * @note
+ */
+void read_genlib( const std::string& file )
 {
   if ( !lf::utility::endsWith( file, ".genlib" ) )
   {

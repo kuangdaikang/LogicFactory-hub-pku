@@ -2,15 +2,15 @@
 
 #include "layer_logic/logic_manager.hpp"
 
-#include <cstdio>
-#include <string>
-
 #include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
 #include "base/io/io.h"
 #include "misc/extra/extra.h"
 
 #include "utility/string.hpp"
+
+#include <cstdio>
+#include <string>
 
 namespace lf
 {
@@ -22,17 +22,17 @@ namespace abc
 {
 
 /**
- * @brief Reads a liberty file into the current logic network.
+ * @brief Reads a genlib file into the current logic network.
  * @example
- *  read_liberty [filename]
- *
+ *  read_aiger [options] [filename]
+ *  options: -c
  * @note
  */
-void read_liberty( const std::string& file )
+void read_aiger( const std::string& file, bool is_checking = false )
 {
-  if ( !lf::utility::endsWith( file, ".lib" ) )
+  if ( !lf::utility::endsWith( file, ".genlib" ) )
   {
-    std::cerr << "Unmatched liberty suffix type." << std::endl;
+    std::cerr << "Unmatched genlib suffix type." << std::endl;
     assert( false );
     return;
   }
@@ -41,12 +41,21 @@ void read_liberty( const std::string& file )
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
+  if ( is_checking )
+    argc += 1;
+
   char** argv = ABC_ALLOC( char*, argc + 1 );
 
-  argv[0] = babc::Extra_UtilStrsav( "read" );
-  argv[1] = const_cast<char*>( file.c_str() );
+  int pos = 0;
 
-  babc::IoCommandRead( ntk_ptr, argc, argv );
+  argv[pos++] = babc::Extra_UtilStrsav( "read" );
+
+  if ( is_checking )
+    argv[pos++] = babc::Extra_UtilStrsav( " -c " );
+
+  argv[pos++] = babc::Extra_UtilStrsav( file.c_str() );
+
+  babc::IoCommandReadAiger( ntk_ptr, argc, argv );
 }
 
 } // namespace abc
