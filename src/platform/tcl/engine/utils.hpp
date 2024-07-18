@@ -9,6 +9,27 @@ namespace lf
 namespace tcl
 {
 
+struct CStrHash
+{
+  std::size_t operator()( const char* s ) const
+  {
+    std::size_t h = 0;
+    for ( ; *s; ++s )
+    {
+      h = h * 101 + *s;
+    }
+    return h;
+  }
+};
+
+struct CStrEqual
+{
+  bool operator()( const char* s1, const char* s2 ) const
+  {
+    return strcmp( s1, s2 ) == 0;
+  }
+};
+
 /**
  * @brief
  */

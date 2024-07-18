@@ -2,6 +2,7 @@
 
 #include "tcl_script.hpp"
 #include "tcl_option.hpp"
+#include "utils.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -33,7 +34,7 @@ bool matchWildcardWithtarget( const char* const pattern, const char* const targe
  * @brief
  * @example
  */
-int CmdProc( ClientData clientData, Tcl_Interp* interp, int objc, struct Tcl_Obj* const* objv );
+int cmdProcess( ClientData clientData, Tcl_Interp* interp, int objc, struct Tcl_Obj* const* objv );
 
 class TclCmd
 {
@@ -122,8 +123,8 @@ private:
 
 private:
   char* _cmd_name;
-  std::unordered_map<const char*, std::unique_ptr<TclOption>> _options; // store the options
-  std::vector<TclOption*> _args;                                        // the tcl args need keep order
+  std::unordered_map<const char*, std::unique_ptr<TclOption>, CStrHash, CStrEqual> _options; // store the options
+  std::vector<TclOption*> _args;                                                             // the tcl args need keep order
 }; // class TclCmd
 
 class TclCmds
@@ -135,7 +136,7 @@ public:
 public:
   static void addTclCmd( std::unique_ptr<TclCmd> cmd )
   {
-    TclScript::getOrCreateInstance()->createCmd( cmd->get_cmd_name(), CmdProc, cmd.get() );
+    TclScript::getOrCreateInstance()->createCmd( cmd->get_cmd_name(), cmdProcess, cmd.get() );
     _cmds.emplace( cmd->get_cmd_name(), std::move( cmd ) );
   }
 
@@ -150,10 +151,10 @@ public:
   }
 
 private:
-  static std::unordered_map<const char*, std::unique_ptr<TclCmd>> _cmds;
+  static std::unordered_map<const char*, std::unique_ptr<TclCmd>, CStrHash, CStrEqual> _cmds;
 }; // class TclCmds
 
-std::unordered_map<const char*, std::unique_ptr<TclCmd>> TclCmds::_cmds;
+std::unordered_map<const char*, std::unique_ptr<TclCmd>, CStrHash, CStrEqual> TclCmds::_cmds;
 
 bool containWildcard( const char* pattern )
 {
@@ -235,7 +236,7 @@ bool matchWildcardWithtarget( const char* const pattern, const char* const targe
   }
 }
 
-int CmdProc( ClientData clientData, Tcl_Interp* interp, int objc, struct Tcl_Obj* const* objv )
+int cmdProcess( ClientData clientData, Tcl_Interp* interp, int objc, struct Tcl_Obj* const* objv )
 {
   const char* cmd_name = Tcl_GetString( objv[0] );
   TclCmd* cmd = TclCmds::getTclCmd( cmd_name );
