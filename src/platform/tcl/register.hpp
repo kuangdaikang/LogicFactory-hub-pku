@@ -13,6 +13,7 @@ namespace tcl
 
 int registerCmds()
 {
+  registerCmdArchYosys();
   registerCmdiEDA();
 }
 

@@ -1,6 +1,7 @@
 message("lf_platform.")
 add_library(lf_platform INTERFACE)
 target_link_libraries(lf_platform INTERFACE
+    lf_arch
     lf_logic
     lf_netlist
     lf_utility
