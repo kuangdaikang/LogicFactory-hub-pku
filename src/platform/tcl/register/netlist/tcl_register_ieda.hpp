@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../tcl_macro.hpp"
-#include "tcl_cmd_ieda.hpp"
+#include "tcl/register/tcl_macro.hpp"
+#include "tcl_cmds_ieda.hpp"
 
 namespace lf
 {
