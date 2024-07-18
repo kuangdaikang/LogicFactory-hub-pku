@@ -25,7 +25,7 @@ public:
   {
     int argc = 1;
     char** argv = new char*[2];
-    argv[0] = const_cast<char*>( "UserShell\n" );
+    argv[0] = const_cast<char*>( "TclMain\n" );
 
     if ( file_path )
     {
