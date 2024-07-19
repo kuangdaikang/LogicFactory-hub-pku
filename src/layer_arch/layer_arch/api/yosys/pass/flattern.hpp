@@ -16,7 +16,7 @@ namespace arch
 namespace yosys
 {
 
-void aigmap()
+void flatten()
 {
   std::string script = "flatten";
   auto frame = lfAmINST->current<Yosys::RTLIL::Design*>();
