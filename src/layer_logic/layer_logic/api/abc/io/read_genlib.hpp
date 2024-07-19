@@ -1,12 +1,7 @@
 #pragma once
 
 #include "layer_logic/logic_manager.hpp"
-
-#include "misc/util/abc_namespaces.h"
-#include "misc/util/abc_global.h"
-#include "base/io/io.h"
-#include "misc/extra/extra.h"
-
+#include "layer_logic/api/abc/frame.hpp"
 #include "utility/string.hpp"
 
 #include <cstdio>

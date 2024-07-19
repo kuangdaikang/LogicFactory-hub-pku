@@ -1,12 +1,7 @@
 #pragma once
 
 #include "layer_logic/logic_manager.hpp"
-
-#include "misc/util/abc_namespaces.h"
-#include "misc/util/abc_global.h"
-#include "base/io/io.h"
-#include "misc/extra/extra.h"
-
+#include "layer_logic/api/abc/frame.hpp"
 #include "utility/string.hpp"
 
 #include <cstdio>
@@ -22,7 +17,7 @@ namespace abc
 {
 
 /**
- * @brief Reads a genlib file into the current logic network.
+ * @brief Reads a aig file into the current logic network.
  * @example
  *  read_aiger [options] [filename]
  *  options: -c
@@ -30,9 +25,9 @@ namespace abc
  */
 void read_aiger( const std::string& file, bool is_checking = false )
 {
-  if ( !lf::utility::endsWith( file, ".genlib" ) )
+  if ( !lf::utility::endsWith( file, ".aig" ) )
   {
-    std::cerr << "Unmatched genlib suffix type." << std::endl;
+    std::cerr << "Unmatched aig suffix type." << std::endl;
     assert( false );
     return;
   }
