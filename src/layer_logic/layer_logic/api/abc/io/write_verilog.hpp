@@ -17,7 +17,7 @@ namespace abc
 {
 
 /**
- * @brief Reads a liberty file into the current logic network.
+ * @brief Reads current logic into a file.
  * @example
  *  write_verilog [options] [filename]
  *  options: -K <k-feasible-cut> -f -a -m

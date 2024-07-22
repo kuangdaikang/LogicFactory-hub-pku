@@ -17,7 +17,7 @@ namespace abc
 {
 
 /**
- * @brief Reads a liberty file into the current logic network.
+ * @brief Reads file into the current logic network.
  * @example
  *  read_liberty [filename]
  *

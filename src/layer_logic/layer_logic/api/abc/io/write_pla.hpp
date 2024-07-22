@@ -17,17 +17,17 @@ namespace abc
 {
 
 /**
- * @brief Reads file into the current logic network.
+ * @brief Reads current logic into a file.
  * @example
- *  read_aiger [options] [filename]
- *  options: -c
+ *  write_pla [options] [filename]
+ *  options: [-M <num>] [-mh]
  * @note
  */
-void read_aiger( const std::string& file, bool is_checking = false )
+void write_pla( const std::string& file, int M = -1, bool is_multi_output = false )
 {
-  if ( !lf::utility::endsWith( file, ".aig" ) )
+  if ( !lf::utility::endsWith( file, ".pla" ) )
   {
-    std::cerr << "Unmatched aig suffix type." << std::endl;
+    std::cerr << "Unmatched pla suffix type." << std::endl;
     assert( false );
     return;
   }
@@ -36,21 +36,26 @@ void read_aiger( const std::string& file, bool is_checking = false )
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
-  if ( is_checking )
+  if ( M > 0 )
+  {
+    argc += 1;
+  }
+  if ( is_multi_output )
     argc += 1;
 
   char** argv = ABC_ALLOC( char*, argc + 1 );
 
   int pos = 0;
+  argv[pos++] = babc::Extra_UtilStrsav( "write_pla" );
 
-  argv[pos++] = babc::Extra_UtilStrsav( "read_aiger" );
-
-  if ( is_checking )
-    argv[pos++] = babc::Extra_UtilStrsav( " -c " );
+  if ( M > 0 )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -M " + M ).c_str() );
+  if ( is_multi_output )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -m " ).c_str() );
 
   argv[pos++] = babc::Extra_UtilStrsav( file.c_str() );
 
-  babc::IoCommandReadAiger( ntk_ptr, argc, argv );
+  babc::IoCommandWritePla( ntk_ptr, argc, argv );
 }
 
 } // namespace abc

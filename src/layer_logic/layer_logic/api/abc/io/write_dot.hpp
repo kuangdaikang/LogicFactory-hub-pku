@@ -17,17 +17,17 @@ namespace abc
 {
 
 /**
- * @brief Reads file into the current logic network.
+ * @brief Reads current logic into a file.
  * @example
- *  read_genlib [filename]
- *
+ *  write_dot [options] [filename]
+ *  options:
  * @note
  */
-void read_genlib( const std::string& file )
+void write_dot( const std::string& file )
 {
-  if ( !lf::utility::endsWith( file, ".genlib" ) )
+  if ( !lf::utility::endsWith( file, ".dot" ) )
   {
-    std::cerr << "Unmatched genlib suffix type." << std::endl;
+    std::cerr << "Unmatched dot suffix type." << std::endl;
     assert( false );
     return;
   }
@@ -36,12 +36,15 @@ void read_genlib( const std::string& file )
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
+
   char** argv = ABC_ALLOC( char*, argc + 1 );
 
-  argv[0] = babc::Extra_UtilStrsav( "read" );
-  argv[1] = const_cast<char*>( file.c_str() );
+  int pos = 0;
+  argv[pos++] = babc::Extra_UtilStrsav( "write_dot" );
 
-  babc::IoCommandRead( ntk_ptr, argc, argv );
+  argv[pos++] = babc::Extra_UtilStrsav( file.c_str() );
+
+  babc::IoCommandWriteDot( ntk_ptr, argc, argv );
 }
 
 } // namespace abc
