@@ -32,7 +32,6 @@ void write_truth( const std::string& file, bool is_hex = false, bool is_reversin
     return;
   }
 
-  lfLmINST->update_logic( E_ToolLogicType::E_LOGIC_ABC_AIG );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 2;
