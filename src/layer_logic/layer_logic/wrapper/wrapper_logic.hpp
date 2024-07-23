@@ -391,6 +391,51 @@ public:
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
                                           /* gate-function params */ std::make_tuple( args, lhs, "and" ) );
       }
+      else if ( cell_type == "$_NAND_" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "nand" ) );
+      }
+      else if ( cell_type == "$_OR_" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "or" ) );
+      }
+      else if ( cell_type == "$_NOR_" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "nor" ) );
+      }
+      else if ( cell_type == "$_XOR_" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "xor" ) );
+      }
+      else if ( cell_type == "$_XNOR_" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "xnor" ) );
+      }
       else if ( cell_type == "$_FF_" )
       {
         std::string lhs = fanout_ports[0];
