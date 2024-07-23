@@ -58,8 +58,8 @@ void read_bench( const std::string& file )
   lorina::diagnostic_engine diag( &consumer );
   mockturtle::read_verilog_params ports;
 
-  // TODO: add the ports for aiger_reader
-  lorina::return_code rc = lorina::read_aiger( filename, mockturtle::aiger_reader<Ntk>( ntk ), &diag );
+  // TODO: add the ports for bench_reader
+  lorina::return_code rc = lorina::read_bench( filename, mockturtle::bench_reader<Ntk>( ntk ), &diag );
   if ( rc != lorina::return_code::success )
   {
     std::cerr << "parser wrong!" << std::endl;

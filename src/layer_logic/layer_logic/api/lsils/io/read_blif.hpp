@@ -16,7 +16,7 @@ namespace lsils
  *
  */
 template<typename Ntk = aig_seq_network>
-void read_gtech( const std::string& file )
+void read_blif( const std::string& file )
 {
   using NtkBase = typename Ntk::base_type;
   if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
@@ -51,7 +51,7 @@ void read_gtech( const std::string& file )
   mockturtle::read_verilog_params ports;
 
   // TODO: add the ports for aiger_reader
-  lorina::return_code rc = lorina::read_aiger( filename, mockturtle::aiger_reader<Ntk>( ntk ), &diag );
+  lorina::return_code rc = lorina::read_blif( filename, mockturtle::blif_reader<Ntk>( ntk ), &diag );
   if ( rc != lorina::return_code::success )
   {
     std::cerr << "parser wrong!" << std::endl;
