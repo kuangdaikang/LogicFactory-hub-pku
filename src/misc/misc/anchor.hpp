@@ -104,8 +104,8 @@ private:
 
 private:
   static LfAnchor* instance_;
-  E_LF_ANCHOR anchor_prev_{ E_LF_ANCHOR_NONE };
-  E_LF_ANCHOR anchor_curr_{ E_LF_ANCHOR_NONE };
+  E_LF_ANCHOR anchor_prev_{ E_LF_ANCHOR::E_LF_ANCHOR_NONE };
+  E_LF_ANCHOR anchor_curr_{ E_LF_ANCHOR::E_LF_ANCHOR_NONE };
 }; // class LfAnchor
 
 LfAnchor* LfAnchor::instance_ = nullptr;

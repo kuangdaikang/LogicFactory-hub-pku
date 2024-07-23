@@ -60,9 +60,12 @@ public:
     /// update the logic status
     lfAnchorINST->set_anchor( logic_type );
 
+    auto anchor_prev = lfAnchorINST->get_anchor_prev();
+    auto anchor_curr = lfAnchorINST->get_anchor_curr();
+
     /// adapt the data strcuture if needed
     // condition1: same logic type
-    if ( logic_type_prev_ == logic_type_curr_ )
+    if ( anchor_prev == anchor_curr )
     {
       return;
     }
@@ -74,7 +77,7 @@ public:
       babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame_abc_ );
 
       // step1:  previous logic-based data structure -> IR
-      switch ( logic_type_prev_ )
+      switch ( anchor_prev )
       {
       case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG:
       {
@@ -114,7 +117,7 @@ public:
       }
 
       // step2:  IR -> current logic-based data structure
-      switch ( logic_type_curr_ )
+      switch ( anchor_curr )
       {
       case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG:
       {
