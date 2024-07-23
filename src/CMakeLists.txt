@@ -1,3 +1,9 @@
+# utility
+add_subdirectory(utility)
+
+# misc
+add_subdirectory(misc)
+
 # architectyre layer synthesis (RTL-level synthesis)
 add_subdirectory(layer_arch)
 
@@ -10,8 +16,5 @@ add_subdirectory(layer_netlist)
 # formal layer synthesis (formal verification)
 add_subdirectory(layer_formal)
 
-# utility
+# platform
 add_subdirectory(platform)
-
-# utility
-add_subdirectory(utility)
