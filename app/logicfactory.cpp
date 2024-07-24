@@ -18,7 +18,7 @@ void print_banner()
   std::cout << line << std::endl;
   print_centered( "Welcome to LogicFactory (Platform)", width );
   print_centered( "Version 0.1", width );
-  print_centered( "Driving innovation in Logic Synthesis!", width );
+  print_centered( "https://github.com/Logic-Factory", width );
   std::cout << line << std::endl;
 }
 
