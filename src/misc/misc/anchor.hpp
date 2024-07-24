@@ -47,6 +47,7 @@ enum class E_LF_ANCHOR
   E_LF_ANCHOR_LOGIC_LSILS_NONE,
   E_LF_ANCHOR_LOGIC_LSILS_INIT,
   E_LF_ANCHOR_LOGIC_LSILS_NTK_NONE,         // unused
+  E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_CVG,    // Cover Graph  , each node is a boolean function
   E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG,    // And-Inverter Graph
   E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG,    // Xor-And Graph
   E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG,    // Majority-Inverter Graph

@@ -15,6 +15,7 @@ namespace logic
 
 namespace lsils
 {
+
 ///////////////////////////////////////////////////////////
 //  combinational
 ///////////////////////////////////////////////////////////
@@ -23,6 +24,7 @@ using xag_comb_network = mockturtle::xag_network;
 using mig_comb_network = mockturtle::mig_network;
 using xmg_comb_network = mockturtle::xmg_network;
 using gtg_comb_network = mockturtle::gtg_network;
+using cvg_comb_network = mockturtle::cover_network;
 
 using klut_comb_network = mockturtle::klut_network;
 using blut_comb_network = mockturtle::binding_view<klut_comb_network>;
@@ -35,6 +37,7 @@ using xag_seq_network = mockturtle::sequential<xag_comb_network>;
 using mig_seq_network = mockturtle::sequential<mig_comb_network>;
 using xmg_seq_network = mockturtle::sequential<xmg_comb_network>;
 using gtg_seq_network = mockturtle::sequential<gtg_comb_network>;
+using cvg_seq_network = mockturtle::sequential<cvg_comb_network>;
 
 using klut_seq_network = mockturtle::sequential<klut_comb_network>;
 using blut_seq_network = mockturtle::binding_view<klut_seq_network>;
@@ -57,6 +60,7 @@ struct Lsils_Frame_t
   mig_seq_network curr_mig;
   xmg_seq_network curr_xmg;
   gtg_seq_network curr_gtg;
+  cvg_seq_network curr_cvg;
 
   // technology-dependent netlist
   blut_seq_network netlist_asic;

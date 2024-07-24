@@ -19,11 +19,11 @@ namespace abc
 /**
  * @brief Reads file into the current logic network.
  * @example
- *  read_aiger [options] [filename]
+ *  read_verilog [options] [filename]
  *  options: -m -c -b
  * @note
  */
-void read_aiger( const std::string& file, bool is_mapped = false, bool is_checking = false, bool is_barrier_buffer = false )
+void read_verilog( const std::string& file, bool is_mapped = false, bool is_checking = false, bool is_barrier_buffer = false )
 {
   if ( !lf::utility::endsWith( file, ".v" ) )
   {

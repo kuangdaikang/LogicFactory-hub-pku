@@ -20,7 +20,7 @@ namespace abc
  * @brief Reads current logic into a file.
  * @example
  *  write_pla [options] [filename]
- *  options: [-M <num>] [-mh]
+ *  options: [-M <num>] [-m]
  * @note
  */
 void write_pla( const std::string& file, int M = -1, bool is_multi_output = false )

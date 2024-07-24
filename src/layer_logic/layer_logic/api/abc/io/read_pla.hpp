@@ -23,7 +23,7 @@ namespace abc
  *  options: -z -b -d -x -c
  * @note
  */
-void read_pla( const std::string& file, bool is_zeors = false, bool is_both = false, bool is_dont_care = false, bool is_checking = false, bool is_checking = false )
+void read_pla( const std::string& file, bool is_zeors = false, bool is_both = false, bool is_dont_care = false, bool is_exor_sop = false, bool is_checking = false )
 {
   if ( !lf::utility::endsWith( file, ".pla" ) )
   {
@@ -42,6 +42,8 @@ void read_pla( const std::string& file, bool is_zeors = false, bool is_both = fa
     argc += 1;
   if ( is_dont_care )
     argc += 1;
+  if ( is_exor_sop )
+    argc += 1;
   if ( is_checking )
     argc += 1;
 
@@ -57,6 +59,8 @@ void read_pla( const std::string& file, bool is_zeors = false, bool is_both = fa
     argv[pos++] = babc::Extra_UtilStrsav( " -b " );
   if ( is_dont_care )
     argv[pos++] = babc::Extra_UtilStrsav( " -d " );
+  if ( is_exor_sop )
+    argv[pos++] = babc::Extra_UtilStrsav( " -x " );
   if ( is_checking )
     argv[pos++] = babc::Extra_UtilStrsav( " -c " );
 
