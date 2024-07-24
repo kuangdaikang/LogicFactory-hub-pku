@@ -11,6 +11,3 @@
 [submodule "toolkit/mockturtle"]
 	path = toolkit/mockturtle
 	url = git@github.com:Logic-Factory/mockturtle.git
-[submodule "toolkit/iEDA"]
-	path = toolkit/iEDA
-	url = git@github.com:Logic-Factory/iEDA.git
