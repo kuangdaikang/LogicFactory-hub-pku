@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
 
 RUN apt-get update && apt-get upgrade -y --no-install-recommends apt-utils
 
@@ -11,6 +12,7 @@ RUN apt-get install -y \
     wget \
     curl \
     cmake \
+    ninja-build \
     git
 
 # toolkit related libraries
@@ -20,7 +22,9 @@ RUN apt-get install -y \
     pkg-config \
     bison \
     flex \
-    libffi-dev
+    rustc \
+    cargo
+
 
 RUN apt-get install -y \
     libboost-all-dev \
@@ -31,7 +35,11 @@ RUN apt-get install -y \
     libcairo2-dev \
     libunwind-dev \
     libgmp-dev \
-    libgmpxx4ldbl
+    libgmpxx4ldbl \
+    libhwloc-dev \
+    libffi-dev \
+    libgflags-dev \
+    libmetis-dev
 
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y \
     && apt-get update \
