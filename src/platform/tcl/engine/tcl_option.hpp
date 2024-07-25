@@ -22,6 +22,10 @@ public:
 
   unsigned is_arg() const { return _is_arg; }
 
+  void set_description( const std::string& description ) { _description = description; }
+
+  std::string get_description() const { return _description; }
+
   virtual unsigned isSwitchOption() { return 0; }
 
   virtual unsigned isDoubleOption() { return 0; }
@@ -146,6 +150,7 @@ protected:
 private:
   const char* _option_name;
   unsigned _is_arg;
+  std::string _description = "";
 };
 
 /**

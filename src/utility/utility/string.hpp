@@ -27,6 +27,11 @@ bool endsWith( const std::string& str, const std::string& suffix )
   }
 }
 
+bool startWith( const std::string& str, const std::string& prefix )
+{
+  return str.rfind( prefix, 0 ) == 0;
+}
+
 /**
  * @brief generate random name
  */

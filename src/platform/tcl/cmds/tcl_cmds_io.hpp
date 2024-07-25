@@ -57,24 +57,30 @@ namespace tcl
 class CmdLfIoReadAigerYosys : public TclCmd
 {
 public:
-  explicit CmdLfIoReadAigerYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadAigerYosys( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
-    std::vector<std::string> strs = {
-        "-file", "-module_name", "-clk_name", "-map" };
+    // TODO: it is better to add descripton for this commands
+    std::vector<std::pair<std::string, std::string>> strs = {
+        std::make_pair( "-module_name", "" ),
+        std::make_pair( "-clk_name", "" ),
+        std::make_pair( "-map", "" ) };
 
-    std::vector<std::string> switches = {
-        "-wideports", "-xaiger" };
+    std::vector<std::pair<std::string, std::string>> switches = {
+        std::make_pair( "-wideports", "" ),
+        std::make_pair( "-xaiger", "" ) };
 
-    for ( auto str : strs )
+    for ( auto [args, desc] : strs )
     {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
+      auto* option = new TclStringOption( args.c_str(), 1, nullptr );
+      option->set_description( desc );
       addOption( option );
     }
 
-    for ( auto flag : switches )
+    for ( auto [args, desc] : switches )
     {
-      auto* option = new TclSwitchOption( flag.c_str() );
+      auto* option = new TclSwitchOption( args.c_str() );
+      option->set_description( desc );
       addOption( option );
     }
   }
@@ -140,8 +146,8 @@ public:
 class CmdLfIoReadLibertyYosys : public TclCmd
 {
 public:
-  explicit CmdLfIoReadLibertyYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadLibertyYosys( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file", "-setattr" };
@@ -231,8 +237,8 @@ public:
 class CmdLfIoReadVerilogYosys : public TclCmd
 {
 public:
-  explicit CmdLfIoReadVerilogYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadVerilogYosys( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file", "-setattr", "-Dname", "-Idir" };
@@ -427,8 +433,8 @@ public:
 class CmdLfIoWriteVerilogYosys : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteVerilogYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteVerilogYosys( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file", "-renameprefix" };
@@ -539,8 +545,8 @@ public:
 class CmdLfIoReadAigerAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadAigerAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadAigerAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -609,8 +615,8 @@ public:
 class CmdLfIoReadBenchAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBenchAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadBenchAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -679,8 +685,8 @@ public:
 class CmdLfIoReadBlifAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBlifAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadBlifAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -758,8 +764,8 @@ public:
 class CmdLfIoReadCnfAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadCnfAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadCnfAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -828,8 +834,8 @@ public:
 class CmdLfIoReadPlaAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadPlaAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadPlaAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -910,8 +916,8 @@ public:
 class CmdLfIoReadFormulaAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadFormulaAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadFormulaAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -975,8 +981,8 @@ public:
 class CmdLfIoReadTruthAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadTruthAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadTruthAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1046,8 +1052,8 @@ public:
 class CmdLfIoReadGenlibAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadGenlibAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadGenlibAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1111,8 +1117,8 @@ public:
 class CmdLfIoReadLibertyAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadLibertyAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadLibertyAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1176,8 +1182,8 @@ public:
 class CmdLfIoReadVerilogAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoReadVerilogAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadVerilogAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1252,8 +1258,8 @@ public:
 class CmdLfIoWriteAigerAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteAigerAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteAigerAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1330,8 +1336,8 @@ public:
 class CmdLfIoWriteBenchAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBenchAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteBenchAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1399,8 +1405,8 @@ public:
 class CmdLfIoWriteBlifAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBlifAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteBlifAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file", "-S" };
@@ -1475,8 +1481,8 @@ public:
 class CmdLfIoWriteCnfAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteCnfAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteCnfAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1556,8 +1562,8 @@ public:
 class CmdLfIoWriteDotAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteDotAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteDotAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1621,8 +1627,8 @@ public:
 class CmdLfIoWritePlaAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWritePlaAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWritePlaAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1704,8 +1710,8 @@ public:
 class CmdLfIoWriteTruthAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteTruthAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteTruthAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1776,8 +1782,8 @@ public:
 class CmdLfIoWriteVerilogAbc : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteVerilogAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteVerilogAbc( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1866,8 +1872,8 @@ public:
 class CmdLfIoReadAigerLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadAigerLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadAigerLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1931,8 +1937,8 @@ public:
 class CmdLfIoReadBenchLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBenchLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadBenchLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -1996,8 +2002,8 @@ public:
 class CmdLfIoReadBlifLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBlifLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadBlifLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2061,8 +2067,8 @@ public:
 class CmdLfIoReadCnfLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadCnfLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadCnfLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2126,8 +2132,8 @@ public:
 class CmdLfIoReadGenlibLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadGenlibLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadGenlibLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2191,8 +2197,8 @@ public:
 class CmdLfIoReadGtechLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadGtechLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadGtechLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2256,8 +2262,8 @@ public:
 class CmdLfIoReadLibertyLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadLibertyLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadLibertyLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2321,8 +2327,8 @@ public:
 class CmdLfIoReadPlaLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoReadPlaLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadPlaLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2386,8 +2392,8 @@ public:
 class CmdLfIoWriteAigerLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteAigerLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteAigerLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2451,8 +2457,8 @@ public:
 class CmdLfIoWriteBenchLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBenchLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteBenchLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2516,8 +2522,8 @@ public:
 class CmdLfIoWriteBlifLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBlifLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteBlifLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2581,8 +2587,8 @@ public:
 class CmdLfIoWriteCnfLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteCnfLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteCnfLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2646,8 +2652,8 @@ public:
 class CmdLfIoWriteDotLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteDotLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteDotLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };
@@ -2711,8 +2717,8 @@ public:
 class CmdLfIoWriteVerilogLsils : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteVerilogLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteVerilogLsils( const char* cmd_name, const char* anchor_domain )
+      : TclCmd( cmd_name, anchor_domain )
   {
     std::vector<std::string> strs = {
         "-file" };

@@ -52,7 +52,7 @@ void write_verilog( const std::string& file )
   else if constexpr ( std::is_same_v<NtkBase, mockturtle::klut_network> )
   {
     // write the netlist according to the anchor
-    lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor();
+    lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor_curr();
     switch ( stat )
     {
     case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA:

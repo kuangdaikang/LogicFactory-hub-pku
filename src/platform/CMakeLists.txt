@@ -4,6 +4,7 @@ target_link_libraries(lf_platform INTERFACE
     lf_arch
     lf_logic
     lf_netlist
+    lf_misc
     lf_utility
     lf_3rd_json
 )

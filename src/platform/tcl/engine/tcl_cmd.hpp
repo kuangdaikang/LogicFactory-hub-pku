@@ -1,5 +1,7 @@
 #pragma once
 
+#include "misc/anchor.hpp"
+
 #include "tcl_script.hpp"
 #include "tcl_option.hpp"
 #include "utils.hpp"
@@ -39,8 +41,9 @@ int cmdProcess( ClientData clientData, Tcl_Interp* interp, int objc, struct Tcl_
 class TclCmd
 {
 public:
-  explicit TclCmd( const char* cmd_name )
-      : _cmd_name( copyCharStar( cmd_name ) )
+  explicit TclCmd( const char* cmd_name, const char* anchor_domain )
+      : _cmd_name( copyCharStar( cmd_name ) ),
+        _anchor_domain( copyCharStar( anchor_domain ) )
   {}
 
   virtual ~TclCmd()
@@ -50,6 +53,7 @@ public:
   }
 
   char* get_cmd_name() const { return _cmd_name; }
+  char* get_anchor_domain() const { return _anchor_domain; }
 
   TclOption* getOptionOrArg( const char* option_name )
   {
@@ -123,6 +127,7 @@ private:
 
 private:
   char* _cmd_name;
+  char* _anchor_domain;                                                                      // anchor to the cmd
   std::unordered_map<const char*, std::unique_ptr<TclOption>, CStrHash, CStrEqual> _options; // store the options
   std::vector<TclOption*> _args;                                                             // the tcl args need keep order
 }; // class TclCmd
@@ -137,12 +142,14 @@ public:
   static void addTclCmd( std::unique_ptr<TclCmd> cmd )
   {
     TclScript::getOrCreateInstance()->createCmd( cmd->get_cmd_name(), cmdProcess, cmd.get() );
-    _cmds.emplace( cmd->get_cmd_name(), std::move( cmd ) );
+    std::string cmd_with_anchor = std::string( cmd->get_cmd_name() ) + std::string( cmd->get_anchor_domain() );
+    _cmds.emplace( cmd_with_anchor.c_str(), std::move( cmd ) );
   }
 
-  static TclCmd* getTclCmd( const char* cmd_name )
+  static TclCmd* getTclCmd( const char* cmd_name, const char* anchor_domain )
   {
-    auto it = _cmds.find( cmd_name );
+    std::string cmd_with_anchor = std::string( cmd_name ) + std::string( anchor_domain );
+    auto it = _cmds.find( cmd_with_anchor.c_str() );
     if ( it != _cmds.end() )
     {
       return it->second.get();
@@ -150,7 +157,7 @@ public:
     return nullptr;
   }
 
-private:
+  // cmd_name + anchor as the key
   static std::unordered_map<const char*, std::unique_ptr<TclCmd>, CStrHash, CStrEqual> _cmds;
 }; // class TclCmds
 
@@ -239,7 +246,9 @@ bool matchWildcardWithtarget( const char* const pattern, const char* const targe
 int cmdProcess( ClientData clientData, Tcl_Interp* interp, int objc, struct Tcl_Obj* const* objv )
 {
   const char* cmd_name = Tcl_GetString( objv[0] );
-  TclCmd* cmd = TclCmds::getTclCmd( cmd_name );
+  std::string anchor_domain = lfAnchorINST->get_anchor_domain();
+  // process cmds according to the anchor domain and cmd_name
+  TclCmd* cmd = TclCmds::getTclCmd( cmd_name, anchor_domain.c_str() );
   cmd->resetOptionArgValue();
 
   bool next_is_option_val = false;

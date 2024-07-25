@@ -16,8 +16,8 @@ enum class E_LF_ANCHOR
   ////////////////////////////////////////////////////
   // architecture steps
   ////////////////////////////////////////////////////
+  E_LF_ANCHOR_ARCH_INIT,
   // YOSYS
-  E_LF_ANCHOR_ARCH_YOSYS_NONE,
   E_LF_ANCHOR_ARCH_YOSYS_INIT,
   E_LF_ANCHOR_ARCH_YOSYS_NTK_NONE,         // unused
   E_LF_ANCHOR_ARCH_YOSYS_NTK_ARCH_AST,     // ast analysis
@@ -29,8 +29,8 @@ enum class E_LF_ANCHOR
   ////////////////////////////////////////////////////
   // logic steps
   ////////////////////////////////////////////////////
+  E_LF_ANCHOR_LOGIC_INIT,
   // ABC
-  E_LF_ANCHOR_LOGIC_ABC_NONE,
   E_LF_ANCHOR_LOGIC_ABC_INIT,
   E_LF_ANCHOR_LOGIC_ABC_NTK_NONE,      // unused
   E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_SOP, // logic graphs
@@ -44,7 +44,6 @@ enum class E_LF_ANCHOR
   E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_FPGA,
   E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC,
   // LSILS
-  E_LF_ANCHOR_LOGIC_LSILS_NONE,
   E_LF_ANCHOR_LOGIC_LSILS_INIT,
   E_LF_ANCHOR_LOGIC_LSILS_NTK_NONE,         // unused
   E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_CVG,    // Cover Graph  , each node is a boolean function
@@ -60,8 +59,8 @@ enum class E_LF_ANCHOR
   ////////////////////////////////////////////////////
   // netlist steps
   ////////////////////////////////////////////////////
+  E_LF_ANCHOR_NETLIST_INIT,
   // iEDA
-  E_LF_ANCHOR_NETLIST_IEDA_NONE,
   E_LF_ANCHOR_NETLIST_IEDA_INIT,
   E_LF_ANCHOR_NETLIST_IEDA_STA,
   E_LF_ANCHOR_NETLIST_IEDA_FLOORPLAN,
@@ -93,8 +92,71 @@ public:
     anchor_curr_ = anchor;
   }
 
+  std::string get_anchor_domain() const
+  {
+    E_LF_ANCHOR anchor = get_anchor_curr();
+    switch ( anchor )
+    {
+    case E_LF_ANCHOR::E_LF_ANCHOR_NONE:
+    case E_LF_ANCHOR::E_LF_ANCHOR_INIT:
+      return "gen";
+    ////////////////////////////////////////////////////
+    // architecture steps
+    ////////////////////////////////////////////////////
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_NONE:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_ARCH_AST:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_ARCH_RTLIR:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_LOGIC_AIG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_NETLIST_FPGA:
+    case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_NETLIST_ASIC:
+      return "arch";
+    ////////////////////////////////////////////////////
+    // logic steps
+    ////////////////////////////////////////////////////
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NONE:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_SOP:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_BDD:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_AIG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_FPGA:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_ASIC:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_SOP:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_AIG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_FPGA:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NONE:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_CVG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_COVER_KLUT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA:
+    case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC:
+      return "logic";
+    ////////////////////////////////////////////////////
+    // netlist steps
+    ////////////////////////////////////////////////////
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_INIT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_STA:
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_FLOORPLAN:
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_PLACEMENT:
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_CTS:
+    case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_ROUTING:
+      return "netlist";
+    default:
+      return "none";
+    }
+  }
+
   E_LF_ANCHOR get_anchor_prev() const { return anchor_prev_; }
-  E_LF_ANCHOR get_anchor() const { return anchor_curr_; }
   E_LF_ANCHOR get_anchor_curr() const { return anchor_curr_; }
 
 private:
