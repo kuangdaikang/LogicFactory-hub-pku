@@ -63,8 +63,15 @@ public:
     auto anchor_prev = lfAnchorINST->get_anchor_prev();
     auto anchor_curr = lfAnchorINST->get_anchor_curr();
 
-    /// adapt the data strcuture if needed
-    // condition1: same logic type
+    if ( anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG &&
+         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG &&
+         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG &&
+         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG &&
+         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG &&
+         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG )
+    {
+      return;
+    }
     if ( anchor_prev == anchor_curr )
     {
       return;
