@@ -15,8 +15,8 @@ namespace tcl
 class CmdLfHelp : public TclCmd
 {
 public:
-  explicit CmdLfHelp( const char* cmd_name, const char* anchor_domain )
-      : TclCmd( cmd_name, anchor_domain )
+  explicit CmdLfHelp( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
   }
 
@@ -32,35 +32,23 @@ public:
     if ( !check() )
       return 0;
 
-    std::vector<std::string> commands_misc;
-    std::vector<std::string> commands_flow;
+    std::vector<std::string> commands_misc = {
+        "help", "man" };
+    std::vector<std::string> commands_flow = {
+        "start", "stop", "anchor" };
+    std::vector<std::string> commands_io = {
+        "read_aiger", "read_blif", "read_bench", "read_pla", "read_cnf", "read_truth", "read_genlib", "read_liberty", "read_verilog",
+        "write_aiger", "write_blif", "write_bench", "write_cnf", "write_dot", "write_verilog" };
     std::vector<std::string> commands_arch;
     std::vector<std::string> commands_logic;
     std::vector<std::string> commands_netlist;
 
-    for ( auto&& [key, cmd] : TclCmds::_cmds )
-    {
-      std::string anchor_domain = cmd->get_anchor_domain();
-      if ( anchor_domain == "misc" )
-        commands_misc.push_back( cmd->get_cmd_name() );
-      else if ( anchor_domain == "flow" )
-        commands_flow.push_back( cmd->get_cmd_name() );
-      else if ( lf::utility::startWith( anchor_domain, "arch:" ) )
-        commands_arch.push_back( cmd->get_cmd_name() );
-      else if ( lf::utility::startWith( anchor_domain, "logic:" ) )
-        commands_logic.push_back( cmd->get_cmd_name() );
-      else if ( lf::utility::startWith( anchor_domain, "netlist:" ) )
-        commands_netlist.push_back( cmd->get_cmd_name() );
-      else
-      {
-        std::cerr << "Unknown anchor domain: " << anchor_domain << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-
     auto printCommands = []( const std::string& title, const std::vector<std::string>& commands ) {
+      if ( commands.empty() )
+        return;
+
       std::cout << title << std::endl;
+
       int count = 0;
       for ( const auto& cmd : commands )
       {
@@ -77,41 +65,19 @@ public:
       }
     };
 
-    printCommands( "misc commands:", commands_misc );
-    printCommands( "flow commands:", commands_flow );
-    printCommands( "arch commands:", commands_arch );
-    printCommands( "logic commands:", commands_logic );
-    printCommands( "netlist commands:", commands_netlist );
+    printCommands( "MISC:", commands_misc );
+    printCommands( "FLOW:", commands_flow );
+    printCommands( "IOs:", commands_io );
+    printCommands( "ARCH:", commands_arch );
+    printCommands( "LOGIC:", commands_logic );
+    printCommands( "NETLIST:", commands_netlist );
+
+    std::cout << "TODO: Use 'help <command>' for more information about a specific command." << std::endl;
 
     return 1;
   }
 
 }; // class CmdLfHelp
-
-class CmdLfMan : public TclCmd
-{
-public:
-  explicit CmdLfMan( const char* cmd_name, const char* anchor_domain )
-      : TclCmd( cmd_name, anchor_domain )
-  {
-  }
-
-  ~CmdLfMan() override = default;
-
-  unsigned check() override
-  {
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    return 1;
-  }
-
-}; // class CmdLfMan
 
 } // namespace tcl
 

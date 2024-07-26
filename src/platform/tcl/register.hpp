@@ -1,8 +1,8 @@
 #pragma once
 
-#include "tcl/cmds/tcl_macro.hpp"
+#include "tcl/engine/tcl_macro.hpp"
 #include "tcl/cmds/tcl_cmds_misc.hpp"
-#include "tcl/cmds/tcl_cmds_init.hpp"
+#include "tcl/cmds/tcl_cmds_flow.hpp"
 #include "tcl/cmds/tcl_cmds_io.hpp"
 
 namespace lf
@@ -13,53 +13,50 @@ namespace tcl
 
 int registerCmds()
 {
+  //////////////////////////////////////////////////////////
   // misc
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfHelp, "help", "misc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfMan, "man", "misc" );
+  //////////////////////////////////////////////////////////
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfHelp, "help" );
+  //////////////////////////////////////////////////////////
   // init
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfStart, "start", "flow" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfStop, "stop", "flow" );
+  //////////////////////////////////////////////////////////
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfStart, "start" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfStop, "stop" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfAnchor, "anchor" );
+  //////////////////////////////////////////////////////////
   // IO
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadAigerYosys, "read_aiger", "arch:yosys" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadVerilogYosys, "read_verilog", "arch:yosys" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadLibertyYosys, "read_liberty", "arch:yosys" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteVerilogYosys, "write_verilog", "arch:yosys" );
+  //////////////////////////////////////////////////////////
 
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadAigerAbc, "read_aiger", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBenchAbc, "read_bench", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBlifAbc, "read_blif", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadCnfAbc, "read_cnf", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadFormulaAbc, "read_formula", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGenlibAbc, "read_genlib", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadLibertyAbc, "read_liberty", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadPlaAbc, "read_pla", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadTruthAbc, "read_truth", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadVerilogAbc, "read_verilog", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteAigerAbc, "write_aiger", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBenchAbc, "write_bench", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBlifAbc, "write_blif", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteCnfAbc, "write_cnf", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteDotAbc, "write_dot", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWritePlaAbc, "write_pla", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteTruthAbc, "write_truth", "logic:abc" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteVerilogAbc, "write_verilog", "logic:abc" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadAiger, "read_aiger" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBlif, "read_blif" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBench, "read_bench" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadCnf, "read_cnf" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadFormula, "read_formula" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadPla, "read_pla" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadTruth, "read_truth" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGenlib, "read_genlib" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadLiberty, "read_liberty" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadVerilog, "read_verilog" );
 
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadAigerLsils, "read_aiger", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBenchLsils, "read_bench", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBlifLsils, "read_blif", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadCnfLsils, "read_cnf", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGtechLsils, "read_gtech", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGenlibLsils, "read_genlib", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadLibertyLsils, "read_liberty", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadPlaLsils, "read_pla", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteAigerLsils, "write_aiger", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBenchLsils, "write_bench", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBlifLsils, "write_blif", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteCnfLsils, "write_cnf", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteDotLsils, "write_dot", "logic:lsils" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteVerilogLsils, "write_verilog", "logic:lsils" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteAiger, "write_aiger" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBlif, "write_blif" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBench, "write_bench" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteCnf, "write_cnf" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWritePla, "write_pla" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteVerilog, "write_verilog" );
+  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteDot, "write_dot" );
 
-  // Pass
+  //////////////////////////////////////////////////////////
+  // arch
+  //////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////
+  // logic
+  //////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////
+  // netlist
+  //////////////////////////////////////////////////////////
 
   return EXIT_SUCCESS;
 }
