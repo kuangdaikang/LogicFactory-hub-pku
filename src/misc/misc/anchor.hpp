@@ -69,6 +69,18 @@ enum class E_LF_ANCHOR
   E_LF_ANCHOR_NETLIST_IEDA_ROUTING
 };
 
+enum class E_LF_ANCHOR_DOMAIN
+{
+  E_LF_ANCHOR_DOMAIN_NONE,
+  E_LF_ANCHOR_DOMAIN_ARCH_NONE,
+  E_LF_ANCHOR_DOMAIN_ARCH_YOSYS,
+  E_LF_ANCHOR_DOMAIN_LOGIC_NONE,
+  E_LF_ANCHOR_DOMAIN_LOGIC_ABC,
+  E_LF_ANCHOR_DOMAIN_LOGIC_LSILS,
+  E_LF_ANCHOR_DOMAIN_NETLIST_NONE,
+  E_LF_ANCHOR_DOMAIN_NETLIST_IEDA
+};
+
 #define lfAnchorINST lf::misc::LfAnchor::get_instance()
 
 /**
@@ -92,18 +104,19 @@ public:
     anchor_curr_ = anchor;
   }
 
-  std::string get_anchor_domain() const
+  E_LF_ANCHOR_DOMAIN get_anchor_domain() const
   {
     E_LF_ANCHOR anchor = get_anchor_curr();
     switch ( anchor )
     {
     case E_LF_ANCHOR::E_LF_ANCHOR_NONE:
     case E_LF_ANCHOR::E_LF_ANCHOR_INIT:
-      return "gen";
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NONE;
     ////////////////////////////////////////////////////
     // architecture steps
     ////////////////////////////////////////////////////
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_INIT:
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_NONE;
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_INIT:
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_NONE:
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_ARCH_AST:
@@ -111,11 +124,12 @@ public:
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_LOGIC_AIG:
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_NETLIST_FPGA:
     case E_LF_ANCHOR::E_LF_ANCHOR_ARCH_YOSYS_NTK_NETLIST_ASIC:
-      return "arch";
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS;
     ////////////////////////////////////////////////////
     // logic steps
     ////////////////////////////////////////////////////
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_INIT:
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_NONE;
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_INIT:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NONE:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_SOP:
@@ -128,6 +142,7 @@ public:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_AIG:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_FPGA:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC:
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC;
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_INIT:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NONE:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_CVG:
@@ -139,20 +154,21 @@ public:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_COVER_KLUT:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA:
     case E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC:
-      return "logic";
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS;
     ////////////////////////////////////////////////////
     // netlist steps
     ////////////////////////////////////////////////////
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_INIT:
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_NONE;
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_INIT:
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_STA:
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_FLOORPLAN:
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_PLACEMENT:
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_CTS:
     case E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_ROUTING:
-      return "netlist";
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA;
     default:
-      return "none";
+      return E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NONE;
     }
   }
 
