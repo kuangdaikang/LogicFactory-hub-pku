@@ -1,8 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <string>
-#include <string.h>
+#include <cstring>
 
 namespace lf
 {
@@ -26,7 +25,15 @@ struct CStrEqual
 {
   bool operator()( const char* s1, const char* s2 ) const
   {
-    return strcmp( s1, s2 ) == 0;
+    return std::strcmp( s1, s2 ) == 0;
+  }
+};
+
+struct CStrCmp
+{
+  bool operator()( const char* lhs, const char* rhs ) const
+  {
+    return std::strcmp( lhs, rhs ) < 0;
   }
 };
 

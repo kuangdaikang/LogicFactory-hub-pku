@@ -13,7 +13,7 @@ class TclOption
 {
 public:
   TclOption( const char* option_name, unsigned is_arg )
-      : _option_name( option_name ), _is_arg( is_arg )
+      : _option_name( copyCharStar( option_name ) ), _is_arg( is_arg )
   {}
 
   virtual ~TclOption() { _option_name = nullptr; }
