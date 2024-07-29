@@ -2,12 +2,24 @@
 
 #include "tcl/engine/tcl_cmd.hpp"
 #include "tcl/engine/tcl_option.hpp"
+#include "tcl/cmds/utils.hpp"
 
 #include "misc/anchor.hpp"
 
 #include "layer_arch/api/yosys/io/read_aiger.hpp"
+#include "layer_arch/api/yosys/io/read_blif.hpp"
+#include "layer_arch/api/yosys/io/read_json.hpp"
+#include "layer_arch/api/yosys/io/read_rtlil.hpp"
 #include "layer_arch/api/yosys/io/read_liberty.hpp"
 #include "layer_arch/api/yosys/io/read_verilog.hpp"
+#include "layer_arch/api/yosys/io/write_aiger.hpp"
+#include "layer_arch/api/yosys/io/write_blif.hpp"
+#include "layer_arch/api/yosys/io/write_btor.hpp"
+#include "layer_arch/api/yosys/io/write_edif.hpp"
+#include "layer_arch/api/yosys/io/write_firrtl.hpp"
+#include "layer_arch/api/yosys/io/write_json.hpp"
+#include "layer_arch/api/yosys/io/write_rtlil.hpp"
+#include "layer_arch/api/yosys/io/write_spice.hpp"
 #include "layer_arch/api/yosys/io/write_verilog.hpp"
 
 #include "layer_logic/api/abc/io/read_aiger.hpp"
@@ -59,66 +71,21 @@ public:
   explicit CmdLfIoReadAiger( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::pair<std::string, std::string>> str_common = {
-        std::make_pair( "-file", "[type: common]" ) };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::pair<std::string, std::string>> str_yosys = {
-        std::make_pair( "-module_name", "[type: yosys], " ),
-        std::make_pair( "-clk_name", "[type: yosys]," ),
-        std::make_pair( "-map", "[type: yosys]," ) };
-    std::vector<std::pair<std::string, std::string>> str_abc = {};
-    std::vector<std::pair<std::string, std::string>> str_lsils = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-module_name", "yosys", "string", "" },
+        { "-clk_name", "yosys", "string", "" },
+        { "-map", "yosys", "string", "" },
+        { "-wideports", "yosys", "bool", "" },
+        { "-xaiger", "yosys", "bool", "" },
+        { "-c", "abc", "bool", "" } };
 
-    std::vector<std::pair<std::string, std::string>> switch_yosys = {
-        std::make_pair( "-wideports", "[type: yosys]," ),
-        std::make_pair( "-xaiger", "[type: yosys]," ) };
-    std::vector<std::pair<std::string, std::string>> switch_abc = {
-        std::make_pair( "-c", "[type: abc]," ) };
-    std::vector<std::pair<std::string, std::string>> switch_lsils = {};
-
-    for ( auto [args, desc] : str_common )
-    {
-      auto* option = new TclStringOption( args.c_str(), 1, nullptr );
-      option->set_description( desc );
-      addOption( option );
-    }
-    for ( auto [args, desc] : str_yosys )
-    {
-      auto* option = new TclStringOption( args.c_str(), 1, nullptr );
-      option->set_description( desc );
-      addOption( option );
-    }
-    for ( auto [args, desc] : str_abc )
-    {
-      auto* option = new TclStringOption( args.c_str(), 1, nullptr );
-      option->set_description( desc );
-      addOption( option );
-    }
-    for ( auto [args, desc] : str_lsils )
-    {
-      auto* option = new TclStringOption( args.c_str(), 1, nullptr );
-      option->set_description( desc );
-      addOption( option );
-    }
-
-    for ( auto [args, desc] : switch_yosys )
-    {
-      auto* option = new TclSwitchOption( args.c_str() );
-      option->set_description( desc );
-      addOption( option );
-    }
-    for ( auto [args, desc] : switch_abc )
-    {
-      auto* option = new TclSwitchOption( args.c_str() );
-      option->set_description( desc );
-      addOption( option );
-    }
-    for ( auto [args, desc] : switch_lsils )
-    {
-      auto* option = new TclSwitchOption( args.c_str() );
-      option->set_description( desc );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
   ~CmdLfIoReadAiger() override = default;
@@ -127,16 +94,7 @@ public:
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -144,40 +102,26 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "", module_name = "", clk_name = "", map_file = "";
-    bool is_wideports = false, is_xaiger = false, is_checking = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_module_name = getOptionOrArg( "-module_name" );
-    TclOption* option_clk_name = getOptionOrArg( "-clk_name" );
-    TclOption* option_map_file = getOptionOrArg( "-map" );
-    TclOption* option_wideports = getOptionOrArg( "-wideports" );
-    TclOption* option_xaiger = getOptionOrArg( "-xaiger" );
-    TclOption* option_checking = getOptionOrArg( "-c" );
+    std::vector<std::string> strOptions = { "-file", "-module_name", "-clk_name", "-map" };
+    std::vector<std::string> boolOptions = { "-wideports", "-xaiger", "-c" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    else
-    {
-      std::cerr << "Essential option -file is not set!" << std::endl;
-      assert( false );
-      return 0;
-    }
-
-    if ( option_module_name->is_set_val() )
-      module_name = option_module_name->getStringVal();
-    if ( option_clk_name->is_set_val() )
-      clk_name = option_clk_name->getStringVal();
-    if ( option_map_file->is_set_val() )
-      map_file = option_map_file->getStringVal();
-    if ( option_wideports->is_set_val() )
-      is_wideports = true;
-    if ( option_xaiger->is_set_val() )
-      is_xaiger = true;
-    if ( option_checking->is_set_val() )
-      is_checking = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
@@ -185,74 +129,57 @@ public:
     {
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
       std::cout << "yosys" << std::endl;
-      lf::arch::yosys::read_aiger( file, module_name, clk_name, map_file, is_wideports, is_xaiger );
+      lf::arch::yosys::read_aiger( strOptionsValue["-file"],
+                                   strOptionsValue["-module_name"],
+                                   strOptionsValue["-clk_name"],
+                                   strOptionsValue["-map"],
+                                   boolOptionsValue["-wideports"],
+                                   boolOptionsValue["-xaiger"] );
       break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
       std::cout << "abc" << std::endl;
-      lf::logic::abc::read_aiger( file, is_checking );
+      lf::logic::abc::read_aiger( strOptionsValue["-file"],
+                                  boolOptionsValue["-c"] );
       break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
-      lf::logic::lsils::read_aiger( file );
+      lf::logic::lsils::read_aiger( strOptionsValue["-file"] );
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
     }
     return 1;
   }
-
 }; // class CmdLfIoReadAiger
 
-////////////////////////////////////////////////////////////////////////////
-//  read_aiger / yosys
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadAigerYosys : public TclCmd
+class CmdLfIoReadBlif : public TclCmd
 {
 public:
-  explicit CmdLfIoReadAigerYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadBlif( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    // TODO: it is better to add descripton for this commands
-    std::vector<std::pair<std::string, std::string>> strs = {
-        std::make_pair( "-module_name", "" ),
-        std::make_pair( "-clk_name", "" ),
-        std::make_pair( "-map", "" ) };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::pair<std::string, std::string>> switches = {
-        std::make_pair( "-wideports", "" ),
-        std::make_pair( "-xaiger", "" ) };
-
-    for ( auto [args, desc] : strs )
-    {
-      auto* option = new TclStringOption( args.c_str(), 1, nullptr );
-      option->set_description( desc );
-      addOption( option );
-    }
-
-    for ( auto [args, desc] : switches )
-    {
-      auto* option = new TclSwitchOption( args.c_str() );
-      option->set_description( desc );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-sop", "yosys", "bool", "cover with sop, rather than lut!" },
+        { "-wideports", "yosys", "bool", "" },
+        { "-n", "abc", "bool", "" },
+        { "-m", "abc", "bool", "" },
+        { "-a", "abc", "bool", "" },
+        { "-c", "abc", "bool", "" } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadAigerYosys() override = default;
+  ~CmdLfIoReadBlif() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -260,82 +187,119 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "", module_name = "", clk_name = "", map_file = "";
-    bool is_wideports = false, is_xaiger = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_module_name = getOptionOrArg( "-module_name" );
-    TclOption* option_clk_name = getOptionOrArg( "-clk_name" );
-    TclOption* option_map_file = getOptionOrArg( "-map" );
-    TclOption* option_wideports = getOptionOrArg( "-wideports" );
-    TclOption* option_xaiger = getOptionOrArg( "-xaiger" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-sop", "-wideports", "-n", "-m", "-a", "-c" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_module_name->is_set_val() )
-      module_name = option_module_name->getStringVal();
-    if ( option_clk_name->is_set_val() )
-      clk_name = option_clk_name->getStringVal();
-    if ( option_map_file->is_set_val() )
-      map_file = option_map_file->getStringVal();
-    if ( option_wideports->is_set_val() )
-      is_wideports = true;
-    if ( option_xaiger->is_set_val() )
-      is_xaiger = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::arch::yosys::read_aiger( file, module_name, clk_name, map_file, is_wideports, is_xaiger );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::read_blif( strOptionsValue["-file"],
+                                  boolOptionsValue["-sop"],
+                                  boolOptionsValue["-wideports"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_blif( strOptionsValue["-file"],
+                                 boolOptionsValue["-n"],
+                                 boolOptionsValue["-m"],
+                                 boolOptionsValue["-a"],
+                                 boolOptionsValue["-c"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::read_blif( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
+}; // class CmdLfIoReadBlif
 
-}; // class CmdLfIoReadAigerYosys
-
-////////////////////////////////////////////////////////////////////////////
-//  read_liberty / yosys
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadLibertyYosys : public TclCmd
+class CmdLfIoReadVerilog : public TclCmd
 {
 public:
-  explicit CmdLfIoReadLibertyYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadVerilog( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file", "-setattr" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-lib", "-wb", "-nooverwrite", "-overwrite", "-ignore_miss_func", "-ignore_miss_dir", "-ignore_miss_data_latch" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-setattr", "yosys", "string", "Set attributes on the design." },
+        { "-Dname", "yosys", "string", "Define a macro with an optional value." },
+        { "-Idir", "yosys", "string", "Specify an include directory." },
+        { "-sv", "yosys", "bool", "Enable SystemVerilog features." },
+        { "-formal", "yosys", "bool", "Enable formal verification features." },
+        { "-nosynthesis", "yosys", "bool", "Disable synthesis, for analysis tasks only." },
+        { "-noassert", "yosys", "bool", "Disable assertions." },
+        { "-noassume", "yosys", "bool", "Disable assumptions." },
+        { "-norestrict", "yosys", "bool", "Disable restrictions." },
+        { "-assume-asserts", "yosys", "bool", "Treat asserts as assumptions." },
+        { "-assert-assumes", "yosys", "bool", "Treat assumptions as asserts." },
+        { "-nodisplay", "yosys", "bool", "Disable display statements." },
+        { "-debug", "yosys", "bool", "Enable debugging features." },
+        { "-dump_ast1", "yosys", "bool", "Dump initial AST." },
+        { "-dump_ast2", "yosys", "bool", "Dump final AST after elaboration." },
+        { "-no_dump_ptr", "yosys", "bool", "Do not dump pointers in AST dump." },
+        { "-dump_vlog1", "yosys", "bool", "Dump Verilog output after first stage." },
+        { "-dump_vlog2", "yosys", "bool", "Dump Verilog output after final stage." },
+        { "-dump_rtlil", "yosys", "bool", "Dump RTLIL output." },
+        { "-yydebug", "yosys", "bool", "Enable parser debugging." },
+        { "-nolatches", "yosys", "bool", "Prevent generation of latches." },
+        { "-nomem2reg", "yosys", "bool", "Disable conversion of memories to registers." },
+        { "-mem2reg", "yosys", "bool", "Force conversion of memories to registers." },
+        { "-nomeminit", "yosys", "bool", "Disable memory initialization." },
+        { "-ppdump", "yosys", "bool", "Dump preprocessed designs." },
+        { "-nopp", "yosys", "bool", "Disable preprocessor." },
+        { "-nodpi", "yosys", "bool", "Disable DPI feature." },
+        { "-noblackbox", "yosys", "bool", "Treat blackbox modules as white boxes." },
+        { "-lib", "yosys", "bool", "Enable library features." },
+        { "-nowb", "yosys", "bool", "Disable whitebox." },
+        { "-specify", "yosys", "bool", "Enable specify blocks." },
+        { "-noopt", "yosys", "bool", "Disable optimizations." },
+        { "-icells", "yosys", "bool", "Ignore cells in outputs." },
+        { "-pwires", "yosys", "bool", "Preserve wires in outputs." },
+        { "-nooverwrite", "yosys", "bool", "Prevent overwriting output files." },
+        { "-overwrite", "yosys", "bool", "Allow overwriting output files." },
+        { "-defer", "yosys", "bool", "Defer execution." },
+        { "-noautowire", "yosys", "bool", "Disable automatic wiring." },
+        { "-m", "abc", "bool", "" },
+        { "-c", "abc", "bool", "" },
+        { "-b", "abc", "bool", "" }
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadLibertyYosys() override = default;
+  ~CmdLfIoReadVerilog() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -343,95 +307,115 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "", setattr = "";
-    bool is_lib = false, is_wb = false, is_nooverwrite = false, is_overwrite = false, is_ignore_miss_func = false, is_ignore_miss_dir = false, is_ignore_miss_data_latch = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_setattr = getOptionOrArg( "-setattr" );
-    TclOption* option_lib = getOptionOrArg( "-lib" );
-    TclOption* option_wb = getOptionOrArg( "-wb" );
-    TclOption* option_nooverwrite = getOptionOrArg( "-nooverwrite" );
-    TclOption* option_overwrite = getOptionOrArg( "-overwrite" );
-    TclOption* option_ignore_miss_func = getOptionOrArg( "-ignore_miss_func" );
-    TclOption* option_ignore_miss_dir = getOptionOrArg( "-ignore_miss_dir" );
-    TclOption* option_ignore_miss_data_latch = getOptionOrArg( "-ignore_miss_data_latch" );
+    std::vector<std::string> strOptions = { "-file", "-setattr", "-Dname", "-Idir" };
+    std::vector<std::string> boolOptions = { "-sv", "-formal", "-nosynthesis", "-noassert", "-noassume", "-norestrict",
+                                             "-assume-asserts", "-assert-assumes", "-nodisplay", "-debug", "-dump_ast1",
+                                             "-dump_ast2", "-no_dump_ptr", "-dump_vlog1", "-dump_vlog2", "-dump_rtlil",
+                                             "-yydebug", "-nolatches", "-nomem2reg", "-mem2reg", "-nomeminit", "-ppdump",
+                                             "-nopp", "-nodpi", "-noblackbox", "-lib", "-nowb", "-specify", "-noopt",
+                                             "-icells", "-pwires", "-nooverwrite", "-overwrite", "-defer", "-noautowire",
+                                             "-m", "-c", "-b" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_setattr->is_set_val() )
-      setattr = option_setattr->getStringVal();
-    if ( option_lib->is_set_val() )
-      is_lib = true;
-    if ( option_wb->is_set_val() )
-      is_wb = true;
-    if ( option_nooverwrite->is_set_val() )
-      is_nooverwrite = true;
-    if ( option_overwrite->is_set_val() )
-      is_overwrite = true;
-    if ( option_ignore_miss_func->is_set_val() )
-      is_ignore_miss_func = true;
-    if ( option_ignore_miss_dir->is_set_val() )
-      is_ignore_miss_dir = true;
-    if ( option_ignore_miss_data_latch->is_set_val() )
-      is_ignore_miss_data_latch = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::arch::yosys::read_liberty( file, is_lib, is_wb, is_nooverwrite, is_overwrite, is_ignore_miss_func, is_ignore_miss_dir, is_ignore_miss_data_latch, setattr );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::read_verilog( strOptionsValue["-file"],
+                                     boolOptionsValue["-sv"],
+                                     boolOptionsValue["-formal"],
+                                     boolOptionsValue["-nosynthesis"],
+                                     boolOptionsValue["-noassert"],
+                                     boolOptionsValue["-noassume"],
+                                     boolOptionsValue["-norestrict"],
+                                     boolOptionsValue["-assume-asserts"],
+                                     boolOptionsValue["-assert-assumes"],
+                                     boolOptionsValue["-nodisplay"],
+                                     boolOptionsValue["-debug"],
+                                     boolOptionsValue["-dump_ast1"],
+                                     boolOptionsValue["-dump_ast2"],
+                                     boolOptionsValue["-no_dump_ptr"],
+                                     boolOptionsValue["-dump_vlog1"],
+                                     boolOptionsValue["-dump_vlog2"],
+                                     boolOptionsValue["-dump_rtlil"],
+                                     boolOptionsValue["-yydebug"],
+                                     boolOptionsValue["-nolatches"],
+                                     boolOptionsValue["-nomem2reg"],
+                                     boolOptionsValue["-mem2reg"],
+                                     boolOptionsValue["-nomeminit"],
+                                     boolOptionsValue["-ppdump"],
+                                     boolOptionsValue["-nopp"],
+                                     boolOptionsValue["-nodpi"],
+                                     boolOptionsValue["-noblackbox"],
+                                     boolOptionsValue["-lib"],
+                                     boolOptionsValue["-nowb"],
+                                     boolOptionsValue["-specify"],
+                                     boolOptionsValue["-noopt"],
+                                     boolOptionsValue["-icells"],
+                                     boolOptionsValue["-pwires"],
+                                     boolOptionsValue["-nooverwrite"],
+                                     boolOptionsValue["-overwrite"],
+                                     boolOptionsValue["-defer"],
+                                     boolOptionsValue["-noautowire"],
+                                     strOptionsValue["-setattr"],
+                                     strOptionsValue["-Dname"],
+                                     strOptionsValue["-Idir"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_verilog( strOptionsValue["-file"],
+                                    boolOptionsValue["-m"],
+                                    boolOptionsValue["-c"],
+                                    boolOptionsValue["-b"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadLibertyYosys
+}; // class CmdLfIoReadVerilog
 
-////////////////////////////////////////////////////////////////////////////
-//  read_verilog / yosys
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadVerilogYosys : public TclCmd
+class CmdLfIoReadBench : public TclCmd
 {
 public:
-  explicit CmdLfIoReadVerilogYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadBench( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file", "-setattr", "-Dname", "-Idir" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-sv", "-formal", "-nosynthesis", "-noassert", "-noassume", "-norestrict",
-        "-assume-asserts", "-assert-assumes", "-nodisplay", "-debug", "-dump_ast1",
-        "-dump_ast2", "-no_dump_ptr", "-dump_vlog1", "-dump_vlog2", "-dump_rtlil",
-        "-yydebug", "-nolatches", "-nomem2reg", "-mem2reg", "-nomeminit", "-ppdump",
-        "-nopp", "-nodpi", "-noblackbox", "-lib", "-nowb", "-specify", "-noopt",
-        "-icells", "-pwires", "-nooverwrite", "-overwrite", "-defer", "-noautowire" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-c", "abc", "bool", "" } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadVerilogYosys() override = default;
+  ~CmdLfIoReadBench() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -439,193 +423,69 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "", setattr = "", Dname = "", Idir = "";
-    bool is_sv = false, is_formal = false, is_nosynthesis = false, is_noassert = false,
-         is_noassume = false, is_norestrict = false, is_assume_asserts = false, is_assert_assumes = false,
-         is_nodisplay = false, is_debug = false, is_dump_ast1 = false, is_dump_ast2 = false, is_no_dump_ptr = false,
-         is_dump_vlog1 = false, is_dump_vlog2 = false, is_dump_rtlil = false, is_yydebug = false, is_nolatches = false,
-         is_nomem2reg = false, is_mem2reg = false, is_nomeminit = false, is_ppdump = false, is_nopp = false, is_nodpi = false,
-         is_noblackbox = false, is_lib = false, is_nowb = false, is_specify = false, is_noopt = false, is_icells = false,
-         is_pwires = false, is_nooverwrite = false, is_overwrite = false, is_defer = false, is_noautowire = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_setattr = getOptionOrArg( "-setattr" );
-    TclOption* option_Dname = getOptionOrArg( "-Dname" );
-    TclOption* option_Idir = getOptionOrArg( "-Idir" );
-    TclOption* option_sv = getOptionOrArg( "-sv" );
-    TclOption* option_formal = getOptionOrArg( "-formal" );
-    TclOption* option_nosynthesis = getOptionOrArg( "-nosynthesis" );
-    TclOption* option_noassert = getOptionOrArg( "-noassert" );
-    TclOption* option_noassume = getOptionOrArg( "-noassume" );
-    TclOption* option_norestrict = getOptionOrArg( "-norestrict" );
-    TclOption* option_assume_asserts = getOptionOrArg( "-assume_asserts" );
-    TclOption* option_assert_assumes = getOptionOrArg( "-assert_assumes" );
-    TclOption* option_nodisplay = getOptionOrArg( "-nodisplay" );
-    TclOption* option_debug = getOptionOrArg( "-debug" );
-    TclOption* option_dump_ast1 = getOptionOrArg( "-dump_ast1" );
-    TclOption* option_dump_ast2 = getOptionOrArg( "-dump_ast2" );
-    TclOption* option_no_dump_ptr = getOptionOrArg( "-no_dump_ptr" );
-    TclOption* option_dump_vlog1 = getOptionOrArg( "-dump_vlog1" );
-    TclOption* option_dump_vlog2 = getOptionOrArg( "-dump_vlog2" );
-    TclOption* option_dump_rtlil = getOptionOrArg( "-dump_rtlil" );
-    TclOption* option_yydebug = getOptionOrArg( "-yydebug" );
-    TclOption* option_nolatches = getOptionOrArg( "-nolatches" );
-    TclOption* option_nomem2reg = getOptionOrArg( "-nomem2reg" );
-    TclOption* option_mem2reg = getOptionOrArg( "-mem2reg" );
-    TclOption* option_nomeminit = getOptionOrArg( "-nomeminit" );
-    TclOption* option_ppdump = getOptionOrArg( "-ppdump" );
-    TclOption* option_nopp = getOptionOrArg( "-nopp" );
-    TclOption* option_nodpi = getOptionOrArg( "-nodpi" );
-    TclOption* option_noblackbox = getOptionOrArg( "-noblackbox" );
-    TclOption* option_lib = getOptionOrArg( "-lib" );
-    TclOption* option_nowb = getOptionOrArg( "-nowb" );
-    TclOption* option_specify = getOptionOrArg( "-specify" );
-    TclOption* option_noopt = getOptionOrArg( "-noopt" );
-    TclOption* option_icells = getOptionOrArg( "-icells" );
-    TclOption* option_pwires = getOptionOrArg( "-pwires" );
-    TclOption* option_nooverwrite = getOptionOrArg( "-nooverwrite" );
-    TclOption* option_overwrite = getOptionOrArg( "-overwrite" );
-    TclOption* option_defer = getOptionOrArg( "-defer" );
-    TclOption* option_noautowire = getOptionOrArg( "-noautowire" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-c" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_setattr->is_set_val() )
-      setattr = option_setattr->getStringVal();
-    if ( option_Dname->is_set_val() )
-      Dname = option_Dname->getStringVal();
-    if ( option_Idir->is_set_val() )
-      Idir = option_Idir->getStringVal();
-    if ( option_sv->is_set_val() )
-      is_sv = true;
-    if ( option_formal->is_set_val() )
-      is_formal = true;
-    if ( option_nosynthesis->is_set_val() )
-      is_nosynthesis = true;
-    if ( option_noassert->is_set_val() )
-      is_noassert = true;
-    if ( option_noassume->is_set_val() )
-      is_noassume = true;
-    if ( option_norestrict->is_set_val() )
-      is_norestrict = true;
-    if ( option_assume_asserts->is_set_val() )
-      is_assume_asserts = true;
-    if ( option_assert_assumes->is_set_val() )
-      is_assert_assumes = true;
-    if ( option_nodisplay->is_set_val() )
-      is_nodisplay = true;
-    if ( option_debug->is_set_val() )
-      is_debug = true;
-    if ( option_dump_ast1->is_set_val() )
-      is_dump_ast1 = true;
-    if ( option_dump_ast2->is_set_val() )
-      is_dump_ast2 = true;
-    is_no_dump_ptr = true;
-    if ( option_dump_vlog1->is_set_val() )
-      is_dump_vlog1 = true;
-    if ( option_dump_vlog2->is_set_val() )
-      is_dump_vlog2 = true;
-    if ( option_dump_rtlil->is_set_val() )
-      is_dump_rtlil = true;
-    if ( option_yydebug->is_set_val() )
-      is_yydebug = true;
-    if ( option_nolatches->is_set_val() )
-      is_nolatches = true;
-    if ( option_nomem2reg->is_set_val() )
-      is_nomem2reg = true;
-    if ( option_mem2reg->is_set_val() )
-      is_mem2reg = true;
-    if ( option_nomeminit->is_set_val() )
-      is_nomeminit = true;
-    if ( option_ppdump->is_set_val() )
-      is_ppdump = true;
-    if ( option_nopp->is_set_val() )
-      is_nopp = true;
-    if ( option_nodpi->is_set_val() )
-      is_nodpi = true;
-    if ( option_noblackbox->is_set_val() )
-      is_noblackbox = true;
-    if ( option_lib->is_set_val() )
-      is_lib = true;
-    if ( option_nowb->is_set_val() )
-      is_nowb = true;
-    if ( option_specify->is_set_val() )
-      is_specify = true;
-    if ( option_noopt->is_set_val() )
-      is_noopt = true;
-    if ( option_icells->is_set_val() )
-      is_icells = true;
-    if ( option_pwires->is_set_val() )
-      is_pwires = true;
-    if ( option_nooverwrite->is_set_val() )
-      is_nooverwrite = true;
-    if ( option_overwrite->is_set_val() )
-      is_overwrite = true;
-    if ( option_defer->is_set_val() )
-      is_defer = true;
-    if ( option_noautowire->is_set_val() )
-      is_noautowire = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::arch::yosys::read_verilog( file, is_sv, is_formal, is_nosynthesis, is_noassert, is_noassume, is_norestrict,
-                                   is_assume_asserts, is_assert_assumes, is_nodisplay, is_debug, is_dump_ast1, is_dump_ast2,
-                                   is_no_dump_ptr, is_dump_vlog1, is_dump_vlog2, is_dump_rtlil, is_yydebug, is_nolatches,
-                                   is_nomem2reg, is_mem2reg, is_nomeminit, is_ppdump, is_nopp, is_nodpi, is_noblackbox,
-                                   is_lib, is_nowb, is_specify, is_noopt, is_icells, is_pwires, is_nooverwrite,
-                                   is_overwrite, is_defer, is_noautowire, setattr, Dname, Idir );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_bench( strOptionsValue["-file"],
+                                  boolOptionsValue["-c"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::read_bench( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadVerilogYosys
+}; // class CmdLfIoReadBench
 
-////////////////////////////////////////////////////////////////////////////
-//  write_verilog / yosys
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteVerilogYosys : public TclCmd
+class CmdLfIoReadCnf : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteVerilogYosys( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadCnf( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file", "-renameprefix" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-sv", "-norename", "-noattr", "-attr2comment", "-noexpr",
-        "-noparallelcase", "-siminit", "-nodec", "-decimal", "-nohex",
-        "-nostr", "-simple-lhs", "-extmem", "-defparam", "-blackboxes",
-        "-selected", "-v" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-m", "abc", "bool", "" } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteVerilogYosys() override = default;
+  ~CmdLfIoReadCnf() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -633,108 +493,73 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file, renameprefix;
-    bool is_sv = false, is_norename = false, is_noattr = false, is_attr2comment = false,
-         is_noexpr = false, is_noparallelcase = false, is_siminit = false, is_nodec = false,
-         is_decimal = false, is_nohex = false, is_nostr = false, is_simple_lhs = false,
-         is_extmem = false, is_defparam = false, is_blackboxes = false, is_selected = false,
-         is_v = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // Retrieve all options values only if they have been set by the user
-    if ( getOptionOrArg( "-file" )->is_set_val() )
-      file = getOptionOrArg( "-file" )->getStringVal();
-    if ( getOptionOrArg( "-renameprefix" )->is_set_val() )
-      renameprefix = getOptionOrArg( "-renameprefix" )->getStringVal();
-    if ( getOptionOrArg( "-sv" )->is_set_val() )
-      is_sv = true;
-    if ( getOptionOrArg( "-norename" )->is_set_val() )
-      is_norename = true;
-    if ( getOptionOrArg( "-noattr" )->is_set_val() )
-      is_noattr = true;
-    if ( getOptionOrArg( "-attr2comment" )->is_set_val() )
-      is_attr2comment = true;
-    if ( getOptionOrArg( "-noexpr" )->is_set_val() )
-      is_noexpr = true;
-    if ( getOptionOrArg( "-noparallelcase" )->is_set_val() )
-      is_noparallelcase = true;
-    if ( getOptionOrArg( "-siminit" )->is_set_val() )
-      is_siminit = true;
-    if ( getOptionOrArg( "-nodec" )->is_set_val() )
-      is_nodec = true;
-    if ( getOptionOrArg( "-decimal" )->is_set_val() )
-      is_decimal = true;
-    if ( getOptionOrArg( "-nohex" )->is_set_val() )
-      is_nohex = true;
-    if ( getOptionOrArg( "-nostr" )->is_set_val() )
-      is_nostr = true;
-    if ( getOptionOrArg( "-simple-lhs" )->is_set_val() )
-      is_simple_lhs = true;
-    if ( getOptionOrArg( "-extmem" )->is_set_val() )
-      is_extmem = true;
-    if ( getOptionOrArg( "-defparam" )->is_set_val() )
-      is_defparam = true;
-    if ( getOptionOrArg( "-blackboxes" )->is_set_val() )
-      is_blackboxes = true;
-    if ( getOptionOrArg( "-selected" )->is_set_val() )
-      is_selected = true;
-    if ( getOptionOrArg( "-v" )->is_set_val() )
-      is_v = true;
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-m" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    lf::arch::yosys::write_verilog( file, is_sv, is_norename, renameprefix, is_noattr, is_attr2comment,
-                                    is_noexpr, is_noparallelcase, is_siminit, is_nodec, is_decimal,
-                                    is_nohex, is_nostr, is_simple_lhs, is_extmem, is_defparam,
-                                    is_blackboxes, is_selected, is_v );
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_cnf( strOptionsValue["-file"],
+                                boolOptionsValue["-m"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::read_cnf( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteVerilogYosys
+}; // class CmdLfIoReadCnf
 
-#pragma region IO abc
-////////////////////////////////////////////////////////////////////////////
-//  read_aiger / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadAigerAbc : public TclCmd
+class CmdLfIoReadPla : public TclCmd
 {
 public:
-  explicit CmdLfIoReadAigerAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadPla( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-c" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-z", "abc", "bool", "" },
+        { "-b", "abc", "bool", "" },
+        { "-d", "abc", "bool", "" },
+        { "-x", "abc", "bool", "" },
+        { "-c", "abc", "bool", "" } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadAigerAbc() override = default;
+  ~CmdLfIoReadPla() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -742,69 +567,72 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_checking = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_checking = getOptionOrArg( "-c" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-z", "-b", "-d", "-x", "-c" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_checking->is_set_val() )
-      is_checking = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_aiger( file, is_checking );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_pla( strOptionsValue["-file"],
+                                boolOptionsValue["-z"],
+                                boolOptionsValue["-b"],
+                                boolOptionsValue["-d"],
+                                boolOptionsValue["-x"],
+                                boolOptionsValue["-c"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::read_pla( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadAigerAbc
+}; // class CmdLfIoReadPla
 
-////////////////////////////////////////////////////////////////////////////
-//  read_bench / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadBenchAbc : public TclCmd
+class CmdLfIoReadGtech : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBenchAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadGtech( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-c" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadBenchAbc() override = default;
+  ~CmdLfIoReadGtech() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -812,69 +640,64 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_checking = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_checking = getOptionOrArg( "-c" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_checking->is_set_val() )
-      is_checking = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_bench( file, is_checking );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::read_gtech( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadBenchAbc
+}; // class CmdLfIoReadGtech
 
-////////////////////////////////////////////////////////////////////////////
-//  read_blif / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadBlifAbc : public TclCmd
+class CmdLfIoReadFormula : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBlifAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadFormula( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-n", "-m", "-a", "-c" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadBlifAbc() override = default;
+  ~CmdLfIoReadFormula() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -882,78 +705,64 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_old_parser = false, is_aig_created = false, is_saving_names = false, is_checking = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_old_parser = getOptionOrArg( "-n" );
-    TclOption* option_is_aig_created = getOptionOrArg( "-m" );
-    TclOption* option_is_saving_names = getOptionOrArg( "-a" );
-    TclOption* option_is_checking = getOptionOrArg( "-c" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_checking->is_set_val() )
-      is_checking = true;
-    if ( option_is_old_parser->is_set_val() )
-      is_old_parser = true;
-    if ( option_is_aig_created->is_set_val() )
-      is_aig_created = true;
-    if ( option_is_saving_names->is_set_val() )
-      is_saving_names = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_blif( file, is_old_parser, is_aig_created, is_saving_names, is_checking );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_formula( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadBlifAbc
+}; // class CmdLfIoReadFormula
 
-////////////////////////////////////////////////////////////////////////////
-//  read_cnf / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadCnfAbc : public TclCmd
+class CmdLfIoReadJson : public TclCmd
 {
 public:
-  explicit CmdLfIoReadCnfAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadJson( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-m" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadCnfAbc() override = default;
+  ~CmdLfIoReadJson() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -961,69 +770,67 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_multi_output = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_multi_output = getOptionOrArg( "-m" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_multi_output->is_set_val() )
-      is_multi_output = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_cnf( file, is_multi_output );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::read_json( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadCnfAbc
+}; // class CmdLfIoReadJson
 
-////////////////////////////////////////////////////////////////////////////
-//  read_pla / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadPlaAbc : public TclCmd
+class CmdLfIoReadRtlil : public TclCmd
 {
 public:
-  explicit CmdLfIoReadPlaAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadRtlil( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-z", "-b", "-d", "-x", "-c" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-nooverwrite ", "yosys", "bool", "" },
+        { "-overwrite ", "yosys", "bool", "" },
+        { "-lib ", "yosys", "bool", "" } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadPlaAbc() override = default;
+  ~CmdLfIoReadRtlil() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1031,80 +838,64 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_zeors = false, is_both = false, is_dont_care = false, is_exor_sop = false, is_checking = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_zeros = getOptionOrArg( "-z" );
-    TclOption* option_is_both = getOptionOrArg( "-b" );
-    TclOption* option_is_dont_care = getOptionOrArg( "-d" );
-    TclOption* option_is_exor_sop = getOptionOrArg( "-x" );
-    TclOption* option_is_checking = getOptionOrArg( "-c" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-nooverwrite", "-overwrite", "-lib" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_zeros->is_set_val() )
-      is_zeors = true;
-    if ( option_is_both->is_set_val() )
-      is_both = true;
-    if ( option_is_dont_care->is_set_val() )
-      is_dont_care = true;
-    if ( option_is_exor_sop->is_set_val() )
-      is_exor_sop = true;
-    if ( option_is_checking->is_set_val() )
-      is_checking = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_pla( file, is_zeors, is_both, is_dont_care, is_exor_sop, is_checking );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::read_rtlil( strOptionsValue["-file"], boolOptionsValue["-nooverwrite"], boolOptionsValue["-overwrite"], boolOptionsValue["-lib"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadPlaAbc
+}; // class CmdLfIoReadRtlil
 
-////////////////////////////////////////////////////////////////////////////
-//  read_formula / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadFormulaAbc : public TclCmd
+class CmdLfIoReadGenlib : public TclCmd
 {
 public:
-  explicit CmdLfIoReadFormulaAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadGenlib( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadFormulaAbc() override = default;
+  ~CmdLfIoReadGenlib() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1112,135 +903,75 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_formula( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
-    return 1;
-  }
-}; // class CmdLfIoReadFormulaAbc
-
-////////////////////////////////////////////////////////////////////////////
-//  read_truth / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadTruthAbc : public TclCmd
-{
-public:
-  explicit CmdLfIoReadTruthAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {
-        "-x", "-f" };
-
-    for ( auto str : strs )
+    switch ( anchor_domain )
     {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoReadTruthAbc() override = default;
-
-  unsigned check() override
-  {
-    auto* option_file = getOptionOrArg( "-file" );
-    auto* option_is_from_file = getOptionOrArg( "-f" );
-
-    if ( ( option_file && !option_is_from_file ) || ( !option_file && option_is_from_file ) )
-    {
-      std::cerr << "-file is set with -f" << std::endl;
-      assert( false );
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_genlib( strOptionsValue["-file"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::read_genlib( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
     }
     return 1;
   }
+}; // class CmdLfIoReadGenlib
 
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-    bool is_hex = false, is_from_file = false;
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_hex = getOptionOrArg( "-x" );
-    TclOption* option_is_from_file = getOptionOrArg( "-f" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_hex->is_set_val() )
-      is_hex = true;
-    if ( option_is_from_file->is_set_val() )
-      is_from_file = true;
-
-    lf::logic::abc::read_truth( file, is_hex, is_from_file );
-
-    return 1;
-  }
-}; // class CmdLfIoReadTruthAbc
-
-////////////////////////////////////////////////////////////////////////////
-//  read_genlib / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadGenlibAbc : public TclCmd
+class CmdLfIoReadLiberty : public TclCmd
 {
 public:
-  explicit CmdLfIoReadGenlibAbc( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoReadLiberty( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to read." },
+        { "-lib", "yosys", "bool", "" },
+        { "-wb", "yosys", "bool", "" },
+        { "-nooverwrite", "yosys", "bool", "" },
+        { "-overwrite", "yosys", "bool", "" },
+        { "-ignore_miss_func", "yosys", "bool", "" },
+        { "-ignore_miss_dir", "yosys", "bool", "" },
+        { "-is_ignore_miss_data_latch", "yosys", "bool", "" },
+        { "-setattr", "yosys", "string", "" } };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadGenlibAbc() override = default;
+  ~CmdLfIoReadLiberty() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1248,64 +979,94 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file", "-setattr" };
+    std::vector<std::string> boolOptions = { "-lib", "-wb", "-nooverwrite", "-overwrite", "-ignore_miss_func", "-ignore_miss_dir", "-is_ignore_miss_data_latch" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_genlib( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::read_liberty( strOptionsValue["-file"],
+                                     boolOptionsValue["-lib"],
+                                     boolOptionsValue["-wb"],
+                                     boolOptionsValue["-nooverwrite"],
+                                     boolOptionsValue["-overwrite"],
+                                     boolOptionsValue["-ignore_miss_func"],
+                                     boolOptionsValue["-ignore_miss_dir"],
+                                     boolOptionsValue["-is_ignore_miss_data_latch"],
+                                     strOptionsValue["-setattr"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::read_liberty( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadGenlibAbc
+}; // class CmdLfIoReadLiberty
 
-////////////////////////////////////////////////////////////////////////////
-//  read_liberty / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadLibertyAbc : public TclCmd
+#pragma region Writer
+class CmdLfIoWriteAiger : public TclCmd
 {
 public:
-  explicit CmdLfIoReadLibertyAbc( const char* cmd_name )
+  explicit CmdLfIoWriteAiger( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-ascii", "yosys", "bool", "" },
+        { "-zinit", "yosys", "bool", "" },
+        { "-miter", "yosys", "bool", "" },
+        { "-symbols", "yosys", "bool", "" },
+        { "-map", "yosys", "string", "" },
+        { "-vmap", "yosys", "string", "" },
+        { "-no-startoffset", "yosys", "bool", "" },
+        { "-ymap", "yosys", "string", "" },
+        { "-I", "yosys", "bool", "" },
+        { "-O", "yosys", "bool", "" },
+        { "-B", "yosys", "bool", "" },
+        { "-L", "yosys", "bool", "" },
+        { "-s", "abc", "bool", "" },
+        { "-c", "abc", "bool", "" },
+        { "-u", "abc", "bool", "" },
+        { "-v", "abc", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadLibertyAbc() override = default;
+  ~CmdLfIoWriteAiger() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1313,65 +1074,91 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file", "-map", "-vmap", "-ymap" };
+    std::vector<std::string> boolOptions = { "-ascii", "-zinit", "-miter", "-symbols", "-no-startoffset", "-I", "-O", "-B", "-L", "-s", "-c", "-u", "-v" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_liberty( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      std::cout << "yosys" << std::endl;
+      lf::arch::yosys::write_aiger( strOptionsValue["-file"],
+                                    boolOptionsValue["-ascii"],
+                                    boolOptionsValue["-zinit"],
+                                    boolOptionsValue["-miter"],
+                                    boolOptionsValue["-symbols"],
+                                    strOptionsValue["-map"],
+                                    strOptionsValue["-vmap"],
+                                    boolOptionsValue["-no-startoffset"],
+                                    strOptionsValue["-ymap"],
+                                    boolOptionsValue["-I"],
+                                    boolOptionsValue["-O"],
+                                    boolOptionsValue["-B"],
+                                    boolOptionsValue["-L"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      std::cout << "abc" << std::endl;
+      lf::logic::abc::write_aiger( strOptionsValue["-file"],
+                                   boolOptionsValue["-s"],
+                                   boolOptionsValue["-c"],
+                                   boolOptionsValue["-u"],
+                                   boolOptionsValue["-v"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      std::cout << "lsils" << std::endl;
+      lf::logic::lsils::write_aiger( strOptionsValue["-file"] );
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadLibertyAbc
+}; // class CmdLfIoWriteAiger
 
-////////////////////////////////////////////////////////////////////////////
-//  read_verilog / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadVerilogAbc : public TclCmd
+class CmdLfIoWriteBench : public TclCmd
 {
 public:
-  explicit CmdLfIoReadVerilogAbc( const char* cmd_name )
+  explicit CmdLfIoWriteBench( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-m", "-c", "-b" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-l", "abc", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadVerilogAbc() override = default;
+  ~CmdLfIoWriteBench() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1379,75 +1166,91 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_mapped = false, is_checking = false, is_barrier_buffer = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_mapped = getOptionOrArg( "-m" );
-    TclOption* option_is_checking = getOptionOrArg( "-c" );
-    TclOption* option_is_barrier_buffer = getOptionOrArg( "-b" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-l" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_mapped->is_set_val() )
-      is_mapped = true;
-    if ( option_is_checking->is_set_val() )
-      is_checking = true;
-    if ( option_is_barrier_buffer->is_set_val() )
-      is_barrier_buffer = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::read_verilog( file, is_mapped, is_checking, is_barrier_buffer );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      std::cout << "abc" << std::endl;
+      lf::logic::abc::write_bench( strOptionsValue["-file"],
+                                   boolOptionsValue["-l"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      std::cout << "lsils" << std::endl;
+      lf::logic::lsils::write_bench( strOptionsValue["-file"] );
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadVerilogAbc
+}; // class CmdLfIoWriteBench
 
-////////////////////////////////////////////////////////////////////////////
-//  write_aiger / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteAigerAbc : public TclCmd
+class CmdLfIoWriteBlif : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteAigerAbc( const char* cmd_name )
+  explicit CmdLfIoWriteBlif( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-s", "-c", "-u", "-v" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-top", "yosys", "string", "" },
+        { "-buf", "yosys", "strvec", "" },
+        { "-unbuf", "yosys", "strvec", "" },
+        { "-true", "yosys", "strvec", "" },
+        { "-false", "yosys", "strvec", "" },
+        { "-undef", "yosys", "strvec", "" },
+        { "-noalias", "yosys", "bool", "" },
+        { "-icells", "yosys", "bool", "" },
+        { "-gates", "yosys", "bool", "" },
+        { "-conn", "yosys", "bool", "" },
+        { "-attr", "yosys", "bool", "" },
+        { "-param", "yosys", "bool", "" },
+        { "-cname", "yosys", "bool", "" },
+        { "-iname", "yosys", "bool", "" },
+        { "-iattr", "yosys", "bool", "" },
+        { "-blackbox", "yosys", "bool", "" },
+        { "-impltf", "yosys", "bool", "" },
+        { "-S", "abc", "string", "" },
+        { "-j", "abc", "bool", "" },
+        { "-a", "abc", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteAigerAbc() override = default;
+  ~CmdLfIoWriteBlif() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1455,77 +1258,96 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_save_names = false, is_compact = false, is_unique = false, is_verbose = false;
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_save_names = getOptionOrArg( "-s" );
-    TclOption* option_is_compact = getOptionOrArg( "-c" );
-    TclOption* option_is_unique = getOptionOrArg( "-u" );
-    TclOption* option_is_verbose = getOptionOrArg( "-v" );
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_save_names->is_set_val() )
-      is_save_names = true;
-    if ( option_is_compact->is_set_val() )
-      is_compact = true;
-    if ( option_is_unique->is_set_val() )
-      is_unique = true;
-    if ( option_is_verbose->is_set_val() )
-      is_verbose = true;
+    std::vector<std::string> strOptions = { "-file", "-top", "-S" };
+    std::vector<std::string> boolOptions = { "-noalias", "icells", "gates", "conn", "attr", "param", "cname", "iname", "iattr", "blackbox", "impltf", "-j", "-a" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = { "-buf", "unbuf", "true", "false", "undef" };
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    lf::logic::abc::write_aiger( file, is_save_names, is_compact, is_unique, is_verbose );
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::logic::abc::write_blif( strOptionsValue["-file"],
+                                  strOptionsValue["-top"],
+                                  strvecOptionsValue["-buf"],
+                                  strvecOptionsValue["-unbuf"],
+                                  strvecOptionsValue["-true"],
+                                  strvecOptionsValue["-false"],
+                                  strvecOptionsValue["-undef"],
+                                  boolOptionsValue["-noalias"],
+                                  boolOptionsValue["-icells"],
+                                  boolOptionsValue["-gates"],
+                                  boolOptionsValue["-conn"],
+                                  boolOptionsValue["-attr"],
+                                  boolOptionsValue["-param"],
+                                  boolOptionsValue["-cname"],
+                                  boolOptionsValue["-iname"],
+                                  boolOptionsValue["-iattr"],
+                                  boolOptionsValue["-blackbox"],
+                                  boolOptionsValue["-impltf"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::write_blif( strOptionsValue["-file"],
+                                  strOptionsValue["-S"],
+                                  boolOptionsValue["-j"],
+                                  boolOptionsValue["-a"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::write_blif( strOptionsValue["-file"] );
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteAigerAbc
+}; // class CmdLfIoWriteBlif
 
-////////////////////////////////////////////////////////////////////////////
-//  write_bench / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteBenchAbc : public TclCmd
+class CmdLfIoWriteCnf : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBenchAbc( const char* cmd_name )
+  explicit CmdLfIoWriteCnf( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-l" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-n", "abc", "bool", "" },
+        { "-f", "abc", "bool", "" },
+        { "-p", "abc", "bool", "" },
+        { "-c", "abc", "bool", "" },
+        { "-v", "abc", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteBenchAbc() override = default;
+  ~CmdLfIoWriteCnf() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1533,68 +1355,73 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_lut = false;
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_lut = getOptionOrArg( "-l" );
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_lut->is_set_val() )
-      is_lut = true;
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-n", "-f", "-p", "-c", "-v" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    lf::logic::abc::write_bench( file, is_lut );
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::write_cnf( strOptionsValue["-file"],
+                                 boolOptionsValue["-n"],
+                                 boolOptionsValue["-f"],
+                                 boolOptionsValue["-p"],
+                                 boolOptionsValue["-c"],
+                                 boolOptionsValue["-v"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::write_cnf( strOptionsValue["-file"] );
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteBenchAbc
+}; // class CmdLfIoWriteCnf
 
-////////////////////////////////////////////////////////////////////////////
-//  write_blif / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteBlifAbc : public TclCmd
+class CmdLfIoWriteDot : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBlifAbc( const char* cmd_name )
+  explicit CmdLfIoWriteDot( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file", "-S" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-j", "a" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteBlifAbc() override = default;
+  ~CmdLfIoWriteDot() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1602,75 +1429,72 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "", str_lut = "";
-    bool is_special = false, is_hierarchy = false;
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_lut_str = getOptionOrArg( "-S" );
-    TclOption* option_is_special = getOptionOrArg( "-j" );
-    TclOption* option_is_hierarchy = getOptionOrArg( "-a" );
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_lut_str->is_set_val() )
-      str_lut = option_lut_str->getStringVal();
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_is_special->is_set_val() )
-      is_special = true;
-    if ( option_is_hierarchy->is_set_val() )
-      is_hierarchy = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::write_blif( file, str_lut, is_special, is_hierarchy );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::write_dot( strOptionsValue["-file"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::write_dot( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteBlifAbc
+}; // class CmdLfIoWriteDot
 
-////////////////////////////////////////////////////////////////////////////
-//  write_cnf / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteCnfAbc : public TclCmd
+class CmdLfIoWritePla : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteCnfAbc( const char* cmd_name )
+  explicit CmdLfIoWritePla( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-n", "-f", "-p", "-c", "-v" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-M", "abc", "int", "" },
+        { "-m", "abc", "bool", "" },
+    };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteCnfAbc() override = default;
+  ~CmdLfIoWritePla() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1678,79 +1502,70 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_new = false, is_fast = false, is_primes = false, is_adjast = false, is_verbose = false;
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_new = getOptionOrArg( "-n" );
-    TclOption* option_is_fast = getOptionOrArg( "-f" );
-    TclOption* option_is_primes = getOptionOrArg( "-p" );
-    TclOption* option_is_adjast = getOptionOrArg( "-c" );
-    TclOption* option_is_verbose = getOptionOrArg( "-v" );
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_new->is_set_val() )
-      is_new = true;
-    if ( option_is_fast->is_set_val() )
-      is_fast = true;
-    if ( option_is_primes->is_set_val() )
-      is_primes = true;
-    if ( option_is_adjast->is_set_val() )
-      is_adjast = true;
-    if ( option_is_verbose->is_set_val() )
-      is_verbose = true;
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-m" };
+    std::vector<std::string> intOptions = { "-M" };
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    lf::logic::abc::write_cnf( file, is_new, is_fast, is_primes, is_adjast, is_verbose );
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::write_pla( strOptionsValue["-file"],
+                                 intOptionsValue["-M"],
+                                 boolOptionsValue["-m"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteCnfAbc
+}; // class CmdLfIoWritePla
 
-////////////////////////////////////////////////////////////////////////////
-//  write_cnf / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteDotAbc : public TclCmd
+class CmdLfIoWriteTruth : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteDotAbc( const char* cmd_name )
+  explicit CmdLfIoWriteTruth( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-x", "abc", "bool", "" },
+        { "-r", "abc", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteDotAbc() override = default;
+  ~CmdLfIoWriteTruth() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1758,74 +1573,75 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-x", "-r" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::write_dot( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::write_truth( strOptionsValue["-file"],
+                                   boolOptionsValue["-x"],
+                                   boolOptionsValue["-r"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteDotAbc
+}; // class CmdLfIoWriteTruth
 
-////////////////////////////////////////////////////////////////////////////
-//  write_pla / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWritePlaAbc : public TclCmd
+class CmdLfIoWriteBtor : public TclCmd
 {
 public:
-  explicit CmdLfIoWritePlaAbc( const char* cmd_name )
+  explicit CmdLfIoWriteBtor( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> inumbers = {
-        "-M" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-v", "yosys", "bool", "" },
+        { "-s", "yosys", "bool", "" },
+        { "-c", "yosys", "bool", "" },
+        { "-i", "yosys", "bool", "" },
+        { "-x", "yosys", "bool", "" },
+        { "-ywmap", "yosys", "string", "" },
+    };
 
-    std::vector<std::string> switches = {
-        "-m" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto number : inumbers )
-    {
-      auto* option = new TclIntOption( number.c_str(), 1, -1 );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWritePlaAbc() override = default;
+  ~CmdLfIoWriteBtor() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1833,73 +1649,79 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    int M = -1;
-    bool is_multi_output = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_M = getOptionOrArg( "-M" );
-    TclOption* option_is_multi_output = getOptionOrArg( "-m" );
+    std::vector<std::string> strOptions = { "-file", "-ywmap" };
+    std::vector<std::string> boolOptions = { "-v", "-s", "-c", "-i", "-x" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_M->is_set_val() )
-      M = option_M->getIntVal();
-    if ( option_is_multi_output->is_set_val() )
-      is_multi_output = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::write_pla( file, M, is_multi_output );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_btor( strOptionsValue["-file"],
+                                   boolOptionsValue["-v"],
+                                   boolOptionsValue["-s"],
+                                   boolOptionsValue["-c"],
+                                   boolOptionsValue["-i"],
+                                   boolOptionsValue["-x"],
+                                   strOptionsValue["-ywmap"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWritePlaAbc
+}; // class CmdLfIoWriteBtor
 
-////////////////////////////////////////////////////////////////////////////
-//  write_truth / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteTruthAbc : public TclCmd
+class CmdLfIoWriteBtor : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteTruthAbc( const char* cmd_name )
+  explicit CmdLfIoWriteBtor( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {
-        "-x", "-r" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-top", "yosys", "string", "" },
+        { "-nogndvcc", "yosys", "bool", "" },
+        { "-gndvccy", "yosys", "bool", "" },
+        { "-attrprop", "yosys", "bool", "" },
+        { "-keep", "yosys", "bool", "" },
+        { "-pvector", "yosys", "string", "" },
+        { "-lsbidx", "yosys", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteTruthAbc() override = default;
+  ~CmdLfIoWriteBtor() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1907,80 +1729,73 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    bool is_hex = false, is_reversing = false;
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_is_hex = getOptionOrArg( "-x" );
-    TclOption* option_is_reversing = getOptionOrArg( "-r" );
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_is_hex->is_set_val() )
-      is_hex = true;
-    if ( option_is_reversing->is_set_val() )
-      is_reversing = true;
+    std::vector<std::string> strOptions = { "-file", "-top", "-pvector" };
+    std::vector<std::string> boolOptions = { "-nogndvcc", "-gndvccy", "-attrprop", "-keep", "-lsbidx" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    lf::logic::abc::write_truth( file, is_hex, is_reversing );
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_edif( strOptionsValue["-file"],
+                                   strOptionsValue["-top"],
+                                   boolOptionsValue["-nogndvcc"],
+                                   boolOptionsValue["-gndvccy"],
+                                   boolOptionsValue["-attrprop"],
+                                   boolOptionsValue["-keep"],
+                                   strOptionsValue["-pvector"],
+                                   boolOptionsValue["-lsbidx"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteTruthAbc
+}; // class CmdLfIoWriteEdif
 
-////////////////////////////////////////////////////////////////////////////
-//  write_verilog / abc
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteVerilogAbc : public TclCmd
+class CmdLfIoWriteFirrtl : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteVerilogAbc( const char* cmd_name )
+  explicit CmdLfIoWriteFirrtl( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> inumbers = {
-        "-K" };
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." } };
 
-    std::vector<std::string> switches = {
-        "-f", "-a", "-m" };
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto number : inumbers )
-    {
-      auto* option = new TclIntOption( number.c_str(), 1, -1 );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoWriteVerilogAbc() override = default;
+  ~CmdLfIoWriteFirrtl() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -1988,79 +1803,68 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
-    int K = -1;
-    bool is_fixed_format = false, is_only_ands = false, is_modules = false;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-    TclOption* option_K = getOptionOrArg( "-K" );
-    TclOption* option_is_fixed_format = getOptionOrArg( "-f" );
-    TclOption* option_is_only_ands = getOptionOrArg( "-a" );
-    TclOption* option_is_modules = getOptionOrArg( "-m" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-    if ( option_K->is_set_val() )
-      K = option_K->getIntVal();
-    if ( option_is_fixed_format->is_set_val() )
-      is_fixed_format = true;
-    if ( option_is_only_ands->is_set_val() )
-      is_only_ands = true;
-    if ( option_is_modules->is_set_val() )
-      is_modules = true;
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::abc::write_verilog( file, K, is_fixed_format, is_only_ands, is_modules );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_firrtl( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoWriteVerilogAbc
+}; // class CmdLfIoWriteFirrtl
 
-#pragma region IO lsils
-////////////////////////////////////////////////////////////////////////////
-//  read_aiger / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadAigerLsils : public TclCmd
+class CmdLfIoWriteJson : public TclCmd
 {
 public:
-  explicit CmdLfIoReadAigerLsils( const char* cmd_name )
+  explicit CmdLfIoWriteJson( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "is_aig", "yosys", "bool", "" },
+        { "-compat-int", "yosys", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadAigerLsils() override = default;
+  ~CmdLfIoWriteJson() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -2068,64 +1872,69 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-is_aig", "-compat-int" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::lsils::read_aiger( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_json( strOptionsValue["-file"],
+                                   boolOptionsValue["-is_aig"],
+                                   boolOptionsValue["-compat-int"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadAigerLsils
+}; // class CmdLfIoWriteJson
 
-////////////////////////////////////////////////////////////////////////////
-//  read_bench / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadBenchLsils : public TclCmd
+class CmdLfIoWriteRtlil : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBenchLsils( const char* cmd_name )
+  explicit CmdLfIoWriteRtlil( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-selected", "yosys", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadBenchLsils() override = default;
+  ~CmdLfIoWriteRtlil() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -2133,64 +1942,74 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = { "-selected" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::lsils::read_bench( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_json( strOptionsValue["-file"],
+                                   boolOptionsValue["-selected"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadBenchLsils
+}; // class CmdLfIoWriteRtlil
 
-////////////////////////////////////////////////////////////////////////////
-//  read_blif / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadBlifLsils : public TclCmd
+class CmdLfIoWriteSpice : public TclCmd
 {
 public:
-  explicit CmdLfIoReadBlifLsils( const char* cmd_name )
+  explicit CmdLfIoWriteSpice( const char* cmd_name )
       : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "The file to write." },
+        { "-top", "yosys", "string", "" },
+        { "-big_endian", "yosys", "bool", "" },
+        { "-neg", "yosys", "string", "" },
+        { "-pos", "yosys", "string", "" },
+        { "-buf", "yosys", "string", "" },
+        { "-nc_prefix", "yosys", "string", "" },
+        { "-inames", "yosys", "bool", "" } };
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadBlifLsils() override = default;
+  ~CmdLfIoWriteSpice() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -2198,64 +2017,95 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file", "-top", "-neg", "-pos", "-buf", "-nc_prefix" };
+    std::vector<std::string> boolOptions = { "-big_endian", "-inames" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::lsils::read_blif( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_spice( strOptionsValue["-file"],
+                                    strOptionsValue["-top"],
+                                    boolOptionsValue["-big_endian"],
+                                    strOptionsValue["-neg"],
+                                    strOptionsValue["-pos"],
+                                    strOptionsValue["-buf"],
+                                    strOptionsValue["-nc_prefix"],
+                                    boolOptionsValue["-inames"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
-}; // class CmdLfIoReadBlifLsils
+}; // class CmdLfIoWriteSpice
 
-////////////////////////////////////////////////////////////////////////////
-//  read_cnf / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadCnfLsils : public TclCmd
+class CmdLfIoWriteVerilog : public TclCmd
 {
 public:
-  explicit CmdLfIoReadCnfLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
+  explicit CmdLfIoWriteVerilog( const char* cmd_name ) : TclCmd( cmd_name )
   {
-    std::vector<std::string> strs = {
-        "-file" };
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
 
-    std::vector<std::string> switches = {};
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "" },
+        { "-renameprefix", "yosys", "string", "" },
+        { "-sv", "yosys", "bool", "" },
+        { "-norename", "yosys", "bool", "" },
+        { "-noattr", "yosys", "bool", "" },
+        { "-attr2comment", "yosys", "bool", "" },
+        { "-noexpr", "yosys", "bool", "" },
+        { "-noparallelcase", "yosys", "bool", "" },
+        { "-siminit", "yosys", "bool", "" },
+        { "-nodec", "yosys", "bool", "" },
+        { "-decimal", "yosys", "bool", "" },
+        { "-nohex", "yosys", "bool", "" },
+        { "-nostr", "yosys", "bool", "" },
+        { "-simple-lhs", "yosys", "bool", "" },
+        { "-extmem", "yosys", "bool", "" },
+        { "-defparam", "yosys", "bool", "" },
+        { "-blackboxes", "yosys", "bool", "" },
+        { "-selected", "yosys", "bool", "" },
+        { "-v", "yosys", "bool", "" },
+        { "-K", "abc", "int", "" },
+        { "-f", "abc", "bool", "" },
+        { "-a", "abc", "bool", "" },
+        { "-m", "abc", "bool", "" }
 
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
+    };
+    setOptions( this, options );
   }
 
-  ~CmdLfIoReadCnfLsils() override = default;
+  ~CmdLfIoWriteVerilog() override = default;
 
   unsigned check() override
   {
     std::vector<std::string> essential = {
         "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
@@ -2263,670 +2113,70 @@ public:
     if ( !check() )
       return 0;
 
-    // init the args
-    std::string file = "";
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
+    std::vector<std::string> strOptions = { "-file", "-renameprefix" };
+    std::vector<std::string> boolOptions = { "-sv", "-norename", "-noattr", "-attr2comment", "-noexpr",
+                                             "-noparallelcase", "-siminit", "-nodec", "-decimal", "-nohex",
+                                             "-nostr", "-simple-lhs", "-extmem", "-defparam", "-blackboxes",
+                                             "-selected", "-v",
+                                             "-f", "-a", "-m" };
+    std::vector<std::string> intOptions = { "-K" };
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::lsils::read_cnf( file );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
 
-    return 1;
-  }
-}; // class CmdLfIoReadCnfLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  read_genlib / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadGenlibLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoReadGenlibLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
+    switch ( anchor_domain )
     {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoReadGenlibLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::write_verilog( strOptionsValue["-file"],
+                                      boolOptionsValue["-sv"],
+                                      boolOptionsValue["-norename"],
+                                      strOptionsValue["-renameprefix"],
+                                      boolOptionsValue["-noattr"],
+                                      boolOptionsValue["-attr2comment"],
+                                      boolOptionsValue["-noexpr"],
+                                      boolOptionsValue["-noparallelcase"],
+                                      boolOptionsValue["-siminit"],
+                                      boolOptionsValue["-nodec"],
+                                      boolOptionsValue["-decimal"],
+                                      boolOptionsValue["-nohex"],
+                                      boolOptionsValue["-nostr"],
+                                      boolOptionsValue["-simple-lhs"],
+                                      boolOptionsValue["-extmem"],
+                                      boolOptionsValue["-defparam"],
+                                      boolOptionsValue["-blackboxes"],
+                                      boolOptionsValue["-selected"],
+                                      boolOptionsValue["-v"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::abc::write_verilog( strOptionsValue["-file"],
+                                     intOptionsValue["-K"],
+                                     boolOptionsValue["-f"],
+                                     boolOptionsValue["-a"],
+                                     boolOptionsValue["-m"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::read_genlib( file );
-
-    return 1;
-  }
-}; // class CmdLfIoReadGenlibLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  read_gtech / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadGtechLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoReadGtechLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoReadGtechLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
     }
     return 1;
   }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::read_gtech( file );
-
-    return 1;
-  }
-}; // class CmdLfIoReadGtechLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  read_liberty / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadLibertyLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoReadLibertyLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoReadLibertyLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::read_liberty( file );
-
-    return 1;
-  }
-}; // class CmdLfIoReadLibertyLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  read_pla / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoReadPlaLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoReadPlaLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoReadPlaLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::read_pla( file );
-
-    return 1;
-  }
-}; // class CmdLfIoReadPlaLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  write_aiger / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteAigerLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoWriteAigerLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoWriteAigerLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::write_aiger( file );
-
-    return 1;
-  }
-}; // class CmdLfIoWriteAigerLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  write_bench / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteBenchLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoWriteBenchLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoWriteBenchLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::write_bench( file );
-
-    return 1;
-  }
-}; // class CmdLfIoWriteBenchLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  write_blif / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteBlifLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoWriteBlifLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoWriteBlifLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::write_blif( file );
-
-    return 1;
-  }
-}; // class CmdLfIoWriteBlifLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  write_cnf / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteCnfLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoWriteCnfLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoWriteCnfLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::write_cnf( file );
-
-    return 1;
-  }
-}; // class CmdLfIoWriteCnfLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  write_dot / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteDotLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoWriteDotLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoWriteDotLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::write_dot( file );
-
-    return 1;
-  }
-}; // class CmdLfIoWriteDotLsils
-
-////////////////////////////////////////////////////////////////////////////
-//  write_verilog / lsils
-////////////////////////////////////////////////////////////////////////////
-class CmdLfIoWriteVerilogLsils : public TclCmd
-{
-public:
-  explicit CmdLfIoWriteVerilogLsils( const char* cmd_name )
-      : TclCmd( cmd_name )
-  {
-    std::vector<std::string> strs = {
-        "-file" };
-
-    std::vector<std::string> switches = {};
-
-    for ( auto str : strs )
-    {
-      auto* option = new TclStringOption( str.c_str(), 1, nullptr );
-      addOption( option );
-    }
-
-    for ( auto flag : switches )
-    {
-      auto* option = new TclSwitchOption( flag.c_str() );
-      addOption( option );
-    }
-  }
-
-  ~CmdLfIoWriteVerilogLsils() override = default;
-
-  unsigned check() override
-  {
-    std::vector<std::string> essential = {
-        "-file" };
-    for ( auto& ess : essential )
-    {
-      if ( !getOptionOrArg( ess.c_str() ) )
-      {
-        std::cerr << "Essential option " << ess << " is not set!" << std::endl;
-        assert( false );
-        return 0;
-      }
-    }
-    return 1;
-  }
-
-  unsigned exec() override
-  {
-    if ( !check() )
-      return 0;
-
-    // init the args
-    std::string file = "";
-
-    // bind the args with the option
-    TclOption* option_file = getOptionOrArg( "-file" );
-
-    if ( option_file->is_set_val() )
-      file = option_file->getStringVal();
-
-    lf::logic::lsils::write_verilog( file );
-
-    return 1;
-  }
-}; // class CmdLfIoWriteVerilogLsils
+}; // class CmdLfIoWriteVerilog
 
 } // namespace tcl
 

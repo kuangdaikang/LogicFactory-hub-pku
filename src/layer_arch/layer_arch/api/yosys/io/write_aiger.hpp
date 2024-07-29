@@ -28,8 +28,7 @@ void write_aiger( const std::string& file,
                   bool is_ascii = false, bool is_zinit = false, bool is_miter = false, bool is_symbols = false,
                   const std::string& map = "", const std::string& vmap = "", bool is_no_startoffset = false,
                   const std::string& ymap = "",
-
-                  bool is_imode = false, bool is_omode = false, bool is_bmode = false, bool is_lmode = false, )
+                  bool is_imode = false, bool is_omode = false, bool is_bmode = false, bool is_lmode = false )
 {
   std::string script = "write_aiger ";
   if ( !lf::utility::endsWith( file, ".aig" ) )

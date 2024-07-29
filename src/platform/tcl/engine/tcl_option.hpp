@@ -26,6 +26,10 @@ public:
 
   std::string get_description() const { return _description; }
 
+  void set_tool( const std::string& tool ) { _tool = tool; }
+
+  std::string get_tool() const { return _tool; }
+
   virtual unsigned isSwitchOption() { return 0; }
 
   virtual unsigned isDoubleOption() { return 0; }
@@ -151,6 +155,7 @@ private:
   const char* _option_name;
   unsigned _is_arg;
   std::string _description = "";
+  std::string _tool = ""; // flag the tool of this option
 };
 
 /**

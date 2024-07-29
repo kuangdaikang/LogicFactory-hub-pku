@@ -25,8 +25,8 @@ namespace yosys
  * @note
  */
 void write_blif( const std::string& file = "", const std::string& top = "",
-                 std::array<std::string, 3> buf = {}, std::array<std::string, 3> unbuf = {},
-                 std::array<std::string, 2> true_port = {}, std::array<std::string, 2> false_port = {}, std::array<std::string, 2> undef_port = {},
+                 std::vector<std::string> buf = {}, std::vector<std::string> unbuf = {},
+                 std::vector<std::string> true_port = {}, std::vector<std::string> false_port = {}, std::vector<std::string> undef_port = {},
                  bool is_noalias = false, bool is_icells = false, bool is_gates = false, bool is_conn = false, bool is_attr = false, bool is_param = false, bool is_cname = false, bool is_iname = false, bool is_iattr = false, bool is_blackbox = false, bool is_impltf = false )
 {
   std::string script = "write_blif ";

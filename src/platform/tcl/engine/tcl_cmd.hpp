@@ -52,6 +52,10 @@ public:
 
   char* get_cmd_name() const { return _cmd_name; }
 
+  void set_description( const std::string description ) { _description = description; }
+
+  std::string get_description() const { return _description; }
+
   TclOption* getOptionOrArg( const char* option_name )
   {
     if ( containWildcard( option_name ) )
@@ -126,6 +130,7 @@ private:
   char* _cmd_name;
   std::unordered_map<const char*, std::unique_ptr<TclOption>, CStrHash, CStrEqual> _options; // store the options
   std::vector<TclOption*> _args;                                                             // the tcl args need keep order
+  std::string _descrition = "";
 }; // class TclCmd
 
 class TclCmds
