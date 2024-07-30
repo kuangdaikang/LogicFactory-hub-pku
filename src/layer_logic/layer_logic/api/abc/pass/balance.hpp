@@ -19,11 +19,11 @@ namespace abc
 /**
  * @brief Logic optimization
  * @example
- *  refactor [options]
- *  options: [-NM <num>] [-lzv]
+ *  balance [options]
+ *  options: -lzvw
  * @note
  */
-void refactor( int NInputMax = -1, int MinSaved = -1, bool is_level_preserved = false, bool is_zero_cost = false, bool is_verbose = false )
+void balance( bool is_level_preserved = false, bool is_dump_logic = false, bool is_dump_critical = false, bool is_multi_exors = false, bool is_verbose = false )
 {
   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG );
 
@@ -31,13 +31,13 @@ void refactor( int NInputMax = -1, int MinSaved = -1, bool is_level_preserved = 
 
   int argc = 2;
 
-  if ( NInputMax > 0 )
-    argc++;
-  if ( MinSaved > 0 )
-    argc++;
   if ( is_level_preserved )
     argc++;
-  if ( is_zero_cost )
+  if ( is_dump_logic )
+    argc++;
+  if ( is_dump_critical )
+    argc++;
+  if ( is_multi_exors )
     argc++;
   if ( is_verbose )
     argc++;
@@ -45,20 +45,20 @@ void refactor( int NInputMax = -1, int MinSaved = -1, bool is_level_preserved = 
   char** argv = ABC_ALLOC( char*, argc + 1 );
 
   int pos = 0;
-  argv[pos++] = babc::Extra_UtilStrsav( "refactor" );
+  argv[pos++] = babc::Extra_UtilStrsav( "balance" );
 
-  if ( NInputMax > 0 )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -N " + NInputMax ).c_str() );
-  if ( MinSaved > 0 )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -M " + MinSaved ).c_str() );
   if ( is_level_preserved )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -l " ).c_str() );
-  if ( is_zero_cost )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -z " ).c_str() );
+  if ( is_dump_logic )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -d " ).c_str() );
+  if ( is_dump_critical )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -s " ).c_str() );
+  if ( is_multi_exors )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -x " ).c_str() );
   if ( is_verbose )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -v " ).c_str() );
 
-  babc::Abc_CommandRefactor( ntk_ptr, argc, argv );
+  babc::Abc_CommandBalance( ntk_ptr, argc, argv );
 }
 
 } // namespace abc

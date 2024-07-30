@@ -29,7 +29,7 @@ template<class Ntk = aig_seq_network>
 void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, int AreaIter = -1,
                bool is_verbose = false )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network> ||
                      std::is_same_v<NtkBase, mig_seq_network> ||

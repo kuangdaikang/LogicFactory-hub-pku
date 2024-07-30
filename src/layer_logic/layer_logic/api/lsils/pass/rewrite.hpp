@@ -4,6 +4,8 @@
 
 #include "mockturtle/algorithms/cut_rewriting.hpp"
 #include "mockturtle/algorithms/node_resynthesis/xag_npn.hpp"
+#include "mockturtle/algorithms/node_resynthesis/mig_npn.hpp"
+#include "mockturtle/algorithms/node_resynthesis/xmg_npn.hpp"
 
 namespace lf
 {
@@ -21,11 +23,10 @@ namespace lsils
  *  options: [KCM] [mzlcpvw]
  * @note
  */
-template<class Ntk>
-void rewrite( int K_feasible_cut = -1, int Cut_limit = -1, int Min_cand_cut_size = -1,
-              bool is_min_truth = false, bool is_zero_gain, bool is_preserve_depth = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false, bool is_very_verbose = false )
+template<typename Ntk = aig_seq_network>
+void rewrite( bool is_preserve_depth = false, bool is_zero_gain = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false, bool is_very_verbose = false )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network> ||
                      std::is_same_v<NtkBase, mig_seq_network> ||
@@ -59,14 +60,7 @@ void rewrite( int K_feasible_cut = -1, int Cut_limit = -1, int Min_cand_cut_size
   }
 
   mockturtle::cut_rewriting_params ps;
-  if ( K_feasible_cut > 0 )
-    ps.cut_enumeration_ps.cut_size = K_feasible_cut;
-  if ( Cut_limit > 0 )
-    ps.cut_enumeration_ps.cut_limit = Cut_limit;
-  if ( is_min_truth )
-    ps.cut_enumeration_ps.minimize_truth_table = is_min_truth;
-  if ( Min_cand_cut_size > 0 )
-    ps.min_cand_cut_size = Min_cand_cut_size;
+  ps.cut_enumeration_ps.cut_size = 4;
   if ( is_zero_gain )
     ps.allow_zero_gain = is_zero_gain;
   if ( is_preserve_depth )
@@ -83,24 +77,41 @@ void rewrite( int K_feasible_cut = -1, int Cut_limit = -1, int Min_cand_cut_size
   auto ntk = lfLmINST->current<Ntk>();
 
   // according to the anchor
-  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor();
+  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor_curr();
+  Ntk ntk_new;
   switch ( stat )
   {
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
-    Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk_new );
+    if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
+    {
+      mockturtle::xag_npn_resynthesis<Ntk> resyn_xag;
+      ntk_new = mockturtle::cut_rewriting( ntk, resyn_xag, ps );
+      lfLmINST->set_current<Ntk>( ntk_new );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
-    Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xag_npn_resynthesis<Ntk>>( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk_new );
+    if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
+    {
+      mockturtle::xag_npn_resynthesis<Ntk> resyn_xag;
+      ntk_new = mockturtle::cut_rewriting( ntk, resyn_xag, ps );
+      lfLmINST->set_current<Ntk>( ntk_new );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG:
-    Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::mig_npn_resynthesis>( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk_new );
+    if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
+    {
+      mockturtle::mig_npn_resynthesis resyn_mig;
+      ntk_new = mockturtle::cut_rewriting( ntk, resyn_mig, ps );
+      lfLmINST->set_current<Ntk>( ntk_new );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG:
-    Ntk ntk_new = mockturtle::cut_rewriting<Ntk, mockturtle::xmg_npn_resynthesis>( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk_new );
+    if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
+    {
+      mockturtle::xmg_npn_resynthesis resyn_xmg;
+      ntk_new = mockturtle::cut_rewriting( ntk, resyn_xmg, ps );
+      lfLmINST->set_current<Ntk>( ntk_new );
+    }
     break;
   default:
     assert( false );

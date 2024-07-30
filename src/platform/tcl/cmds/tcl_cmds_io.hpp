@@ -104,8 +104,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -187,8 +185,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -309,8 +305,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -425,8 +419,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -493,8 +485,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -569,8 +559,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -642,8 +630,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -707,8 +693,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -770,8 +754,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -840,8 +822,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -903,8 +883,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -979,8 +957,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -1076,8 +1052,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -1166,8 +1140,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -1260,8 +1232,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -1284,24 +1254,24 @@ public:
     switch ( anchor_domain )
     {
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
-      lf::logic::abc::write_blif( strOptionsValue["-file"],
-                                  strOptionsValue["-top"],
-                                  strvecOptionsValue["-buf"],
-                                  strvecOptionsValue["-unbuf"],
-                                  strvecOptionsValue["-true"],
-                                  strvecOptionsValue["-false"],
-                                  strvecOptionsValue["-undef"],
-                                  boolOptionsValue["-noalias"],
-                                  boolOptionsValue["-icells"],
-                                  boolOptionsValue["-gates"],
-                                  boolOptionsValue["-conn"],
-                                  boolOptionsValue["-attr"],
-                                  boolOptionsValue["-param"],
-                                  boolOptionsValue["-cname"],
-                                  boolOptionsValue["-iname"],
-                                  boolOptionsValue["-iattr"],
-                                  boolOptionsValue["-blackbox"],
-                                  boolOptionsValue["-impltf"] );
+      lf::arch::yosys::write_blif( strOptionsValue["-file"],
+                                   strOptionsValue["-top"],
+                                   strvecOptionsValue["-buf"],
+                                   strvecOptionsValue["-unbuf"],
+                                   strvecOptionsValue["-true"],
+                                   strvecOptionsValue["-false"],
+                                   strvecOptionsValue["-undef"],
+                                   boolOptionsValue["-noalias"],
+                                   boolOptionsValue["-icells"],
+                                   boolOptionsValue["-gates"],
+                                   boolOptionsValue["-conn"],
+                                   boolOptionsValue["-attr"],
+                                   boolOptionsValue["-param"],
+                                   boolOptionsValue["-cname"],
+                                   boolOptionsValue["-iname"],
+                                   boolOptionsValue["-iattr"],
+                                   boolOptionsValue["-blackbox"],
+                                   boolOptionsValue["-impltf"] );
       break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
       lf::logic::abc::write_blif( strOptionsValue["-file"],
@@ -1355,8 +1325,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -1431,8 +1399,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -1504,8 +1470,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -1573,8 +1537,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -1651,8 +1613,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -1691,10 +1651,10 @@ public:
   }
 }; // class CmdLfIoWriteBtor
 
-class CmdLfIoWriteBtor : public TclCmd
+class CmdLfIoWriteEdif : public TclCmd
 {
 public:
-  explicit CmdLfIoWriteBtor( const char* cmd_name )
+  explicit CmdLfIoWriteEdif( const char* cmd_name )
       : TclCmd( cmd_name )
   {
     // set the description
@@ -1715,7 +1675,7 @@ public:
     setOptions( this, options );
   }
 
-  ~CmdLfIoWriteBtor() override = default;
+  ~CmdLfIoWriteEdif() override = default;
 
   unsigned check() override
   {
@@ -1729,8 +1689,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -1805,8 +1763,6 @@ public:
 
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
     std::map<std::string, double> doubleOptionsValue;
     std::map<std::string, std::vector<std::string>> strvecOptionsValue;
@@ -1872,8 +1828,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -1942,8 +1896,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -2017,8 +1969,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;
@@ -2113,8 +2063,6 @@ public:
     if ( !check() )
       return 0;
 
-    std::map<std::string, std::string> strOptionsValue;
-    std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, std::string> strOptionsValue;
     std::map<std::string, bool> boolOptionsValue;
     std::map<std::string, int> intOptionsValue;

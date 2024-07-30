@@ -3,6 +3,8 @@
 #include "layer_logic/logic_manager.hpp"
 
 #include "mockturtle/algorithms/balancing.hpp"
+#include "mockturtle/algorithms/aig_balancing.hpp"
+#include "mockturtle/algorithms/xag_balancing.hpp"
 #include "mockturtle/algorithms/balancing/sop_balancing.hpp"
 #include "mockturtle/algorithms/balancing/utils.hpp"
 #include "mockturtle/utils/cost_functions.hpp"
@@ -23,11 +25,11 @@ namespace lsils
  *  options: [KCF] [mcpv]
  * @note
  */
-template<class Ntk>
+template<typename Ntk = aig_seq_network>
 void balancing( int K_feasible_cut = -1, int Cut_limit = -1, int Fanin_limit = -1,
                 bool is_min_truth = false, bool is_only_critical_path = false, bool is_progress = false, bool is_verbose = false )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network> ||
                      std::is_same_v<NtkBase, mig_seq_network> ||
@@ -70,13 +72,13 @@ void balancing( int K_feasible_cut = -1, int Cut_limit = -1, int Fanin_limit = -
     ps.cut_enumeration_ps.cut_size = K_feasible_cut;
   if ( Cut_limit > 0 )
     ps.cut_enumeration_ps.cut_limit = Cut_limit;
-  if ( Fanout_limit > 0 )
-    ps.cut_enumeration_ps.fanin_limit = Fanout_limit;
+  if ( Fanin_limit > 0 )
+    ps.cut_enumeration_ps.fanin_limit = Fanin_limit;
   if ( is_min_truth )
     ps.cut_enumeration_ps.minimize_truth_table = true;
   if ( is_only_critical_path )
     ps.only_on_critical_path = true;
-  if ( is_process )
+  if ( is_progress )
     ps.progress = true;
   if ( is_verbose )
     ps.verbose = true;
@@ -94,10 +96,10 @@ void balancing( int K_feasible_cut = -1, int Cut_limit = -1, int Fanin_limit = -
  *  options: [mf]
  * @note
  */
-template<typename Ntk>
+template<typename Ntk = aig_seq_network>
 void balance( bool is_minimize_levels = false, bool is_fast_mode = false )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network>,
                  "NtkSrc is not an AIG, XAG" );
@@ -131,16 +133,22 @@ void balance( bool is_minimize_levels = false, bool is_fast_mode = false )
   auto ntk = lfLmINST->current<Ntk>();
 
   // according to the anchor
-  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor();
+  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor_curr();
   switch ( stat )
   {
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
-    mockturtle::aig_balance( ntk, { is_minimize_levels, is_fast_mode } );
-    lfLmINST->set_current<Ntk>( ntk );
+    if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
+    {
+      mockturtle::aig_balance( ntk, { is_minimize_levels, is_fast_mode } );
+      lfLmINST->set_current<Ntk>( ntk );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
-    mockturtle::xag_balance( ntk, { is_minimize_levels, is_fast_mode } );
-    lfLmINST->set_current<Ntk>( ntk );
+    if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
+    {
+      mockturtle::xag_balance( ntk, { is_minimize_levels, is_fast_mode } );
+      lfLmINST->set_current<Ntk>( ntk );
+    }
     break;
   default:
     assert( false );

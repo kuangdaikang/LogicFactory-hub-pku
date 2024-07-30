@@ -136,7 +136,7 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
   if ( YAreaAnd > 0 )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -Y " + YAreaAnd ).c_str() );
 
-  if ( DelayConstraint 0.0f )
+  if ( DelayConstraint > 0.0f )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -D " + std::to_string( DelayConstraint ) ).c_str() );
   if ( Epsilon > 0.0f )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -E " + std::to_string( Epsilon ) ).c_str() );

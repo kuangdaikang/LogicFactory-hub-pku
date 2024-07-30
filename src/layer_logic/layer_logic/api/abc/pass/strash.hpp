@@ -19,11 +19,11 @@ namespace abc
 /**
  * @brief Logic optimization
  * @example
- *  rewrite [options]
+ *  strash [options]
  *  options: -lzvw
  * @note
  */
-void rewrite( bool is_level_preserved = false, bool is_zero_cost = false, bool is_verbose = false, bool is_very_verbose = false )
+void strash( bool is_all_nodes, bool is_cleanup, bool is_record_used, bool is_inverted_pos )
 {
   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG );
 
@@ -31,13 +31,13 @@ void rewrite( bool is_level_preserved = false, bool is_zero_cost = false, bool i
 
   int argc = 2;
 
-  if ( is_level_preserved )
+  if ( is_all_nodes )
     argc++;
-  if ( is_zero_cost )
+  if ( is_cleanup )
     argc++;
-  if ( is_verbose )
+  if ( is_record_used )
     argc++;
-  if ( is_very_verbose )
+  if ( is_inverted_pos )
     argc++;
 
   char** argv = ABC_ALLOC( char*, argc + 1 );
@@ -45,16 +45,16 @@ void rewrite( bool is_level_preserved = false, bool is_zero_cost = false, bool i
   int pos = 0;
   argv[pos++] = babc::Extra_UtilStrsav( "rewrite" );
 
-  if ( is_level_preserved )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -l " ).c_str() );
-  if ( is_zero_cost )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -z " ).c_str() );
-  if ( is_verbose )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -v " ).c_str() );
-  if ( is_very_verbose )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -w " ).c_str() );
+  if ( is_all_nodes )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -a " ).c_str() );
+  if ( is_cleanup )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -c " ).c_str() );
+  if ( is_record_used )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -r " ).c_str() );
+  if ( is_inverted_pos )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -i " ).c_str() );
 
-  babc::Abc_CommandRewrite( ntk_ptr, argc, argv );
+  babc::Abc_CommandStrash( ntk_ptr, argc, argv );
 }
 
 } // namespace abc

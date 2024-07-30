@@ -4,6 +4,8 @@
 #include "tcl/cmds/tcl_cmds_misc.hpp"
 #include "tcl/cmds/tcl_cmds_flow.hpp"
 #include "tcl/cmds/tcl_cmds_io.hpp"
+#include "tcl/cmds/tcl_cmds_pass_arch.hpp"
+#include "tcl/cmds/tcl_cmds_pass_logic.hpp"
 
 namespace lf
 {
@@ -26,33 +28,56 @@ int registerCmds()
   //////////////////////////////////////////////////////////
   // IO
   //////////////////////////////////////////////////////////
-
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadAiger, "read_aiger" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBlif, "read_blif" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBench, "read_bench" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadCnf, "read_cnf" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadFormula, "read_formula" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadPla, "read_pla" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadTruth, "read_truth" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGenlib, "read_genlib" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadLiberty, "read_liberty" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadVerilog, "read_verilog" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBench, "read_bench" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadBlif, "read_blif" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadCnf, "read_cnf" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadFormula, "read_formula" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadPla, "read_pla" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGenlib, "read_genlib" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadLiberty, "read_liberty" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadVerilog, "read_verilog" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadGtech, "read_gtech" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadJson, "read_json" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoReadRtlil, "read_rtlil" );
 
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteAiger, "write_aiger" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBlif, "write_blif" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBench, "write_bench" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteCnf, "write_cnf" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWritePla, "write_pla" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteVerilog, "write_verilog" );
-  // LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteDot, "write_dot" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteAiger, "write_aiger" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBlif, "write_blif" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBench, "write_bench" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteCnf, "write_cnf" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWritePla, "write_pla" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteVerilog, "write_verilog" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteDot, "write_dot" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteBtor, "write_btor" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteEdif, "write_edif" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteFirrtl, "write_firrtl" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteJson, "write_json" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteTruth, "write_truth" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteRtlil, "write_rtlil" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteSpice, "write_spice" );
 
   //////////////////////////////////////////////////////////
   // arch
   //////////////////////////////////////////////////////////
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchHierarchy, "hierarchy" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchFlatten, "flatten" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchFsm, "fsm" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchOpt, "opt" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchTechmap, "techmap" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchAigmap, "aigmap" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchAbc, "abc" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchGtechmap, "gtechmap" );
 
   //////////////////////////////////////////////////////////
   // logic
   //////////////////////////////////////////////////////////
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicStrash, "strash" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicBalance, "balance" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicRewrite, "rewrite" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicRefactor, "refactor" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicResub, "resub" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicMapFPGA, "map_fpga" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicMapASIC, "map_asic" );
 
   //////////////////////////////////////////////////////////
   // netlist

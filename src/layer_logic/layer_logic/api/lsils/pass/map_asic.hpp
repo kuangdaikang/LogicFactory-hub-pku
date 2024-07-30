@@ -23,8 +23,7 @@ template<class Ntk = aig_seq_network>
 void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -1, int AreaIter = -1, int PowerIter = -1, int logic_Sharing_cut_limit = -1, int Window_size = -1,
                bool is_min_truth = false, bool is_skip_delay_round = false, bool is_logic_sharing = false, bool is_dont_cares = false, bool is_verbose = false )
 {
-
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network> ||
                      std::is_same_v<NtkBase, mig_seq_network> ||

@@ -25,8 +25,8 @@ namespace abc
  */
 void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDelayMulti = -1.0f, double FanoutLogar = -1.0f, double Slew = -1.0f, double Gain = -1.0f,
                int MinGates = -1,
-               bool is_area_only = false, bool is_recovery_area = false, bool is_sweep = false, bool is_power_aware = false,
-               bool is_use_stdcell_profile = false, bool is_output_buffer = false, bool is_verbose = false ),
+               bool is_area_only = false, bool is_recovery_area = false, bool is_sweep = false, bool is_power_aware = false, bool is_fanout_high_skip = false,
+               bool is_use_stdcell_profile = false, bool is_output_buffer = false, bool is_verbose = false )
 {
   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
@@ -57,6 +57,8 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
     argc++;
   if ( is_power_aware )
     argc++;
+  if ( is_fanout_high_skip )
+    argc++;
   if ( is_use_stdcell_profile )
     argc++;
   if ( is_output_buffer )
@@ -83,7 +85,7 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -G " + std::to_string( Gain ) ).c_str() );
 
   if ( MinGates > 0 )
-    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -M " + NodeSizeMax ).c_str() );
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -M " + MinGates ).c_str() );
 
   if ( is_area_only )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -a " ).c_str() );
@@ -93,6 +95,8 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -s " ).c_str() );
   if ( is_power_aware )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -p " ).c_str() );
+  if ( is_fanout_high_skip )
+    argv[pos++] = babc::Extra_UtilStrsav( std::string( " -f " ).c_str() );
   if ( is_use_stdcell_profile )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -u " ).c_str() );
   if ( is_output_buffer )

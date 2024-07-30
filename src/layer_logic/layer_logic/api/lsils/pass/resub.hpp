@@ -18,11 +18,11 @@ namespace lsils
  *  options: [PDIRFW] [ldpv]
  * @note
  */
-template<class Ntk>
-void resubing( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limib_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
+template<typename Ntk = aig_seq_network>
+void resubing( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limib_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
                bool is_preserve_depth = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network> ||
                      std::is_same_v<NtkBase, mig_seq_network> ||
@@ -60,14 +60,14 @@ void resubing( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, in
 
   // update the params
   mockturtle::resubstitution_params ps;
-  if ( Max_pis > 0 )
-    ps.max_pis = Max_pis;
+  if ( NInputMax > 0 )
+    ps.max_pis = NInputMax;
   if ( Max_divisors > 0 )
     ps.max_divisors = Max_divisors;
   if ( Max_inserts > 0 )
     ps.max_inserts = Max_inserts;
   if ( fanout_limib_Root > 0 )
-    ps.skip_fanout_limit_for_roots = MaxPis;
+    ps.skip_fanout_limit_for_roots = fanout_limib_Root;
   if ( Fanout_limit_divisor > 0 )
     ps.skip_fanout_limit_for_divisors = Fanout_limit_divisor;
   if ( Window_size > 0 )
@@ -76,7 +76,7 @@ void resubing( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, in
     ps.preserve_depth = true;
   if ( is_dont_cares )
     ps.use_dont_cares = true;
-  if ( is_process )
+  if ( is_progress )
     ps.progress = true;
   if ( is_verbose )
     ps.verbose = true;
@@ -85,11 +85,11 @@ void resubing( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, in
   lfLmINST->set_current<Ntk>( ntk );
 }
 
-template<class Ntk>
-void resub( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limib_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
+template<typename Ntk = aig_seq_network>
+void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limit_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
             bool is_preserve_depth = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
                      std::is_same_v<NtkBase, xag_seq_network> ||
                      std::is_same_v<NtkBase, mig_seq_network> ||
@@ -126,14 +126,14 @@ void resub( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, int f
 
   // update the params
   mockturtle::resubstitution_params ps;
-  if ( Max_pis > 0 )
-    ps.max_pis = Max_pis;
+  if ( NInputMax > 0 )
+    ps.max_pis = NInputMax;
   if ( Max_divisors > 0 )
     ps.max_divisors = Max_divisors;
   if ( Max_inserts > 0 )
     ps.max_inserts = Max_inserts;
-  if ( fanout_limib_Root > 0 )
-    ps.skip_fanout_limit_for_roots = MaxPis;
+  if ( fanout_limit_Root > 0 )
+    ps.skip_fanout_limit_for_roots = fanout_limit_Root;
   if ( Fanout_limit_divisor > 0 )
     ps.skip_fanout_limit_for_divisors = Fanout_limit_divisor;
   if ( Window_size > 0 )
@@ -142,30 +142,43 @@ void resub( int Max_pis = -1, int Max_divisors = -1, int Max_inserts = -1, int f
     ps.preserve_depth = true;
   if ( is_dont_cares )
     ps.use_dont_cares = true;
-  if ( is_process )
+  if ( is_progress )
     ps.progress = true;
   if ( is_verbose )
     ps.verbose = true;
 
   // according to the anchor
-  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor();
+  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor_curr();
+
   switch ( stat )
   {
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
-    mockturtle::aig_resubstitution( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk );
+    if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
+    {
+      mockturtle::aig_resubstitution( ntk, ps );
+      lfLmINST->set_current<Ntk>( ntk );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
-    mockturtle::resubstitution_minmc_withDC( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk );
+    if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
+    {
+      mockturtle::resubstitution_minmc_withDC( ntk, ps );
+      lfLmINST->set_current<Ntk>( ntk );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG:
-    mockturtle::mig_resubstitution( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk );
+    if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
+    {
+      mockturtle::mig_resubstitution( ntk, ps );
+      lfLmINST->set_current<Ntk>( ntk );
+    }
     break;
   case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG:
-    mockturtle::xmg_resubstitution( ntk, ps );
-    lfLmINST->set_current<Ntk>( ntk );
+    if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
+    {
+      mockturtle::xmg_resubstitution( ntk, ps );
+      lfLmINST->set_current<Ntk>( ntk );
+    }
     break;
 
   default:

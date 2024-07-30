@@ -1,3 +1,5 @@
+#pragma once
+
 #include "tcl/engine/tcl_option.hpp"
 #include "tcl/engine/tcl_cmd.hpp"
 

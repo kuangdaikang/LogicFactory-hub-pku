@@ -130,7 +130,7 @@ private:
   char* _cmd_name;
   std::unordered_map<const char*, std::unique_ptr<TclOption>, CStrHash, CStrEqual> _options; // store the options
   std::vector<TclOption*> _args;                                                             // the tcl args need keep order
-  std::string _descrition = "";
+  std::string _description = "";
 }; // class TclCmd
 
 class TclCmds
