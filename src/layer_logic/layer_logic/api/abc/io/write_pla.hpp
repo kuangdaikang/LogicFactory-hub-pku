@@ -34,7 +34,8 @@ void write_pla( const std::string& file, int M = -1, bool is_multi_output = fals
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( M > 0 )
   {
     argc += 1;

@@ -3,6 +3,7 @@
 #include "layer_logic/logic_manager.hpp"
 #include "layer_logic/api/abc/frame.hpp"
 #include "utility/string.hpp"
+#include "utility/util.hpp"
 
 #include <cstdio>
 #include <string>
@@ -31,7 +32,7 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
 
   if ( DelayGlobal > 0.0f )
     argc++;

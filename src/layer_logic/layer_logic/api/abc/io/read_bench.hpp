@@ -35,7 +35,8 @@ void read_bench( const std::string& file, bool is_checking = false )
   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_LOGIC_SOP );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( is_checking )
     argc += 1;
 

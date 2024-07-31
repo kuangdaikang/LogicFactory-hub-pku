@@ -34,7 +34,8 @@ void write_cnf( const std::string& file, bool is_new = false, bool is_fast = fal
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( is_new )
     argc += 1;
   if ( is_fast )

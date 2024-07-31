@@ -34,7 +34,8 @@ void write_blif( const std::string& file, const std::string& str_lut = "", bool 
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( !str_lut.empty() )
     argc += 1;
   if ( is_special )

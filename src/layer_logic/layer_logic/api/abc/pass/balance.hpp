@@ -29,7 +29,7 @@ void balance( bool is_level_preserved = false, bool is_dump_logic = false, bool 
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
 
   if ( is_level_preserved )
     argc++;

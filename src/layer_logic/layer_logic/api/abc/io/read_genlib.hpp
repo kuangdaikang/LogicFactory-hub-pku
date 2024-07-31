@@ -34,7 +34,8 @@ void read_genlib( const std::string& file )
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   char** argv = ABC_ALLOC( char*, argc + 1 );
 
   argv[0] = babc::Extra_UtilStrsav( "read" );

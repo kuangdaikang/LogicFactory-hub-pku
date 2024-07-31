@@ -20,7 +20,7 @@ namespace abc
  * @brief Logic optimization
  * @example
  *  strash [options]
- *  options: -lzvw
+ *  options: -a -c -r -i
  * @note
  */
 void strash( bool is_all_nodes, bool is_cleanup, bool is_record_used, bool is_inverted_pos )
@@ -29,7 +29,7 @@ void strash( bool is_all_nodes, bool is_cleanup, bool is_record_used, bool is_in
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
 
   if ( is_all_nodes )
     argc++;
@@ -43,7 +43,7 @@ void strash( bool is_all_nodes, bool is_cleanup, bool is_record_used, bool is_in
   char** argv = ABC_ALLOC( char*, argc + 1 );
 
   int pos = 0;
-  argv[pos++] = babc::Extra_UtilStrsav( "rewrite" );
+  argv[pos++] = babc::Extra_UtilStrsav( "strash" );
 
   if ( is_all_nodes )
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -a " ).c_str() );

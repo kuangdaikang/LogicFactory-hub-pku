@@ -34,7 +34,8 @@ void write_bench( const std::string& file, bool is_lut = false )
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( is_lut )
     argc += 1;
 

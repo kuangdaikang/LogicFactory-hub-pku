@@ -35,9 +35,11 @@ void read_aiger( const std::string& file, bool is_checking = false )
   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
   if ( is_checking )
     argc += 1;
+
+  argc += 1; // file name
 
   char** argv = ABC_ALLOC( char*, argc + 1 );
 

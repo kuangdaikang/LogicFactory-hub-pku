@@ -34,7 +34,8 @@ void write_verilog( const std::string& file, int K = -1, bool is_fixed_format = 
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( K > 0 )
   {
     assert( K >= 2 && K <= 4 );

@@ -34,7 +34,8 @@ void write_truth( const std::string& file, bool is_hex = false, bool is_reversin
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
-  int argc = 2;
+  int argc = 1; // command name
+  argc += 1;    // file name
   if ( is_hex )
     argc += 1;
   if ( is_reversing )
