@@ -1,4 +1,5 @@
 {
+    "workspace": "/tmp/workspace_lf/",
     "design": "/workspace/LogicFactory/data/lf_15en3Vtt_abc.v",
     "tech": "sky130",
     "top_module": "top_module",
