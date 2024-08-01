@@ -72,6 +72,13 @@ public:
     {
       return;
     }
+    if ( anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC ||
+         anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_FPGA ||
+         anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC ||
+         anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA )
+    {
+      return;
+    }
     if ( anchor_prev == anchor_curr )
     {
       return;
