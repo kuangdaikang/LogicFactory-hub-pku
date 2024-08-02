@@ -36,7 +36,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-a", "abc", "bool", "" },
@@ -105,7 +106,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-l", "abc", "bool", "" },
@@ -178,7 +180,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-l", "all", "bool", "" },
@@ -250,7 +253,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-z", "all", "bool", "" },
@@ -324,7 +328,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-K", "abc", "int", "the max cut size" },
@@ -408,7 +413,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         // Integer options with descriptions
@@ -530,7 +536,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "logic";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-D", "abc", "double", "Sets the global required times. Default is not used." },

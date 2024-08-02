@@ -74,7 +74,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -158,7 +160,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -239,7 +243,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -395,7 +401,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -463,7 +471,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -531,7 +541,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -607,7 +619,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." } };
@@ -670,7 +684,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." } };
@@ -733,7 +749,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." } };
@@ -796,7 +814,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -862,7 +882,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." } };
@@ -928,7 +950,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to read." },
@@ -1012,7 +1036,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1117,7 +1143,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1188,7 +1216,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1298,7 +1328,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1375,7 +1407,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." } };
@@ -1443,7 +1477,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1513,7 +1549,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1582,7 +1620,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1660,7 +1700,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1739,7 +1781,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." } };
@@ -1804,7 +1848,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1873,7 +1919,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -1940,7 +1988,9 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
@@ -2018,7 +2068,9 @@ public:
     // set the description
     std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "" },

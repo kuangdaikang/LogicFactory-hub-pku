@@ -6,6 +6,7 @@
 #include "tcl/cmds/tcl_cmds_io.hpp"
 #include "tcl/cmds/tcl_cmds_pass_arch.hpp"
 #include "tcl/cmds/tcl_cmds_pass_logic.hpp"
+#include "tcl/cmds/tcl_cmds_pass_netlist.hpp"
 
 namespace lf
 {
@@ -20,9 +21,10 @@ int registerCmds()
   //////////////////////////////////////////////////////////
   LF_MACOR_REGISTER_TCL_CMD( CmdLfHelp, "help" );
   //////////////////////////////////////////////////////////
-  // init
+  // flow
   //////////////////////////////////////////////////////////
   LF_MACOR_REGISTER_TCL_CMD( CmdLfStart, "start" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfInit, "init" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfStop, "stop" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfAnchor, "anchor" );
   //////////////////////////////////////////////////////////
@@ -82,6 +84,11 @@ int registerCmds()
   //////////////////////////////////////////////////////////
   // netlist
   //////////////////////////////////////////////////////////
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistSta, "sta" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistFloorplan, "floorplan" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistPlacement, "placement" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistCts, "cts" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistRouting, "routing" );
 
   return EXIT_SUCCESS;
 }

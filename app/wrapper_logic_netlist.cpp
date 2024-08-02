@@ -21,11 +21,11 @@
 
 #include "layer_logic/logic_manager.hpp"
 
-#include "layer_logic/io/read_aiger.hpp"
-#include "layer_logic/io/read_liberty.hpp"
-
-#include "layer_logic/api/abc/map/map_asic.hpp"
+#include "layer_logic/api/abc/io/read_aiger.hpp"
+#include "layer_logic/api/abc/io/read_liberty.hpp"
 #include "layer_logic/api/abc/io/write_verilog.hpp"
+
+#include "layer_logic/api/abc/pass/map_asic.hpp"
 
 #include "utility/file.hpp"
 #include "utility/string.hpp"
@@ -34,8 +34,7 @@ int main( int argc, char** argv )
 {
   std::string aiger = std::string( argv[1] );
   std::string liberty = std::string( argv[2] );
-  std::string lef_service_folder = std::string( argv[3] );
-  std::string output_folder = std::string( argv[4] );
+  std::string output_folder = std::string( argv[3] );
 
   // load tlef file first
   std::vector<const char*> lib_files = {
@@ -88,15 +87,13 @@ int main( int argc, char** argv )
       "/workspace/LogicFactory/techlib/foundry/sky130/lef/sky130_sram_1rw1r_64x256_8.lef",
       "/workspace/LogicFactory/techlib/foundry/sky130/lef/sky130_sram_1rw1r_80x64_8.lef" };
 
-  std::string tmp_verilog = "/workspace/LogicFactory/tmp/lf_" + lf::utility::genRandomName( 8 ) + "_abc.v";
+  std::string tmp_verilog = output_folder + "/lf_" + lf::utility::genRandomName( 8 ) + "_abc.v";
 
   /// logic technology mapping file
   lfLmINST->start();
 
-  lf::logic::read_aiger( aiger );
-  lf::logic::read_liberty( liberty );
-
-  lfLmINST->update_logic( lf::logic::E_ToolLogicType::E_LOGIC_ABC_AIG ); // convert the aig to ABC frame
+  lf::logic::abc::read_aiger( aiger );
+  lf::logic::abc::read_liberty( liberty );
 
   // technology mapping
   lf::logic::abc::map_asic();
@@ -115,7 +112,7 @@ int main( int argc, char** argv )
   dmInst->readLef( lef_service_files );
 
   // read verilog
-  dmInst->readVerilog( tmp_verilog, "top_module" );
+  dmInst->readVerilog( tmp_verilog );
 
   // save verilog
   dmInst->saveVerilog( "/workspace/LogicFactory/tmp/b1_comb.idb.v" );
@@ -165,32 +162,32 @@ int main( int argc, char** argv )
 
   dmInst->get_idb_design()->set_units( dmInst->get_idb_layout()->get_units() );
 
-  //   //////////////////////////////////
-  //   // sta
-  //   //////////////////////////////////
-  //   const char* sta_workspace = "/workspace/LogicFactory/tmp/";
-  //   // sta analysis
-  //   ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
-  //   ista_manager->set_design_work_space( sta_workspace );
-  //   ista_manager->readLiberty( lib_files );
+  //////////////////////////////////
+  // sta
+  //////////////////////////////////
+  const char* sta_workspace = "/workspace/LogicFactory/tmp/";
+  // sta analysis
+  ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
+  ista_manager->set_design_work_space( sta_workspace );
+  ista_manager->readLiberty( lib_files );
 
-  //   auto ista_adapter = std::make_unique<ista::TimingIDBAdapter>( ista_manager->get_ista() );
-  //   ista_adapter->set_idb( dmInst->get_idb_builder() );
-  //   ista_adapter->convertDBToTimingNetlist();
+  auto ista_adapter = std::make_unique<ista::TimingIDBAdapter>( ista_manager->get_ista() );
+  ista_adapter->set_idb( dmInst->get_idb_builder() );
+  ista_adapter->convertDBToTimingNetlist();
 
-  //   ista_manager->set_db_adapter( std::move( ista_adapter ) );
-  //   ista_manager->readSdc( sdc_file );
+  ista_manager->set_db_adapter( std::move( ista_adapter ) );
+  ista_manager->readSdc( sdc_file );
 
-  //   ista_manager->initRcTree();
-  //   ista_manager->buildGraph();
-  //   ista_manager->updateTiming();
+  ista_manager->initRcTree();
+  ista_manager->buildGraph();
+  ista_manager->updateTiming();
 
-  //   ista_manager->reportTiming();
+  ista_manager->reportTiming();
 
   //////////////////////////////////
   // placement
   //////////////////////////////////
-  std::string pl_config = "/workspace/LogicFactory/toolkit/iEDA/scripts/design/sky130_gcd/iEDA_config/pl_default_config.json";
+  std::string pl_config = "/workspace/LogicFactory/config/layer_netlist/ieda/flow/placement.json";
   iPLAPIInst.initAPI( pl_config, dmInst->get_idb_builder() );
   iPLAPIInst.initTimingEval();
   iPLAPIInst.runFlow();
@@ -199,7 +196,8 @@ int main( int argc, char** argv )
   //////////////////////////////////
   // cts
   //////////////////////////////////
-  std::string cts_config = "/workspace/LogicFactory/toolkit/iEDA/scripts/design/sky130_gcd/iEDA_config/cts_default_config.json";
+  std::string cts_config = "/workspace/LogicFactory/config/layer_netlist/ieda/flow/cts.json";
+  ista_manager->destroyTimingEngine();
   CTSAPIInst.init( cts_config, "/workspace/LogicFactory/tmp" );
   CTSAPIInst.runCTS();
   dmInst->saveDef( "/workspace/LogicFactory/tmp/icts.def" );

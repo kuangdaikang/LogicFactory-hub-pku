@@ -9,18 +9,24 @@ namespace netlist
 namespace ieda
 {
 
-void run_init()
+/**
+ * @brief
+ *
+ */
+void run_init( const std::string& file_config )
 {
-  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init );
+  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_INIT );
 
-  std::string verilog_file = lfNamINST->get_config_ieda()->get_verilog_file();
-  std::string top_module = lfNamINST->get_config_ieda()->get_top_module();
-  std::vector<std::string> lib_files = lfNamINST->get_config_ieda()->get_lib_files();
-  std::vector<std::string> lef_files = lfNamINST->get_config_ieda()->get_lef_files();
-  std::string tlef_file = lfNamINST->get_config_ieda()->get_tlef_file();
-  std::string sdc_file = lfNamINST->get_config_ieda()->get_sdc_file();
+  lfNmINST->set_config_ieda( file_config );
 
-  std::string workspace = lfNamINST->get_config_ieda()->get_workspace();
+  std::string verilog_file = lfNmINST->get_config_ieda()->get_verilog_file();
+  std::string top_module = lfNmINST->get_config_ieda()->get_top_module();
+  std::vector<std::string> lib_files = lfNmINST->get_config_ieda()->get_lib_files();
+  std::vector<std::string> lef_files = lfNmINST->get_config_ieda()->get_lef_files();
+  std::string tlef_file = lfNmINST->get_config_ieda()->get_tlef_file();
+  std::string sdc_file = lfNmINST->get_config_ieda()->get_sdc_file();
+
+  std::string workspace = lfNmINST->get_config_ieda()->get_workspace();
 
   dmInst->get_config().set_verilog_path( verilog_file );
   dmInst->get_config().set_lib_paths( lib_files );
@@ -38,7 +44,8 @@ void run_init()
 
   // sync the unit of layout for dbu = -1 bugs
   dmInst->get_idb_design()->set_units( dmInst->get_idb_layout()->get_units() );
-  dmInst->saveVerilog( workspace + "/init.v" );
+  // dmInst->saveVerilog( workspace + "/init.v" );
+  dmInst->saveDef( workspace + "/init.def" );
 }
 
 } // namespace ieda

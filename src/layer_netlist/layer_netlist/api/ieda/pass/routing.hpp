@@ -84,33 +84,28 @@ void init_routing( const std::string& file )
 ///////////////////////////////////////////////////////////////////////////////////////
 //  EVALUATION
 ///////////////////////////////////////////////////////////////////////////////////////
-struct ProfileRouting
+void eval_routing( ProfileRouting* profile )
 {
-  std::vector<double> areas;
-};
-
-ProfileRouting eval_routing()
-{
-  ProfileRouting profile;
-
-  return profile;
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfileRouting run_routing( )
+void run_routing()
 {
-  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_route );
+  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_ROUTING );
 
-  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_rt();
-  std::string routing_config_file = lfNamINST->get_config_ieda()->get_config_routing_file();
+  std::string workspace = lfNmINST->get_config_ieda()->get_workspace_rt();
+  std::string routing_config_file = lfNmINST->get_config_ieda()->get_config_routing_file();
 
   init_routing( routing_config_file );
 
   dmInst->saveDef( workspace + "/irt.def" );
   dmInst->saveGDSII( workspace + "/irt.gds" );
 
-  return eval_routing();
+  ProfileRouting* profile = lfNmINST->get_profile_routing();
+
+  eval_routing( profile );
 }
 
 } // namespace ieda

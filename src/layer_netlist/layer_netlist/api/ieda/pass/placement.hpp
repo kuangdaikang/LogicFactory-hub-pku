@@ -3,6 +3,7 @@
 #include "platform/data_manager/idm.h"
 #include "operation/iPL/api/PLAPI.hh"
 #include "layer_netlist/netlist_manager.hpp"
+#include "layer_netlist/eval/profile_placement.hpp"
 
 namespace lf
 {
@@ -25,32 +26,29 @@ void init_placement( const std::string& file )
   iPLAPIInst.initAPI( file, dmInst->get_idb_builder() );
   iPLAPIInst.initTimingEval();
   iPLAPIInst.runFlow();
+
+  // update the wireless information
+  iPLAPIInst.get_reporter()->updateWL();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //  EVALUATION
 ///////////////////////////////////////////////////////////////////////////////////////
-struct ProfilePlacement
-{
-  std::vector<double> areas;
-};
 
-ProfilePlacement eval_placement()
+void eval_placement( ProfilePlacement* profile )
 {
-  ProfilePlacement profile;
-
-  return profile;
+  // set the palcement engine
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfilePlacement run_placement()
+void run_placement( bool is_report_placement = false )
 {
-  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_place );
+  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_PLACEMENT );
 
-  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_pl();
-  std::string placement_config_file = lfNamINST->get_config_ieda()->get_config_placement_file();
+  std::string workspace = lfNmINST->get_config_ieda()->get_workspace_pl();
+  std::string placement_config_file = lfNmINST->get_config_ieda()->get_config_placement_file();
 
   std::ifstream file_stream( placement_config_file );
   if ( !file_stream.is_open() )
@@ -80,9 +78,14 @@ ProfilePlacement run_placement()
 
   init_placement( placement_config_file );
 
-  dmInst->saveDef( workspace + "/ipl.def" );
+  if ( is_report_placement )
+  {
+    // iPLAPIInst.reportWLInfo();
+  }
 
-  return eval_placement();
+  ProfilePlacement* profile = lfNmINST->get_profile_place();
+  eval_placement( profile );
+  // dmInst->saveDef( workspace + "/ipl.def" );
 }
 
 } // namespace ieda

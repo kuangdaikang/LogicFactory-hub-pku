@@ -29,7 +29,8 @@ public:
     // set the description
     std::string description = "Read the aiger file and store the data in the current design. please note the current anchor when use this command!";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-check", "yosys", "bool", "" },
@@ -113,7 +114,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-wb", "yosys", "bool", "" },
@@ -179,7 +181,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-expand", "yosys", "bool", "" },
@@ -251,7 +254,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-purge", "yosys", "bool", "" },
@@ -333,7 +337,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-map", "yosys", "string", "" },
@@ -404,7 +409,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-nand", "yosys", "bool", "" },
@@ -469,7 +475,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
         { "-exe", "yosys", "string", "" },
@@ -558,7 +565,8 @@ public:
     // set the description
     std::string description = "";
     this->set_description( description );
-
+    std::string domain = "arch";
+    this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
 

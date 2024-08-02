@@ -2,15 +2,19 @@
 
 #include "platform/data_manager/idm.h"
 #include "layer_netlist/api/ieda/config.hpp"
+#include "layer_netlist/eval/profile_timing.hpp"
+#include "layer_netlist/eval/profile_placement.hpp"
+#include "layer_netlist/eval/profile_routing.hpp"
+
+#include "misc/anchor.hpp"
+#include "utility/string.hpp"
 
 #include "nlohmann/json.hpp"
-
-#include "utility/string.hpp"
 
 #include <fstream>
 #include <assert.h>
 
-#define lfNamINST lf::netlist::NetlistAsicManager::get_instance()
+#define lfNmINST lf::netlist::NetlistManager::get_instance()
 
 namespace lf
 {
@@ -18,31 +22,20 @@ namespace lf
 namespace netlist
 {
 
-enum class E_ToolNetlistAsicType
-{
-  E_NETLIST_Asic_iEDA_init,
-  E_NETLIST_Asic_iEDA_sta,
-  E_NETLIST_Asic_iEDA_fp,
-  E_NETLIST_Asic_iEDA_cts,
-  E_NETLIST_Asic_iEDA_place,
-  E_NETLIST_Asic_iEDA_route,
-  E_NETLIST_Asic_iEDA_drc
-};
-
 /**
- * @class NetlistAsicManager
+ * @class NetlistManager
  * @brief
  *
  * @code
  */
-class NetlistAsicManager
+class NetlistManager
 {
 public:
-  static NetlistAsicManager* get_instance()
+  static NetlistManager* get_instance()
   {
     if ( instance_ == nullptr )
     {
-      instance_ = new NetlistAsicManager;
+      instance_ = new NetlistManager;
     }
     return instance_;
   }
@@ -55,55 +48,30 @@ public:
   {
   }
 
-  /**
-   * @brief
-   */
-  void init_config( const std::string& config_input, const std::string& config_output )
+  lf::netlist::ieda::ConfigiEDA* get_config_ieda()
   {
-    parse_config( config_input, config_output );
+    if ( config_ieda_ == nullptr )
+      config_ieda_ = new lf::netlist::ieda::ConfigiEDA();
+    return config_ieda_;
   }
 
-  /**
-   * @brief update current step for the netlist manager
-   */
-  void update_step( E_ToolNetlistAsicType step )
+  void set_config_ieda( const std::string& file_config )
   {
-    netlist_step_prev_ = netlist_step_curr_;
-    netlist_step_curr_ = step;
-  }
-
-  lf::netlist::ieda::ConfigiEDA* get_config_ieda() const { return config_ieda_; }
-
-private:
-  void parse_config( const std::string& config_input, const std::string& config_output )
-  {
-    switch ( netlist_step_curr_ )
-    {
-    case E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init:
-      parse_ieda( config_input, config_output );
-      break;
-    default:
-      assert( false );
-      break;
-    }
-  }
-
-  void parse_ieda( const std::string& config_input, const std::string& config_output )
-  {
-    assert( lf::utility::endsWith( config_input, ".json" ) );
-    assert( lf::utility::endsWith( config_output, ".json" ) );
+    assert( lf::utility::endsWith( file_config, ".json" ) );
     config_ieda_ = new lf::netlist::ieda::ConfigiEDA();
-    std::ifstream config_input_stream( config_input );
-    nlohmann::json data_input = nlohmann::json::parse( config_input_stream );
+    std::ifstream file_config_stream( file_config );
+    nlohmann::json data = nlohmann::json::parse( file_config_stream );
 
-    assert( data_input.contains( "design" ) );
-    assert( data_input.contains( "top_module" ) );
-    assert( data_input.contains( "liberty" ) );
-    assert( data_input.contains( "clef" ) );
-    assert( data_input.contains( "tlef" ) );
-    assert( data_input.contains( "sdc" ) );
-    assert( data_input.contains( "flow" ) );
+    assert( data.contains( "workspace" ) );
+    assert( data.contains( "design" ) );
+    assert( data.contains( "top_module" ) );
+    assert( data.contains( "liberty" ) );
+    assert( data.contains( "clef" ) );
+    assert( data.contains( "tlef" ) );
+    assert( data.contains( "sdc" ) );
+    assert( data.contains( "flow" ) );
 
+    std::string workspace;
     std::string verilog_file;
     std::string top_module;
     std::vector<std::string> lib_files;
@@ -117,18 +85,20 @@ private:
     std::string config_cts_file;
     std::string config_routing_file;
 
-    data_input.at( "design" ).get_to( verilog_file );
-    data_input.at( "top_module" ).get_to( top_module );
-    data_input.at( "liberty" ).get_to( lib_files );
-    data_input.at( "clef" ).get_to( lef_files );
-    data_input.at( "tlef" ).get_to( tlef_file );
-    data_input.at( "sdc" ).get_to( sdc_file );
-    data_input.at( "flow" ).at( "floorplan" ).get_to( config_floorplan_file );
-    data_input.at( "flow" ).at( "pdn" ).get_to( config_pdn_file );
-    data_input.at( "flow" ).at( "placement" ).get_to( config_placement_file );
-    data_input.at( "flow" ).at( "cts" ).get_to( config_cts_file );
-    data_input.at( "flow" ).at( "routing" ).get_to( config_routing_file );
+    data.at( "workspace" ).get_to( workspace );
+    data.at( "design" ).get_to( verilog_file );
+    data.at( "top_module" ).get_to( top_module );
+    data.at( "liberty" ).get_to( lib_files );
+    data.at( "clef" ).get_to( lef_files );
+    data.at( "tlef" ).get_to( tlef_file );
+    data.at( "sdc" ).get_to( sdc_file );
+    data.at( "flow" ).at( "floorplan" ).get_to( config_floorplan_file );
+    data.at( "flow" ).at( "pdn" ).get_to( config_pdn_file );
+    data.at( "flow" ).at( "placement" ).get_to( config_placement_file );
+    data.at( "flow" ).at( "cts" ).get_to( config_cts_file );
+    data.at( "flow" ).at( "routing" ).get_to( config_routing_file );
 
+    config_ieda_->set_workspace( workspace );
     config_ieda_->set_verilog_file( verilog_file );
     config_ieda_->set_top_module( top_module );
     config_ieda_->set_lib_files( lib_files );
@@ -141,39 +111,44 @@ private:
     config_ieda_->set_config_placement_file( config_placement_file );
     config_ieda_->set_config_cts_file( config_cts_file );
     config_ieda_->set_config_routing_file( config_routing_file );
-
-    std::ifstream config_output_stream( config_output );
-    nlohmann::json data_output = nlohmann::json::parse( config_output_stream );
-    assert( data_output.contains( "workspace" ) );
-
-    std::string workspace;
-    data_output.at( "workspace" ).get_to( workspace );
-    config_ieda_->set_workspace( workspace );
   }
 
-  NetlistAsicManager() = default;
-  ~NetlistAsicManager() = default;
-  NetlistAsicManager( const NetlistAsicManager& ) = delete;
-  NetlistAsicManager& operator=( const NetlistAsicManager& ) = delete;
+  ProfileTiming* get_profile_timing()
+  {
+    if ( profile_timing_ == nullptr )
+      profile_timing_ = new ProfileTiming;
+    return profile_timing_;
+  }
+
+  ProfilePlacement* get_profile_place()
+  {
+    if ( profile_place_ == nullptr )
+      profile_place_ = new ProfilePlacement;
+    return profile_place_;
+  }
+
+  ProfileRouting* get_profile_routing()
+  {
+    if ( profile_routing_ == nullptr )
+      profile_routing_ = new ProfileRouting;
+    return profile_routing_;
+  }
 
 private:
-  static NetlistAsicManager* instance_;
+  NetlistManager() = default;
+  ~NetlistManager() = default;
+  NetlistManager( const NetlistManager& ) = delete;
+  NetlistManager& operator=( const NetlistManager& ) = delete;
+
+private:
+  static NetlistManager* instance_;
   lf::netlist::ieda::ConfigiEDA* config_ieda_ = nullptr;
-
-  E_ToolNetlistAsicType netlist_step_prev_ = { E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init };
-  E_ToolNetlistAsicType netlist_step_curr_ = { E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_init };
-
+  ProfileTiming* profile_timing_ = nullptr;
+  ProfilePlacement* profile_place_ = nullptr;
+  ProfileRouting* profile_routing_ = nullptr;
 }; // class NelistAsicManager
 
-NetlistAsicManager* NetlistAsicManager::instance_ = nullptr;
-
-enum class E_ToolNetlistFpgaType
-{
-  E_NETLIST_Fpga_VPR_init,
-  E_NETLIST_Fpga_VPR_place,
-  E_NETLIST_Fpga_VPR_route,
-  E_NETLIST_Fpga_VPR_bitstream
-};
+NetlistManager* NetlistManager::instance_ = nullptr;
 
 } // namespace netlist
 

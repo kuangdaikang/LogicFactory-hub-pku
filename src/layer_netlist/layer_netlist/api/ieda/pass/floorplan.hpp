@@ -347,38 +347,21 @@ void init_pdn( const std::string& file )
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
-//  EVALUATION
-///////////////////////////////////////////////////////////////////////////////////////
-struct ProfileFloorplan
-{
-  std::vector<double> areas;
-};
-
-ProfileFloorplan eval_floorplan()
-{
-  ProfileFloorplan profile;
-
-  return profile;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
 //  FLOW
 ///////////////////////////////////////////////////////////////////////////////////////
-ProfileFloorplan run_floorplan()
+void run_floorplan()
 {
-  lfNamINST->update_step( E_ToolNetlistAsicType::E_NETLIST_Asic_iEDA_fp );
+  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_CTS );
 
-  std::string workspace = lfNamINST->get_config_ieda()->get_workspace_fp();
-  std::string floorplan_config_file = lfNamINST->get_config_ieda()->get_config_floorplan_file();
-  std::string pdn_config_file = lfNamINST->get_config_ieda()->get_config_pdn_file();
+  std::string workspace = lfNmINST->get_config_ieda()->get_workspace_fp();
+  std::string floorplan_config_file = lfNmINST->get_config_ieda()->get_config_floorplan_file();
+  std::string pdn_config_file = lfNmINST->get_config_ieda()->get_config_pdn_file();
 
   init_floorplan( floorplan_config_file );
   init_pdn( pdn_config_file );
 
   // save def
   dmInst->saveDef( workspace + "/ifp.def" );
-
-  return eval_floorplan();
 }
 
 } // namespace ieda

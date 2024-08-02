@@ -52,9 +52,13 @@ public:
 
   char* get_cmd_name() const { return _cmd_name; }
 
-  void set_description( const std::string description ) { _description = description; }
+  void set_description( const std::string& description ) { _description = description; }
 
   std::string get_description() const { return _description; }
+
+  void set_domain( const std::string& domain ) { _domain = domain; }
+
+  std::string get_domain() const { return _domain; }
 
   TclOption* getOptionOrArg( const char* option_name )
   {
@@ -130,7 +134,8 @@ private:
   char* _cmd_name;
   std::unordered_map<const char*, std::unique_ptr<TclOption>, CStrHash, CStrEqual> _options; // store the options
   std::vector<TclOption*> _args;                                                             // the tcl args need keep order
-  std::string _description = "";
+  std::string _description = "";                                                             // teh description of the cmd
+  std::string _domain = "";                                                                  // the cmd belong to which domain
 }; // class TclCmd
 
 class TclCmds
@@ -156,7 +161,12 @@ public:
     return nullptr;
   }
 
-  // cmd_name + anchor as the key
+  static const std::unordered_map<const char*, std::unique_ptr<TclCmd>, CStrHash, CStrEqual>& getCmds()
+  {
+    return _cmds;
+  }
+
+private:
   static std::unordered_map<const char*, std::unique_ptr<TclCmd>, CStrHash, CStrEqual> _cmds;
 }; // class TclCmds
 
