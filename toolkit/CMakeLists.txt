@@ -66,6 +66,7 @@ endif()
 # compile iEDA with CMakeLists.txt
 ######################################################################
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/iEDA/CMakeLists.txt)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/toolkit/iEDA/src)
     add_subdirectory(iEDA ${CMAKE_BINARY_DIR}/toolkit/iEDA)
 else()
     message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_DIR}/iEDA is missing!")
