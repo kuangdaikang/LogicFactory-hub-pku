@@ -5,6 +5,9 @@
 #include "tcl_option.hpp"
 #include "tcl_encode.hpp"
 
+#include <iostream>
+#include <sstream>
+
 namespace lf
 {
 namespace tcl
@@ -21,6 +24,7 @@ public:
     return instance;
   }
 
+  // run with tcl script file
   static int tcl_main( const char* file_path )
   {
     int argc = 1;
@@ -46,13 +50,32 @@ public:
     return EXIT_SUCCESS;
   }
 
+  // run with commands
   static int tcl_main( int argc, char** argv )
   {
     auto* script_engine = TclScript::getOrCreateInstance();
 
-    Tcl_MainEx( argc, argv, initSetting, script_engine->get_interp() );
+    if ( argc == 1 )
+    {
+      Tcl_MainEx( argc, argv, initSetting, script_engine->get_interp() );
+      return EXIT_SUCCESS;
+    }
+    else
+    {
+      // register the commands
+      initSetting( script_engine->get_interp() );
 
-    return EXIT_SUCCESS;
+      // run the commands
+      for ( int i = 1; i < argc; ++i )
+      {
+        if ( Tcl_Eval( script_engine->get_interp(), argv[i] ) == TCL_ERROR )
+        {
+          std::cerr << "Error running Tcl command: " << Tcl_GetStringResult( script_engine->get_interp() ) << std::endl;
+          return EXIT_FAILURE;
+        }
+      }
+      return EXIT_SUCCESS;
+    }
   }
 
   static void displayHelp()

@@ -20,6 +20,18 @@ int engine_start( int tcl_argc, char** tcl_argv )
   return 0;
 }
 
+int engine_start(const char* script  )
+{
+  auto instance = TclMain::getInstance();
+
+  instance->set_init_func( registerCmds );
+
+  instance->tcl_main( script );
+
+  return 0;
+}
+
+
 } // namespace tcl
 
 } // namespace lf
