@@ -15,50 +15,56 @@ namespace lsils
  * @brief
  *
  */
-template<typename Ntk = aig_seq_network>
 void read_cnf( const std::string& file )
 {
-  using NtkBase = typename Ntk::base_type;
-  static_assert( std::is_same_v<NtkBase, mockturtle::aig_network> ||
-                     std::is_same_v<NtkBase, mockturtle::xag_network> ||
-                     std::is_same_v<NtkBase, mockturtle::mig_network> ||
-                     std::is_same_v<NtkBase, mockturtle::xmg_network> ||
-                     std::is_same_v<NtkBase, mockturtle::gtg_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG, GTG" );
-
-  if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
-  }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::xag_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
-  }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::mig_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
-  }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::xmg_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
-  }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::gtg_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
-  }
-  else
-  {
-    assert( false );
-  }
-
-  Ntk ntk;
 
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
   mockturtle::read_verilog_params ports;
+  lorina::return_code rc;
 
-  // TODO: add the ports
-  lorina::return_code rc = lorina::read_dimacs( file, mockturtle::dimacs_reader<Ntk>( ntk ), &diag );
+  auto ntktype = LfLntINST->get_nkt_type();
+  if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
+    lf::logic::lsils::aig_seq_network ntk;
+    rc = lorina::read_dimacs( file, mockturtle::dimacs_reader( ntk ), &diag );
+    lfLmINST->set_current( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XAG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
+    lf::logic::lsils::xag_seq_network ntk;
+    rc = lorina::read_dimacs( file, mockturtle::dimacs_reader( ntk ), &diag );
+    lfLmINST->set_current( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XMG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
+    lf::logic::lsils::xmg_seq_network ntk;
+    rc = lorina::read_dimacs( file, mockturtle::dimacs_reader( ntk ), &diag );
+    lfLmINST->set_current( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_MIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
+    lf::logic::lsils::mig_seq_network ntk;
+    rc = lorina::read_dimacs( file, mockturtle::dimacs_reader( ntk ), &diag );
+    lfLmINST->set_current( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_GTG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
+    lf::logic::lsils::gtg_seq_network ntk;
+    rc = lorina::read_dimacs( file, mockturtle::dimacs_reader( ntk ), &diag );
+    lfLmINST->set_current( ntk );
+  }
+  else
+  {
+    std::cerr << "unsupport network type!\n";
+    assert( false );
+  }
+
   if ( rc != lorina::return_code::success )
   {
     std::cerr << "parser wrong!" << std::endl;
@@ -66,21 +72,24 @@ void read_cnf( const std::string& file )
   }
 
   // set the ports
-  assert( !ports.input_names.empty() );
-  assert( !ports.output_names.empty() );
-  lfLmINST->ports().set_module_name( ports.module_name.has_value() ? "" : ports.module_name.value() );
-  for ( auto port : ports.input_names )
+  lfLmINST->ports().set_module_name( ports.module_name.has_value() ? ports.module_name.value() : "top" );
+  if ( !ports.input_names.empty() )
   {
-    assert( port.second == 1u );
-    lfLmINST->ports().add_input( port.first );
-  }
-  for ( auto port : ports.output_names )
-  {
-    assert( port.second == 1u );
-    lfLmINST->ports().add_output( port.first );
+    for ( auto port : ports.input_names )
+    {
+      assert( port.second == 1u );
+      lfLmINST->ports().add_input( port.first );
+    }
   }
 
-  lfLmINST->set_current<Ntk>( ntk );
+  if ( !ports.output_names.empty() )
+  {
+    for ( auto port : ports.output_names )
+    {
+      assert( port.second == 1u );
+      lfLmINST->ports().add_output( port.first );
+    }
+  }
 }
 
 } // end namespace lsils

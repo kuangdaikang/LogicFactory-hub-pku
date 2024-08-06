@@ -15,19 +15,8 @@ namespace lsils
  * @brief
  *
  */
-template<typename Ntk = blut_seq_network>
 void write_verilog( const std::string& file )
 {
-  using NtkBase = typename Ntk::base_type;
-  static_assert( std::is_same_v<NtkBase, mockturtle::aig_network> ||
-                     std::is_same_v<NtkBase, mockturtle::xag_network> ||
-                     std::is_same_v<NtkBase, mockturtle::mig_network> ||
-                     std::is_same_v<NtkBase, mockturtle::xmg_network> ||
-                     std::is_same_v<NtkBase, mockturtle::gtg_network> ||
-                     std::is_same_v<NtkBase, mockturtle::klut_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG, GTG, KLUT" );
-  Ntk ntk = lfLmINST->current<Ntk>();
-
   mockturtle::write_verilog_params ports;
   ports.module_name = lfLmINST->ports().get_module_name();
   for ( auto port : lfLmINST->ports().get_inputs() )
@@ -40,37 +29,55 @@ void write_verilog( const std::string& file )
   }
 
   std::ofstream os( file.c_str(), std::ofstream::out );
-  if constexpr ( std::is_same_v<NtkBase, mockturtle::aig_network> ||
-                 std::is_same_v<NtkBase, mockturtle::xag_network> ||
-                 std::is_same_v<NtkBase, mockturtle::mig_network> ||
-                 std::is_same_v<NtkBase, mockturtle::xmg_network> ||
-                 std::is_same_v<NtkBase, mockturtle::gtg_network> )
+
+  auto ntktype = LfLntINST->get_nkt_type();
+  if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
   {
-    mockturtle::write_verilog<Ntk>( ntk, os, ports );
-    os.close();
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
+    lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
+    mockturtle::write_verilog( ntk, os, ports );
   }
-  else if constexpr ( std::is_same_v<NtkBase, mockturtle::klut_network> )
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XAG )
   {
-    // write the netlist according to the anchor
-    lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor_curr();
-    switch ( stat )
-    {
-    case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA:
-      mockturtle::write_verilog_with_binding<Ntk>( ntk, os, ports );
-      break;
-    case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC:
-      mockturtle::write_verilog_with_binding<Ntk>( ntk, os, ports );
-      break;
-    default:
-      std::cerr << "No mapped verilog for this anchor" << std::endl;
-      break;
-    }
-    os.close();
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
+    lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
+    mockturtle::write_verilog( ntk, os, ports );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XMG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
+    lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
+    mockturtle::write_verilog( ntk, os, ports );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_MIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
+    lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
+    mockturtle::write_verilog( ntk, os, ports );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_GTG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
+    lf::logic::lsils::gtg_seq_network ntk = lfLmINST->current<lf::logic::lsils::gtg_seq_network>();
+    mockturtle::write_verilog( ntk, os, ports );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_KLUT )
+  {
+    std::cerr << "TODO ing!\n";
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_BLUT )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC );
+    lf::logic::lsils::blut_seq_network ntk = lfLmINST->current<lf::logic::lsils::blut_seq_network>();
+    mockturtle::write_verilog_with_binding( ntk, os, ports );
   }
   else
   {
+    std::cerr << "unsupport network type!\n";
     assert( false );
   }
+
+  os.close();
 }
 
 } // end namespace lsils

@@ -20,48 +20,9 @@ namespace lsils
  *  options: [P] [zrdpv]
  * @note
  */
-template<typename Ntk = aig_seq_network>
 void refactor( int Max_pis = -1,
                bool is_zero_cost = false, bool is_reconvergence_cut = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
-  using NtkBase = Ntk;
-  static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
-                     std::is_same_v<NtkBase, xag_seq_network> ||
-                     std::is_same_v<NtkBase, mig_seq_network> ||
-                     std::is_same_v<NtkBase, xmg_seq_network> ||
-                     std::is_same_v<NtkBase, gtg_seq_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG, GTG" );
-
-  if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
-  }
-  else
-  {
-    std::cerr << "Unhandled network type provided." << std::endl;
-    assert( false );
-  }
-
-  auto ntk = lfLmINST->current<Ntk>();
-
-  // update the params
-  mockturtle::sop_factoring<Ntk> refactoring_fn;
   mockturtle::refactoring_params ps;
   if ( Max_pis > 0 )
     ps.max_pis = Max_pis;
@@ -76,11 +37,52 @@ void refactor( int Max_pis = -1,
   if ( is_verbose )
     ps.verbose = true;
 
-  // refactoring
-  // mockturtle::refactoring<Ntk, mockturtle::sop_factoring<Ntk>>( ntk, refactoring_fn, ps ); TODO: this lead to compile bugs
-  mockturtle::refactoring( ntk, refactoring_fn, ps );
-  // update current network
-  lfLmINST->set_current<Ntk>( ntk );
+  auto ntktype = LfLntINST->get_nkt_type();
+  if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
+    lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
+
+    mockturtle::sop_factoring<lf::logic::lsils::aig_seq_network> refactoring_fn;
+    mockturtle::refactoring( ntk, refactoring_fn, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::aig_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XAG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
+    lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
+
+    mockturtle::sop_factoring<lf::logic::lsils::xag_seq_network> refactoring_fn;
+    mockturtle::refactoring( ntk, refactoring_fn, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::xag_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XMG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
+    lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
+
+    mockturtle::sop_factoring<lf::logic::lsils::xmg_seq_network> refactoring_fn;
+    mockturtle::refactoring( ntk, refactoring_fn, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::xmg_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_MIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
+    lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
+
+    mockturtle::sop_factoring<lf::logic::lsils::mig_seq_network> refactoring_fn;
+    mockturtle::refactoring( ntk, refactoring_fn, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::mig_seq_network>( ntk );
+  }
+  else
+  {
+    std::cerr << "unsupport network type!\n";
+    assert( false );
+  }
 }
 
 } // end namespace lsils

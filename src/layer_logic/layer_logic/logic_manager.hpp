@@ -11,14 +11,17 @@
 #include <assert.h>
 #include <iostream>
 
+// logic manager instance
 #define lfLmINST lf::logic::LogicManager::get_instance()
+
+// logic network type instance
+#define LfLntINST lf::logic::LogicNtkType::get_instance()
 
 namespace lf
 {
 
 namespace logic
 {
-
 /**
  * @class LogicManager
  * @brief manager the logic type for the logic tools, also it namanger all the list netowrks
@@ -257,6 +260,10 @@ public:
     {
       frame_lsils_.curr_gtg = obj;
     }
+    else if constexpr ( std::is_same_v<T, lsils::cvg_seq_network> )
+    {
+      frame_lsils_.curr_cvg = obj;
+    }
     else if constexpr ( std::is_same_v<T, lsils::blut_seq_network> )
     {
       frame_lsils_.netlist_asic = obj;
@@ -295,6 +302,52 @@ private:
 }; // class LogicManager
 
 LogicManager* LogicManager::instance_ = nullptr;
+
+enum E_LF_LOGIC_NTK_TYPE
+{
+  E_LF_LOGIC_NTK_TYPE_AIG = 0,
+  E_LF_LOGIC_NTK_TYPE_XAG,
+  E_LF_LOGIC_NTK_TYPE_MIG,
+  E_LF_LOGIC_NTK_TYPE_XMG,
+  E_LF_LOGIC_NTK_TYPE_GTG,
+  E_LF_LOGIC_NTK_TYPE_CVG,
+  E_LF_LOGIC_NTK_TYPE_BLG,
+  E_LF_LOGIC_NTK_TYPE_KLUT,
+  E_LF_LOGIC_NTK_TYPE_BLUT,
+}; // enum E_LF_LOGIC_NTK_TYPE
+
+/**
+ * @class
+ * @brief
+ */
+class LogicNtkType
+{
+public:
+  static LogicNtkType* get_instance()
+  {
+    if ( instance_ == nullptr )
+    {
+      instance_ = new LogicNtkType;
+    }
+    return instance_;
+  }
+
+  void set_nkt_type( E_LF_LOGIC_NTK_TYPE ntk_type ) { ntk_type_ = ntk_type; }
+
+  E_LF_LOGIC_NTK_TYPE get_nkt_type() const { return ntk_type_; }
+
+private:
+  LogicNtkType() = default;
+  ~LogicNtkType() = default;
+  LogicNtkType( const LogicNtkType& ) = delete;
+  LogicNtkType& operator=( const LogicNtkType& ) = delete;
+
+private:
+  static LogicNtkType* instance_;
+  E_LF_LOGIC_NTK_TYPE ntk_type_{ E_LF_LOGIC_NTK_TYPE_AIG };
+}; // class LogicManager
+
+LogicNtkType* LogicNtkType::instance_ = nullptr;
 
 } // end namespace logic
 

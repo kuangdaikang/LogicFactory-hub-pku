@@ -25,45 +25,9 @@ namespace lsils
  *  options: [KCDA] [v]
  * @note
  */
-template<class Ntk = aig_seq_network>
 void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, int AreaIter = -1,
                bool is_verbose = false )
 {
-  using NtkBase = Ntk;
-  static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
-                     std::is_same_v<NtkBase, xag_seq_network> ||
-                     std::is_same_v<NtkBase, mig_seq_network> ||
-                     std::is_same_v<NtkBase, xmg_seq_network> ||
-                     std::is_same_v<NtkBase, gtg_seq_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG, GTG" );
-
-  if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
-  }
-  else
-  {
-    std::cerr << "Unhandled network type provided." << std::endl;
-    assert( false );
-  }
-
-  auto ntk = lfLmINST->current<Ntk>();
   mockturtle::lut_mapping_params ps;
   if ( K_feasible_cut > 0 )
     ps.cut_enumeration_ps.cut_size = K_feasible_cut;
@@ -76,15 +40,73 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   if ( is_verbose )
     ps.verbose = true;
 
-  mockturtle::mapping_view<Ntk> ntk_mapped{ ntk };
+  auto ntktype = LfLntINST->get_nkt_type();
+  if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
+    lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
 
-  klut_seq_network netlist_fpga;
+    mockturtle::mapping_view<lf::logic::lsils::aig_seq_network> ntk_mapped{ ntk };
+    klut_seq_network netlist_fpga;
+    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
 
-  mockturtle::lut_mapping( ntk_mapped, ps );
+    lfLmINST->set_current<klut_seq_network>( netlist_fpga );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XAG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
+    lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
 
-  mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
+    mockturtle::mapping_view<lf::logic::lsils::xag_seq_network> ntk_mapped{ ntk };
+    klut_seq_network netlist_fpga;
+    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
 
-  lfLmINST->set_current<klut_seq_network>( netlist_fpga );
+    lfLmINST->set_current<klut_seq_network>( netlist_fpga );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XMG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
+    lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
+
+    mockturtle::mapping_view<lf::logic::lsils::xmg_seq_network> ntk_mapped{ ntk };
+    klut_seq_network netlist_fpga;
+    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
+
+    lfLmINST->set_current<klut_seq_network>( netlist_fpga );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_MIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
+    lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
+
+    mockturtle::mapping_view<lf::logic::lsils::mig_seq_network> ntk_mapped{ ntk };
+    klut_seq_network netlist_fpga;
+    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
+
+    lfLmINST->set_current<klut_seq_network>( netlist_fpga );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_GTG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
+    lf::logic::lsils::gtg_seq_network ntk = lfLmINST->current<lf::logic::lsils::gtg_seq_network>();
+
+    mockturtle::mapping_view<lf::logic::lsils::gtg_seq_network> ntk_mapped{ ntk };
+    klut_seq_network netlist_fpga;
+    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
+
+    lfLmINST->set_current<klut_seq_network>( netlist_fpga );
+  }
+  else
+  {
+    std::cerr << "unsupport network type!\n";
+    assert( false );
+  }
+
   lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA );
 }
 

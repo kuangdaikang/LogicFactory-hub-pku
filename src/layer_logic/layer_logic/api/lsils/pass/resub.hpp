@@ -22,42 +22,6 @@ template<typename Ntk = aig_seq_network>
 void resubing( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limib_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
                bool is_preserve_depth = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
-  using NtkBase = Ntk;
-  static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
-                     std::is_same_v<NtkBase, xag_seq_network> ||
-                     std::is_same_v<NtkBase, mig_seq_network> ||
-                     std::is_same_v<NtkBase, xmg_seq_network> ||
-                     std::is_same_v<NtkBase, gtg_seq_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG, GTG" );
-
-  if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
-  }
-  else
-  {
-    std::cerr << "Unhandled network type provided." << std::endl;
-    assert( false );
-  }
-
-  auto ntk = lfLmINST->current<Ntk>();
-
   // update the params
   mockturtle::resubstitution_params ps;
   if ( NInputMax > 0 )
@@ -81,50 +45,63 @@ void resubing( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, 
   if ( is_verbose )
     ps.verbose = true;
 
-  mockturtle::default_resubstitution<Ntk>( ntk, ps );
-  lfLmINST->set_current<Ntk>( ntk );
+  auto ntktype = LfLntINST->get_nkt_type();
+  if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
+    lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
+
+    mockturtle::default_resubstitution( ntk, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::aig_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XAG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
+    lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
+
+    mockturtle::default_resubstitution( ntk, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::xag_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XMG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
+    lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
+
+    mockturtle::default_resubstitution( ntk, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::xmg_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_MIG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
+    lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
+
+    mockturtle::default_resubstitution( ntk, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::mig_seq_network>( ntk );
+  }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_GTG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
+    lf::logic::lsils::gtg_seq_network ntk = lfLmINST->current<lf::logic::lsils::gtg_seq_network>();
+
+    mockturtle::default_resubstitution( ntk, ps );
+
+    lfLmINST->set_current<lf::logic::lsils::gtg_seq_network>( ntk );
+  }
+  else
+  {
+    std::cerr << "unsupport network type!\n";
+    assert( false );
+  }
 }
 
 template<typename Ntk = aig_seq_network>
 void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limit_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
             bool is_preserve_depth = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
-  using NtkBase = Ntk;
-  static_assert( std::is_same_v<NtkBase, aig_seq_network> ||
-                     std::is_same_v<NtkBase, xag_seq_network> ||
-                     std::is_same_v<NtkBase, mig_seq_network> ||
-                     std::is_same_v<NtkBase, xmg_seq_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG" );
-
-  if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
-  }
-  else if constexpr ( std::is_same_v<Ntk, gtg_seq_network> )
-  {
-    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
-  }
-  else
-  {
-    std::cerr << "Unhandled network type provided." << std::endl;
-    assert( false );
-  }
-
-  auto ntk = lfLmINST->current<Ntk>();
-
-  // update the params
   mockturtle::resubstitution_params ps;
   if ( NInputMax > 0 )
     ps.max_pis = NInputMax;
@@ -147,43 +124,51 @@ void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int
   if ( is_verbose )
     ps.verbose = true;
 
-  // according to the anchor
-  lf::misc::E_LF_ANCHOR stat = lfAnchorINST->get_anchor_curr();
-
-  switch ( stat )
+  auto ntktype = LfLntINST->get_nkt_type();
+  if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
   {
-  case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
-    if constexpr ( std::is_same_v<Ntk, aig_seq_network> )
-    {
-      mockturtle::aig_resubstitution( ntk, ps );
-      lfLmINST->set_current<Ntk>( ntk );
-    }
-    break;
-  case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
-    if constexpr ( std::is_same_v<Ntk, xag_seq_network> )
-    {
-      mockturtle::resubstitution_minmc_withDC( ntk, ps );
-      lfLmINST->set_current<Ntk>( ntk );
-    }
-    break;
-  case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG:
-    if constexpr ( std::is_same_v<Ntk, mig_seq_network> )
-    {
-      mockturtle::mig_resubstitution( ntk, ps );
-      lfLmINST->set_current<Ntk>( ntk );
-    }
-    break;
-  case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG:
-    if constexpr ( std::is_same_v<Ntk, xmg_seq_network> )
-    {
-      mockturtle::xmg_resubstitution( ntk, ps );
-      lfLmINST->set_current<Ntk>( ntk );
-    }
-    break;
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
+    lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
 
-  default:
+    mockturtle::aig_resubstitution( ntk, ps );
+    lfLmINST->set_current( ntk );
+
+    lfLmINST->set_current<lf::logic::lsils::aig_seq_network>( ntk );
+  }
+  // else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XAG )
+  // {
+  //   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG );
+  //   lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
+
+  //   mockturtle::resubstitution_minmc_withDC( ntk, ps );
+  //   lfLmINST->set_current( ntk );
+
+  //   lfLmINST->set_current<lf::logic::lsils::xag_seq_network>( ntk );
+  // }
+  else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_XMG )
+  {
+    lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG );
+    lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
+
+    mockturtle::xmg_resubstitution( ntk, ps );
+    lfLmINST->set_current( ntk );
+
+    lfLmINST->set_current<lf::logic::lsils::xmg_seq_network>( ntk );
+  }
+  // else if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_MIG )
+  // {
+  //   lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG );
+  //   lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
+
+  //   mockturtle::mig_resubstitution( ntk, ps );
+  //   lfLmINST->set_current( ntk );
+
+  //   lfLmINST->set_current<lf::logic::lsils::mig_seq_network>( ntk );
+  // }
+  else
+  {
+    std::cerr << "unsupport network type!\n";
     assert( false );
-    break;
   }
 }
 
