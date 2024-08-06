@@ -3,6 +3,7 @@ add_library(lf_netlist INTERFACE)
 target_link_libraries(lf_netlist INTERFACE
     lf_logic
     lf_3rd_json
+    idm
     ista-engine
     ifp_api
     ipdn_api

@@ -42,6 +42,7 @@ add_subdirectory(${HOME}/3rd-party)
 
 # add the toolkit projects
 add_subdirectory(${HOME}/toolkit)
+include_directories(${PROJECT_SOURCE_DIR}/toolkit/iEDA/src)
 
 # add src folder
 add_subdirectory(${HOME}/src)

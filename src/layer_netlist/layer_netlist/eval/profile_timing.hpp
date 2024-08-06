@@ -1,9 +1,10 @@
 #pragma once
 
+#include "operation/iSTA/api/TimingEngine.hh"
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include "operation/iSTA/api/TimingEngine.hh"
+#include <cfloat>
 
 namespace lf
 {
@@ -69,7 +70,7 @@ public:
 
     if ( rise_value == std::nullopt || fall_value == std::nullopt )
     {
-      return DBL_MAX;
+      return ;
     }
 
     early_slack = std::min( rise_value.value(), fall_value.value() );
