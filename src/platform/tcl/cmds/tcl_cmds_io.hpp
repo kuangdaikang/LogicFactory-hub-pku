@@ -144,6 +144,7 @@ public:
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
       lf::logic::lsils::read_aiger( strOptionsValue["-file"] );
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
@@ -1126,6 +1127,7 @@ public:
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
       lf::logic::lsils::write_aiger( strOptionsValue["-file"] );
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
@@ -1199,6 +1201,7 @@ public:
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
       lf::logic::lsils::write_bench( strOptionsValue["-file"] );
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
@@ -1311,6 +1314,7 @@ public:
       break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       lf::logic::lsils::write_blif( strOptionsValue["-file"] );
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
@@ -1390,6 +1394,7 @@ public:
       break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       lf::logic::lsils::write_cnf( strOptionsValue["-file"] );
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;

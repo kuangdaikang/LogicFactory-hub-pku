@@ -548,6 +548,7 @@ public:
                             doubleOptionsValue["-D"], intOptionsValue["-I"], intOptionsValue["-P"], intOptionsValue["-S"], intOptionsValue["-lut"], strvecOptionsValue["-luts"],
                             boolOptionsValue["-sop"], strvecOptionsValue["-g"], boolOptionsValue["-dff"], boolOptionsValue["-clk"], boolOptionsValue["-keepff"],
                             boolOptionsValue["-nocleanup"], boolOptionsValue["-showtmp"], boolOptionsValue["-markgroups"], boolOptionsValue["-dress"] );
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
