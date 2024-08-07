@@ -1,8 +1,7 @@
 #pragma once
 
 #include "layer_arch/api/yosys/frame.hpp"
-#include "layer_logic/api/abc/frame.hpp"
-#include "layer_logic/api/lsils/frame.hpp"
+#include "layer_logic/logic_manager.hpp"
 
 #include "lorina/gtech.hpp"
 #include "lorina/detail/call_in_topological_order.hpp"
@@ -60,7 +59,7 @@ private:
 
 public:
   lorina::detail::call_in_topological_order<PackedFns, ParamMaps> on_action; // generate network in the given topological order
-  mockturtle::gtech_reader<mockturtle::gtg_network> reader;
+  mockturtle::gtech_reader<lf::logic::lsils::gtg_seq_network> reader;
 
   RTLIL::Design* design;
   RTLIL::Module* module;
@@ -582,8 +581,8 @@ public:
     reader.on_endmodule();
   }
 
-  WrapperYosysLogic( RTLIL::Design* design, mockturtle::gtg_network& ntk, mockturtle::read_verilog_params& ports )
-      : reader( mockturtle::gtech_reader<mockturtle::gtg_network>( ntk, ports ) ), design( design ),
+  WrapperYosysLogic( RTLIL::Design* design, lf::logic::lsils::gtg_seq_network& ntk, mockturtle::read_verilog_params& ports )
+      : reader( mockturtle::gtech_reader<lf::logic::lsils::gtg_seq_network>( ntk, ports ) ), design( design ),
         on_action( PackedFns( GateFn( [&]( const std::vector<std::pair<std::string, bool>>& inputs,
                                            const std::string output,
                                            const std::string type ) {
@@ -702,7 +701,7 @@ public:
   }
 };
 
-void wrapper_yosys_logic( RTLIL::Design* design, mockturtle::gtg_network& ntk, mockturtle::read_verilog_params& ports )
+void wrapper_yosys_logic( RTLIL::Design* design, lf::logic::lsils::gtg_seq_network& ntk, mockturtle::read_verilog_params& ports )
 {
   WrapperYosysLogic worker( design, ntk, ports );
 }
