@@ -15,7 +15,7 @@
 #define lfLmINST lf::logic::LogicManager::get_instance()
 
 // logic network type instance
-#define LfLntINST lf::logic::LogicNtkType::get_instance()
+#define lfLntINST lf::logic::LogicNtkType::get_instance()
 
 namespace lf
 {
@@ -89,7 +89,7 @@ public:
     // condition2: different logic type
     else
     {
-      using NtkIR = lsils::aig_seq_network;
+      using NtkIR = lsils::gtg_seq_network; // gtech is more general, thus the conversion will not affect the original logic
       NtkIR ntk;
       babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame_abc_ );
 
@@ -333,6 +333,28 @@ public:
   }
 
   void set_nkt_type( E_LF_LOGIC_NTK_TYPE ntk_type ) { ntk_type_ = ntk_type; }
+
+  void set_nkt_type( const std::string& ntk_type )
+  {
+    if ( ntk_type == "aig" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_AIG;
+    else if ( ntk_type == "xag" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_XAG;
+    else if ( ntk_type == "mig" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_MIG;
+    else if ( ntk_type == "xmg" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_XMG;
+    else if ( ntk_type == "gtg" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_GTG;
+    else if ( ntk_type == "cvg" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_CVG;
+    else if ( ntk_type == "blg" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_BLG;
+    else if ( ntk_type == "klut" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_KLUT;
+    else if ( ntk_type == "blut" )
+      ntk_type_ = E_LF_LOGIC_NTK_TYPE_BLUT;
+  }
 
   E_LF_LOGIC_NTK_TYPE get_nkt_type() const { return ntk_type_; }
 

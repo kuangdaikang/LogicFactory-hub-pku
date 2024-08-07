@@ -40,7 +40,7 @@ void rewrite( bool is_preserve_depth = false, bool is_zero_gain = false, bool is
   if ( is_very_verbose )
     ps.very_verbose = is_very_verbose;
 
-  auto ntktype = LfLntINST->get_nkt_type();
+  auto ntktype = lfLntINST->get_nkt_type();
   if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
   {
     lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );

@@ -15,11 +15,11 @@ namespace lsils
  * @brief
  *
  */
-void write_cnf(  const std::string& file )
+void write_cnf( const std::string& file )
 {
   std::ofstream os( file.c_str(), std::ofstream::out );
 
-  auto ntktype = LfLntINST->get_nkt_type();
+  auto ntktype = lfLntINST->get_nkt_type();
   if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
   {
     lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );

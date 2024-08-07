@@ -23,7 +23,7 @@ void read_cnf( const std::string& file )
   mockturtle::read_verilog_params ports;
   lorina::return_code rc;
 
-  auto ntktype = LfLntINST->get_nkt_type();
+  auto ntktype = lfLntINST->get_nkt_type();
   if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
   {
     lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );

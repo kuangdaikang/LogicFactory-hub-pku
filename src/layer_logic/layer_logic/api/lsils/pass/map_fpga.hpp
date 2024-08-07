@@ -40,7 +40,7 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   if ( is_verbose )
     ps.verbose = true;
 
-  auto ntktype = LfLntINST->get_nkt_type();
+  auto ntktype = lfLntINST->get_nkt_type();
   if ( ntktype == lf::logic::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_AIG )
   {
     lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG );
