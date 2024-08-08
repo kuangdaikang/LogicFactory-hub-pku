@@ -41,8 +41,19 @@ public:
   void set_tlef_file( const std::string& file ) { tlef_file_ = file; }
   void set_tlef_file( const char* file ) { tlef_file_ = file; }
 
-  void set_verilog_file( const std::string& file ) { verilog_file_ = file; }
-  void set_verilog_file( const char* file ) { verilog_file_ = file; }
+  void set_verilog_file( const std::string& file )
+  {
+    if ( !verilog_file_.empty() )
+      return;
+    verilog_file_ = file;
+  }
+
+  void set_verilog_file( const char* file )
+  {
+    if ( !verilog_file_.empty() )
+      return;
+    verilog_file_ = file;
+  }
 
   void set_top_module( const std::string& name ) { top_module_ = name; }
   void set_top_module( const char* name ) { top_module_ = name; }
@@ -137,24 +148,24 @@ private:
   ///////////////////////////
   //    inputs
   ///////////////////////////
-  std::vector<std::string> lib_files_;
-  std::vector<std::string> lef_files_;
-  std::string tlef_file_;
-  std::string verilog_file_;
-  std::string top_module_;
-  std::string sdc_file_;
+  std::vector<std::string> lib_files_{};
+  std::vector<std::string> lef_files_{};
+  std::string tlef_file_{ "" };
+  std::string verilog_file_{ "" };
+  std::string top_module_{ "" };
+  std::string sdc_file_{ "" };
 
-  std::string config_floorplan_file_;
-  std::string config_pdn_file_;
-  std::string config_placement_file_;
-  std::string config_cts_file_;
-  std::string config_routing_file_;
+  std::string config_floorplan_file_{ "" };
+  std::string config_pdn_file_{ "" };
+  std::string config_placement_file_{ "" };
+  std::string config_cts_file_{ "" };
+  std::string config_routing_file_{ "" };
 
   ///////////////////////////
   //    output
   ///////////////////////////
-  std::string workspace_;
-  std::string timestamp_;
+  std::string workspace_{ "" };
+  std::string timestamp_{ "" };
 };
 
 } // namespace ieda
