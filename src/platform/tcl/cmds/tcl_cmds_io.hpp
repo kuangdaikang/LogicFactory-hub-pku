@@ -1272,10 +1272,10 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     std::vector<std::string> strOptions = { "-file", "-top", "-S" };
-    std::vector<std::string> boolOptions = { "-noalias", "icells", "gates", "conn", "attr", "param", "cname", "iname", "iattr", "blackbox", "impltf", "-j", "-a" };
+    std::vector<std::string> boolOptions = { "-noalias", "-icells", "-gates", "-conn", "-attr", "-param", "-cname", "-iname", "-iattr", "-blackbox", "-impltf", "-j", "-a" };
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
-    std::vector<std::string> strvecOptions = { "-buf", "unbuf", "true", "false", "undef" };
+    std::vector<std::string> strvecOptions = { "-buf", "-unbuf", "-true", "-false", "-undef" };
     std::vector<std::string> intvecOptions = {};
     std::vector<std::string> doublevecOptions = {};
 

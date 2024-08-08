@@ -24,7 +24,6 @@ int registerCmds()
   // flow
   //////////////////////////////////////////////////////////
   LF_MACOR_REGISTER_TCL_CMD( CmdLfStart, "start" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfInit, "init" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfStop, "stop" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfAnchor, "anchor" );
   //////////////////////////////////////////////////////////
@@ -86,12 +85,18 @@ int registerCmds()
   //////////////////////////////////////////////////////////
   // netlist
   //////////////////////////////////////////////////////////
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArch2Netlist, "arch2netlist" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogic2Netlist, "logic2netlist" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistConfig, "config" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistInit, "init" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistSta, "sta" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistFloorplan, "floorplan" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistPlacement, "placement" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistCts, "cts" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistRouting, "routing" );
-
+  // TODO:
+  // write def
+  // write gds
   return EXIT_SUCCESS;
 }
 

@@ -43,7 +43,9 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {
-        { "-set", "all", "string", "" } };
+        { "-tool", "all", "string", "" },
+        { "-type", "all", "string", "" },
+        { "-ntk", "all", "string", "" } };
 
     setOptions( this, options );
   }
@@ -52,7 +54,7 @@ public:
 
   unsigned check() override
   {
-    std::vector<std::string> essential = { "-set" };
+    std::vector<std::string> essential = { "-tool", "-type", "-ntk" };
     return checkEssentialOptions( this, essential );
   }
 
@@ -69,7 +71,7 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = { "-set" };
+    std::vector<std::string> strOptions = { "-tool", "-type", "-ntk" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -79,7 +81,7 @@ public:
 
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
-    lfLntINST->set_nkt_type( strOptionsValue["-set"] );
+    lfLntINST->set_ntktype( strOptionsValue["-tool"], strOptionsValue["-type"], strOptionsValue["-ntk"] );
     return 1;
   }
 }; // class CmdLfLogicNtktype
@@ -133,7 +135,16 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
     // transform arch into logic
-    lf::logic::arch_to_logic( lfAmINST->current<Yosys::RTLIL::Design*>() );
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::logic::arch_to_logic( lfAmINST->current<Yosys::RTLIL::Design*>() );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
     return 1;
   }
 }; // class CmdLfArch2Logic
@@ -692,7 +703,7 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     std::vector<std::string> strOptions = {};
-    std::vector<std::string> boolOptions = { "-a", "r", "s", "p", "f", "u", "o", "v" };
+    std::vector<std::string> boolOptions = { "-a", "-r", "-s", "-p", "-f", "-u", "-o", "-v" };
     std::vector<std::string> intOptions = { "-M" };
     std::vector<std::string> doubleOptions = { "-D", "-A", "-B", "-F", "-S", "-G" };
     std::vector<std::string> strvecOptions = {};
