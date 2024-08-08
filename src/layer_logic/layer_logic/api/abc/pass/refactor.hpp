@@ -25,7 +25,7 @@ namespace abc
  */
 void refactor( int NInputMax = -1, int MinSaved = -1, bool is_level_preserved = false, bool is_zero_cost = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG );
+  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

@@ -31,9 +31,9 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
                bool is_out_buffers = false, bool is_jcheck = false, bool is_i_cofactor = false, bool is_k_dsd_manager = false, bool is_t_average = false,
                bool is_n_dsd_cutfunc = false, bool is_cut_new_truth = false, bool is_z_derive_luts = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_FPGA );
+  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
-  
+
   int argc = 1; // command name
 
   if ( KCut > 0 )

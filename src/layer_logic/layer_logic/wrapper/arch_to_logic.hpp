@@ -8,8 +8,12 @@ namespace lf
 namespace logic
 {
 
-void arch_to_logic( Yosys::RTLIL::Design* frame_yosys )
+void arch_to_logic( const Yosys::RTLIL::Design* frame_yosys )
 {
+  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
+  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG ); // hard code
+  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
+
   mockturtle::read_verilog_params ports;
   lf::logic::lsils::gtg_seq_network ntk;
   wrapper_yosys_logic( frame_yosys, ntk, ports );
@@ -34,8 +38,6 @@ void arch_to_logic( Yosys::RTLIL::Design* frame_yosys )
       lfLmINST->ports().add_output( port.first );
     }
   }
-
-  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
 }
 
 } // namespace logic

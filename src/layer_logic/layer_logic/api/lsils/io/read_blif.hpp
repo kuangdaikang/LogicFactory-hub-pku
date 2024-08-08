@@ -19,7 +19,8 @@ void read_blif( const std::string& file )
 {
   cvg_seq_network ntk; // sequential cover network
 
-  lfLmINST->update_logic( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_CVG );
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  lfLmINST->update_logic( ntktype );
 
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );

@@ -6,22 +6,21 @@
 #include "layer_logic/aux/convert.hpp"
 
 #include "misc/anchor.hpp"
+#include "misc/ntktye.hpp"
 #include "misc/ports.hpp"
 
 #include <assert.h>
 #include <iostream>
 
-// logic manager instance
-#define lfLmINST lf::logic::LogicManager::get_instance()
-
 // logic network type instance
-#define lfLntINST lf::logic::LogicNtkType::get_instance()
+#define lfLntINST lf::misc::LogicNtkType::get_instance()
 
 namespace lf
 {
 
 namespace logic
 {
+
 /**
  * @class LogicManager
  * @brief manager the logic type for the logic tools, also it namanger all the list netowrks
@@ -58,31 +57,28 @@ public:
    * @example
    *
    */
-  void update_logic( lf::misc::E_LF_ANCHOR logic_type )
+  void update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE ntktype )
   {
-    /// update the logic status
-    lfAnchorINST->set_anchor( logic_type );
+    auto ntktype_prev = lfLntINST->get_ntktype_prev();
+    auto ntktype_curr = lfLntINST->get_ntktype_curr();
 
-    auto anchor_prev = lfAnchorINST->get_anchor_prev();
-    auto anchor_curr = lfAnchorINST->get_anchor_curr();
-
-    if ( anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG &&
-         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG &&
-         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG &&
-         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG &&
-         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG &&
-         anchor_prev != lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG )
+    if ( ntktype_prev != lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG &&
+         ntktype_prev != lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG &&
+         ntktype_prev != lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG &&
+         ntktype_prev != lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG &&
+         ntktype_prev != lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG &&
+         ntktype_prev != lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG )
     {
       return;
     }
-    if ( anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_ASIC ||
-         anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_NETLIST_FPGA ||
-         anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC ||
-         anchor_curr == lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA )
+    if ( ntktype_curr == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_ASIC ||
+         ntktype_curr == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA ||
+         ntktype_curr == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC ||
+         ntktype_curr == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA )
     {
       return;
     }
-    if ( anchor_prev == anchor_curr )
+    if ( ntktype_prev == ntktype_curr )
     {
       return;
     }
@@ -94,34 +90,34 @@ public:
       babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame_abc_ );
 
       // step1:  previous logic-based data structure -> IR
-      switch ( anchor_prev )
+      switch ( ntktype_prev )
       {
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG:
       {
         ntk = lf::logic::convert_abc_2_lsils<NtkIR>( pNtk );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::aig_seq_network>( frame_lsils_.curr_aig );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xag_seq_network>( frame_lsils_.curr_xag );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::mig_seq_network>( frame_lsils_.curr_mig );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xmg_seq_network>( frame_lsils_.curr_xmg );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG:
       {
         ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::gtg_seq_network>( frame_lsils_.curr_gtg );
         break;
@@ -134,35 +130,35 @@ public:
       }
 
       // step2:  IR -> current logic-based data structure
-      switch ( anchor_curr )
+      switch ( ntktype_curr )
       {
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_ABC_NTK_STRASH_AIG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG:
       {
         pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
         babc::Abc_FrameSetCurrentNetwork( frame_abc_, pNtk );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_AIG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG:
       {
         frame_lsils_.curr_aig = lf::logic::convert_lsils_internal<lsils::aig_seq_network, NtkIR>( ntk );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XAG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG:
       {
         frame_lsils_.curr_xag = lf::logic::convert_lsils_internal<lsils::xag_seq_network, NtkIR>( ntk );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_MIG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG:
       {
         frame_lsils_.curr_mig = lf::logic::convert_lsils_internal<lsils::mig_seq_network, NtkIR>( ntk );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_XMG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG:
       {
         frame_lsils_.curr_xmg = lf::logic::convert_lsils_internal<lsils::xmg_seq_network, NtkIR>( ntk );
         break;
       }
-      case lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG:
+      case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG:
       {
         frame_lsils_.curr_gtg = lf::logic::convert_lsils_internal<lsils::gtg_seq_network, NtkIR>( ntk );
         break;
@@ -302,74 +298,6 @@ private:
 }; // class LogicManager
 
 LogicManager* LogicManager::instance_ = nullptr;
-
-enum E_LF_LOGIC_NTK_TYPE
-{
-  E_LF_LOGIC_NTK_TYPE_AIG = 0,
-  E_LF_LOGIC_NTK_TYPE_XAG,
-  E_LF_LOGIC_NTK_TYPE_MIG,
-  E_LF_LOGIC_NTK_TYPE_XMG,
-  E_LF_LOGIC_NTK_TYPE_GTG,
-  E_LF_LOGIC_NTK_TYPE_CVG,
-  E_LF_LOGIC_NTK_TYPE_BLG,
-  E_LF_LOGIC_NTK_TYPE_KLUT,
-  E_LF_LOGIC_NTK_TYPE_BLUT,
-}; // enum E_LF_LOGIC_NTK_TYPE
-
-/**
- * @class
- * @brief
- */
-class LogicNtkType
-{
-public:
-  static LogicNtkType* get_instance()
-  {
-    if ( instance_ == nullptr )
-    {
-      instance_ = new LogicNtkType;
-    }
-    return instance_;
-  }
-
-  void set_nkt_type( E_LF_LOGIC_NTK_TYPE ntk_type ) { ntk_type_ = ntk_type; }
-
-  void set_nkt_type( const std::string& ntk_type )
-  {
-    if ( ntk_type == "aig" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_AIG;
-    else if ( ntk_type == "xag" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_XAG;
-    else if ( ntk_type == "mig" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_MIG;
-    else if ( ntk_type == "xmg" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_XMG;
-    else if ( ntk_type == "gtg" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_GTG;
-    else if ( ntk_type == "cvg" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_CVG;
-    else if ( ntk_type == "blg" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_BLG;
-    else if ( ntk_type == "klut" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_KLUT;
-    else if ( ntk_type == "blut" )
-      ntk_type_ = E_LF_LOGIC_NTK_TYPE_BLUT;
-  }
-
-  E_LF_LOGIC_NTK_TYPE get_nkt_type() const { return ntk_type_; }
-
-private:
-  LogicNtkType() = default;
-  ~LogicNtkType() = default;
-  LogicNtkType( const LogicNtkType& ) = delete;
-  LogicNtkType& operator=( const LogicNtkType& ) = delete;
-
-private:
-  static LogicNtkType* instance_;
-  E_LF_LOGIC_NTK_TYPE ntk_type_{ E_LF_LOGIC_NTK_TYPE_AIG };
-}; // class LogicManager
-
-LogicNtkType* LogicNtkType::instance_ = nullptr;
 
 } // end namespace logic
 
