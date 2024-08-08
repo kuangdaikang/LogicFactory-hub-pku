@@ -1,5 +1,9 @@
 #pragma once
+
+#include "layer_netlist/netlist_manager.hpp"
+
 #include "layer_logic/api/abc/frame.hpp"
+#include "layer_logic/api/lsils/frame.hpp"
 
 #include "platform/data_manager/idm.h"
 #include "database/manager/builder/builder.h"
@@ -48,7 +52,7 @@ public:
   }
 };
 
-void wrapper_abc_netlist( babc::Abc_Frame_t* frame_abc, idb::IdbBuilder* frame_idb )
+void wrapper_abc_netlist( const babc::Abc_Frame_t* frame_abc, idb::IdbBuilder* frame_idb )
 {
   WrapperAbcNetlist wrapper( frame_abc, frame_idb );
 }
