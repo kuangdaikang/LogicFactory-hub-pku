@@ -3,7 +3,7 @@
 ![Framework](LogicFactory.svg "framework")
 
 
-# Startup
+# Build
 - compile with docker
 ```
 > // get to the project root folder
@@ -16,4 +16,26 @@
 > mkdir build && cd build
 > cmake ..
 > make -j 8
+```
+
+# Getting Started
+- RUN with tcl
+```
+$ ./build/app/logicfactory -s "demo/test.tcl"
+```
+
+- RUN with command sequence
+```
+$ ./build/app/logicfactory -s "help; start;"
+```
+
+- RUN with command line
+```
+$ ./build/app/logicfactory
+--------------------------------------------
+*    Welcome to LogicFactory (Platform)    *
+*               Version 0.1                *
+*     https://github.com/Logic-Factory     *
+--------------------------------------------
+% help
 ```
