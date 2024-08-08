@@ -11,13 +11,12 @@ namespace ieda
 
 /**
  * @brief
- *
+ * @note
+ *  this command is after config
  */
-void run_init( const std::string& file_config )
+void run_init()
 {
   lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_NETLIST_IEDA_INIT );
-
-  lfNmINST->set_config_ieda( file_config );
 
   std::string verilog_file = lfNmINST->get_config_ieda()->get_verilog_file();
   std::string top_module = lfNmINST->get_config_ieda()->get_top_module();
