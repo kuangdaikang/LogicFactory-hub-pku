@@ -50,31 +50,30 @@ void run_placement( bool is_report_placement = false )
   std::string workspace = lfNmINST->get_config_ieda()->get_workspace_pl();
   std::string placement_config_file = lfNmINST->get_config_ieda()->get_config_placement_file();
 
-  std::ifstream file_stream( placement_config_file );
-  if ( !file_stream.is_open() )
-  {
-    std::cerr << "Error opening the configuration file: " << placement_config_file << std::endl;
-    assert( false );
-  }
+  // nlohmann::json json_config;
+  // std::ifstream file_stream( placement_config_file );
+  // if ( !file_stream.is_open() )
+  // {
+  //   std::cerr << "Error opening the configuration file: " << placement_config_file << std::endl;
+  //   assert( false );
+  // }
+  // file_stream >> json_config;
+  // assert( json_config.contains( "PL" ) );
 
-  nlohmann::json json_config;
-  file_stream >> json_config;
-  assert( json_config.contains( "PL" ) );
+  // json_config.at( "PL" ).at( "pl_dir" ) = workspace;
+  // file_stream.close();
 
-  json_config.at( "PL" ).at( "pl_dir" ) = workspace;
-  file_stream.close();
-
-  std::ofstream file_stream_out( placement_config_file, std::ios::out | std::ios::trunc );
-  if ( file_stream_out.is_open() )
-  {
-    file_stream_out << json_config << std::endl;
-    file_stream_out.close();
-  }
-  else
-  {
-    std::cerr << "Error saving modified configuration file." << std::endl;
-    assert( false );
-  }
+  // std::ofstream file_stream_out( placement_config_file, std::ios::out | std::ios::trunc );
+  // if ( file_stream_out.is_open() )
+  // {
+  //   file_stream_out << json_config << std::endl;
+  //   file_stream_out.close();
+  // }
+  // else
+  // {
+  //   std::cerr << "Error saving modified configuration file." << std::endl;
+  //   assert( false );
+  // }
 
   init_placement( placement_config_file );
 

@@ -6,7 +6,7 @@
         "is_congestion_effort": 0,
         "ignore_net_degree": 100,
         "num_threads": 1,
-        "pl_dir": "./result",
+        "pl_dir": "/tmp/workspace_lf/pl/",
         "GP": {
             "Wirelength": {
                 "init_wirelength_coef": 0.25,
