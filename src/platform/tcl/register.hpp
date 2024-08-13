@@ -57,6 +57,7 @@ int registerCmds()
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteTruth, "write_truth" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteRtlil, "write_rtlil" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteSpice, "write_spice" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteGraphml, "write_graphml" );
 
   //////////////////////////////////////////////////////////
   // arch

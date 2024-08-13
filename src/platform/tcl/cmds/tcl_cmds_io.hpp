@@ -57,6 +57,7 @@
 #include "layer_logic/api/lsils/io/write_cnf.hpp"
 #include "layer_logic/api/lsils/io/write_dot.hpp"
 #include "layer_logic/api/lsils/io/write_verilog.hpp"
+#include "layer_logic/aux/graphmize.hpp"
 
 namespace lf
 {
@@ -2182,6 +2183,71 @@ public:
     return 1;
   }
 }; // class CmdLfIoWriteVerilog
+
+class CmdLfIoWriteGraphml : public TclCmd
+{
+public:
+  explicit CmdLfIoWriteGraphml( const char* cmd_name ) : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "" } };
+    setOptions( this, options );
+  }
+
+  ~CmdLfIoWriteGraphml() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = {
+        "-file" };
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::write_graphml( strOptionsValue["-file"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
+}; // class CmdLfIoWriteGraphml
 
 } // namespace tcl
 
