@@ -70,6 +70,7 @@ int registerCmds()
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArchAigmap, "aigmap" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArchAbc, "abc" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArchGtechmap, "gtechmap" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchRename, "rename" );
 
   //////////////////////////////////////////////////////////
   // logic

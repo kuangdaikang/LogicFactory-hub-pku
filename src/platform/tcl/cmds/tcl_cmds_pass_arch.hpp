@@ -14,6 +14,7 @@
 #include "layer_arch/api/yosys/pass/aigmap.hpp"
 #include "layer_arch/api/yosys/pass/techmap.hpp"
 #include "layer_arch/api/yosys/pass/abc.hpp"
+#include "layer_arch/api/yosys/pass/rename.hpp"
 
 namespace lf
 {
@@ -624,5 +625,71 @@ public:
     return 1;
   }
 }; // class CmdLfArchGtechmap
+
+class CmdLfArchRename : public TclCmd
+{
+public:
+  explicit CmdLfArchRename( const char* cmd_name )
+      : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "";
+    this->set_description( description );
+    std::string domain = "arch";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-top", "yosys", "string", "" } };
+
+    setOptions( this, options );
+  }
+
+  ~CmdLfArchRename() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = {};
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = { "-top" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      lf::arch::yosys::rename( strOptionsValue["-top"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
+}; // class CmdLfArchRename
+
 } // namespace tcl
 } // namespace lf
