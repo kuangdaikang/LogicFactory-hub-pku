@@ -24,6 +24,7 @@
 #include "layer_logic/api/lsils/pass/resub.hpp"
 #include "layer_logic/api/lsils/pass/map_fpga.hpp"
 #include "layer_logic/api/lsils/pass/map_asic.hpp"
+#include "layer_logic/api/lsils/pass/strash.hpp"
 
 namespace lf
 {
@@ -210,6 +211,7 @@ public:
       lf::logic::abc::strash( boolOptionsValue["-a"], boolOptionsValue["-c"], boolOptionsValue["-r"], boolOptionsValue["-i"] );
       break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::strash();
       break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
