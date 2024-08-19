@@ -206,6 +206,7 @@ public:
 
   void gen_portbox( std::string port, RTLIL::SigSpec sig, bool driver, std::string* node = nullptr )
   {
+    printf( "port: %s\n", port.c_str() );
     std::string net = gen_signode_simple( sig );
     assert( !net.empty() );
 
@@ -279,7 +280,7 @@ public:
       }
     }
 
-    // create latch_output
+    // create latch_output, this should be processed first
     printf( "process latch_outputs:\n" );
     for ( auto cell : module->selected_cells() )
     {
@@ -290,13 +291,14 @@ public:
         std::vector<RTLIL::IdString> in_ports, out_ports;
         for ( auto& conn : cell->connections() )
         {
-          if ( !ct.cell_output( cell->type, conn.first ) )
+          auto port_type = conn.first.str();
+          if ( ct.cell_output( cell->type, conn.first ) || port_type == "\O" )
           {
-            in_ports.push_back( conn.first );
+            out_ports.push_back( conn.first );
           }
           else
           {
-            out_ports.push_back( conn.first );
+            in_ports.push_back( conn.first );
           }
         }
 
@@ -336,13 +338,14 @@ public:
       for ( auto& conn : cell->connections() )
       {
         gen_portbox( stringf( "c%d:p%d", id2num( cell->name ), id2num( conn.first ) ), conn.second, ct.cell_output( cell->type, conn.first ) );
-        if ( !ct.cell_output( cell->type, conn.first ) )
+        auto port_type = conn.first.str();
+        if ( ct.cell_output( cell->type, conn.first ) || port_type == "\\O" )
         {
-          in_ports.push_back( conn.first );
+          out_ports.push_back( conn.first );
         }
         else
         {
-          out_ports.push_back( conn.first );
+          in_ports.push_back( conn.first );
         }
       }
 
@@ -365,7 +368,11 @@ public:
         printf( "fanout: %s\n", port_name.c_str() );
       }
 
-      if ( cell_type == "$_NOT_" )
+      if ( cell_type == "$_NOT_" ||
+           cell_type == "not" ||
+           cell_type == "inv" ||
+           cell_type == "\\not" ||
+           cell_type == "\\inv" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
@@ -373,7 +380,9 @@ public:
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first }, { lhs },
                                           /* gate-function params */ std::make_tuple( args, lhs, "not" ) );
       }
-      else if ( cell_type == "$_BUF_" )
+      else if ( cell_type == "$_BUF_" ||
+                cell_type == "buf" ||
+                cell_type == "\\buf" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
@@ -381,59 +390,107 @@ public:
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first }, { lhs },
                                           /* gate-function params */ std::make_tuple( args, lhs, "buf" ) );
       }
-      else if ( cell_type == "$_AND_" )
+      else if ( cell_type == "$_AND_" ||
+                cell_type == "and2" ||
+                cell_type == "\\and2" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
         std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
         std::vector<std::pair<std::string, bool>> args{ op1, op2 };
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
-                                          /* gate-function params */ std::make_tuple( args, lhs, "and" ) );
+                                          /* gate-function params */ std::make_tuple( args, lhs, "and2" ) );
       }
-      else if ( cell_type == "$_NAND_" )
+      else if ( cell_type == "$_NAND_" ||
+                cell_type == "nand2" ||
+                cell_type == "\\nand2" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
         std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
         std::vector<std::pair<std::string, bool>> args{ op1, op2 };
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
-                                          /* gate-function params */ std::make_tuple( args, lhs, "nand" ) );
+                                          /* gate-function params */ std::make_tuple( args, lhs, "nand2" ) );
       }
-      else if ( cell_type == "$_OR_" )
+      else if ( cell_type == "$_OR_" ||
+                cell_type == "or2" ||
+                cell_type == "\\or2" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
         std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
         std::vector<std::pair<std::string, bool>> args{ op1, op2 };
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
-                                          /* gate-function params */ std::make_tuple( args, lhs, "or" ) );
+                                          /* gate-function params */ std::make_tuple( args, lhs, "or2" ) );
       }
-      else if ( cell_type == "$_NOR_" )
+      else if ( cell_type == "$_NOR_" ||
+                cell_type == "nor2" ||
+                cell_type == "\\nor2" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
         std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
         std::vector<std::pair<std::string, bool>> args{ op1, op2 };
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
-                                          /* gate-function params */ std::make_tuple( args, lhs, "nor" ) );
+                                          /* gate-function params */ std::make_tuple( args, lhs, "nor2" ) );
       }
-      else if ( cell_type == "$_XOR_" )
+      else if ( cell_type == "$_XOR_" ||
+                cell_type == "xor2" ||
+                cell_type == "\\xor2" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
         std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
         std::vector<std::pair<std::string, bool>> args{ op1, op2 };
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
-                                          /* gate-function params */ std::make_tuple( args, lhs, "xor" ) );
+                                          /* gate-function params */ std::make_tuple( args, lhs, "xor2" ) );
       }
-      else if ( cell_type == "$_XNOR_" )
+      else if ( cell_type == "$_XNOR_" ||
+                cell_type == "xnor2" ||
+                cell_type == "\\xnor2" )
       {
         std::string lhs = fanout_ports[0];
         std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
         std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
         std::vector<std::pair<std::string, bool>> args{ op1, op2 };
         on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first }, { lhs },
-                                          /* gate-function params */ std::make_tuple( args, lhs, "xnor" ) );
+                                          /* gate-function params */ std::make_tuple( args, lhs, "xnor2" ) );
+      }
+      else if ( cell_type == "$_MAJ_" ||
+                cell_type == "maj3" ||
+                cell_type == "\\maj3" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::pair<std::string, bool> op3 = std::make_pair( fanin_ports[2], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2, op3 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first, op3.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "maj" ) );
+      }
+      else if ( cell_type == "$_MUX_" ||
+                cell_type == "mux" ||
+                cell_type == "\\mux" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::pair<std::string, bool> op3 = std::make_pair( fanin_ports[2], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2, op3 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first, op3.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "mux" ) );
+      }
+      else if ( cell_type == "$_XOR3_" ||
+                cell_type == "xor3" ||
+                cell_type == "\\xor3" )
+      {
+        std::string lhs = fanout_ports[0];
+        std::pair<std::string, bool> op1 = std::make_pair( fanin_ports[0], false );
+        std::pair<std::string, bool> op2 = std::make_pair( fanin_ports[1], false );
+        std::pair<std::string, bool> op3 = std::make_pair( fanin_ports[2], false );
+        std::vector<std::pair<std::string, bool>> args{ op1, op2, op3 };
+        on_action.call_deferred<GATE_FN>( /* dependencies */ { op1.first, op2.first, op3.first }, { lhs },
+                                          /* gate-function params */ std::make_tuple( args, lhs, "xor3" ) );
       }
       else if ( cell_type == "$_FF_" )
       {
@@ -575,6 +632,7 @@ public:
 
     // check the unconnected nodes/ gates
     const auto& deps = on_action.unresolved_dependencies();
+    // TODO: still bugs here when using abc for technology mapping
     assert( deps.size() == 0u );
 
     // create the outputs
@@ -622,35 +680,50 @@ public:
                                   auto init = lorina::gtech_reader::latch_init_value::NONDETERMINISTIC;
                                   reader.on_latch( output, inputs[0], init );
                                 }
-                                else if ( type == "and" )
+                                else if ( type == "and2" )
                                 {
                                   assert( inputs.size() == 2u );
                                   reader.on_and( output, inputs[0], inputs[1] );
                                 }
-                                else if ( type == "nand" )
+                                else if ( type == "nand2" )
                                 {
                                   assert( inputs.size() == 2u );
                                   reader.on_nand( output, inputs[0], inputs[1] );
                                 }
-                                else if ( type == "or" )
+                                else if ( type == "or2" )
                                 {
                                   assert( inputs.size() == 2u );
                                   reader.on_or( output, inputs[0], inputs[1] );
                                 }
-                                else if ( type == "nor" )
+                                else if ( type == "nor2" )
                                 {
                                   assert( inputs.size() == 2u );
                                   reader.on_nor( output, inputs[0], inputs[1] );
                                 }
-                                else if ( type == "xor" )
+                                else if ( type == "xor2" )
                                 {
                                   assert( inputs.size() == 2u );
                                   reader.on_xor( output, inputs[0], inputs[1] );
                                 }
-                                else if ( type == "xnor" )
+                                else if ( type == "xnor2" )
                                 {
                                   assert( inputs.size() == 2u );
                                   reader.on_xnor( output, inputs[0], inputs[1] );
+                                }
+                                else if ( type == "maj" )
+                                {
+                                  assert( inputs.size() == 3u );
+                                  reader.on_maj( output, inputs[0], inputs[1], inputs[2] );
+                                }
+                                else if ( type == "mux" )
+                                {
+                                  assert( inputs.size() == 3u );
+                                  reader.on_ite( output, inputs[0], inputs[1], inputs[2] );
+                                }
+                                else if ( type == "xor3" )
+                                {
+                                  assert( inputs.size() == 3u );
+                                  reader.on_xor3( output, inputs[0], inputs[1], inputs[2] );
                                 }
                                 else
                                 {
