@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <assert.h>
 
-// logic manager instance
-#define lfLmINST lf::logic::LogicManager::get_instance()
+// logic network type instance
+#define lfLntINST lf::misc::LogicNtkType::get_instance()
 
 namespace lf
 {

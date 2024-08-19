@@ -12,8 +12,8 @@
 #include <assert.h>
 #include <iostream>
 
-// logic network type instance
-#define lfLntINST lf::misc::LogicNtkType::get_instance()
+// logic manager instance
+#define lfLmINST lf::logic::LogicManager::get_instance()
 
 namespace lf
 {
