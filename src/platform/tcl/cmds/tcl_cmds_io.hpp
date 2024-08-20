@@ -57,7 +57,7 @@
 #include "layer_logic/api/lsils/io/write_cnf.hpp"
 #include "layer_logic/api/lsils/io/write_dot.hpp"
 #include "layer_logic/api/lsils/io/write_verilog.hpp"
-#include "layer_logic/aux/graphmize.hpp"
+#include "layer_logic/aux/write_graphml.hpp"
 
 namespace lf
 {
@@ -2238,6 +2238,12 @@ public:
 
     switch ( anchor_domain )
     {
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+      std::cerr << "TODO ing!" << std::endl;
+      break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+      lf::logic::write_graphml( strOptionsValue["-file"] );
+      break;
     case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
       lf::logic::write_graphml( strOptionsValue["-file"] );
       break;
