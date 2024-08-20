@@ -103,7 +103,7 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
     assert( false );
   }
 
-  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_FPGA );
+  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA );
 }
 
 } // end namespace lsils

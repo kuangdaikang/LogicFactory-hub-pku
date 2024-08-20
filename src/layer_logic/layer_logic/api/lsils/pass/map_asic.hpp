@@ -99,8 +99,8 @@ void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -
     std::cerr << "unsupport network type!\n";
     assert( false );
   }
-
-  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_NETLIST_ASIC );
+  
+  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC );
 }
 
 } // end namespace lsils

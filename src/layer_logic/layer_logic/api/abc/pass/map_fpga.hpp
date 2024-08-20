@@ -31,7 +31,8 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
                bool is_out_buffers = false, bool is_jcheck = false, bool is_i_cofactor = false, bool is_k_dsd_manager = false, bool is_t_average = false,
                bool is_n_dsd_cutfunc = false, bool is_cut_new_truth = false, bool is_z_derive_luts = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA );
+  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG ); // AIG for technology mapping
+
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name
@@ -192,6 +193,7 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -v " ).c_str() );
 
   babc::Abc_CommandIf( ntk_ptr, argc, argv );
+  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA );
 }
 
 } // namespace abc

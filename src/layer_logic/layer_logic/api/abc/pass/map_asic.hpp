@@ -29,7 +29,8 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
                bool is_area_only = false, bool is_recovery_area = false, bool is_sweep = false, bool is_power_aware = false, bool is_fanout_high_skip = false,
                bool is_use_stdcell_profile = false, bool is_output_buffer = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_ASIC );
+  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG ); // AIG for technology mapping
+
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name
@@ -106,6 +107,7 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -v " ).c_str() );
 
   babc::Abc_CommandMap( ntk_ptr, argc, argv );
+  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_ASIC );
 }
 
 } // namespace abc
