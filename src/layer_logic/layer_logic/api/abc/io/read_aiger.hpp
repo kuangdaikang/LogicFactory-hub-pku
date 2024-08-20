@@ -32,7 +32,7 @@ void read_aiger( const std::string& file, bool is_checking = false )
     return;
   }
 
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
+  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_AIG );
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name
