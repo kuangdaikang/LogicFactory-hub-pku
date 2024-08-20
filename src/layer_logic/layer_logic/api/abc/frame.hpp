@@ -6,6 +6,100 @@
 
 namespace ABC_NAMESPACE
 {
+#if defined( __ccdoc__ )
+typedef platform_dependent_type ABC_PTRDIFF_T;
+#elif defined( ABC_USE_STDINT_H )
+typedef ptrdiff_t ABC_PTRDIFF_T;
+#elif defined( LIN64 )
+typedef long ABC_PTRDIFF_T;
+#elif defined( NT64 )
+typedef long long ABC_PTRDIFF_T;
+#elif defined( NT ) || defined( LIN ) || defined( WIN32 )
+typedef int ABC_PTRDIFF_T;
+#else
+#error unknown platform
+#endif /* defined(PLATFORM) */
+
+/**
+ * Unsigned integral type that can contain a pointer.
+ * This is an unsigned integral type that is the same size as a pointer.
+ * NOTE: This type may be different sizes on different platforms.
+ */
+#if defined( __ccdoc__ )
+typedef platform_dependent_type ABC_PTRUINT_T;
+#elif defined( ABC_USE_STDINT_H )
+typedef uintptr_t ABC_PTRUINT_T;
+#elif defined( LIN64 )
+typedef unsigned long ABC_PTRUINT_T;
+#elif defined( NT64 )
+typedef unsigned long long ABC_PTRUINT_T;
+#elif defined( NT ) || defined( LIN ) || defined( WIN32 )
+typedef unsigned int ABC_PTRUINT_T;
+#else
+#error unknown platform
+#endif /* defined(PLATFORM) */
+
+/**
+ * Signed integral type that can contain a pointer.
+ * This is a signed integral type that is the same size as a pointer.
+ * NOTE: This type may be different sizes on different platforms.
+ */
+#if defined( __ccdoc__ )
+typedef platform_dependent_type ABC_PTRINT_T;
+#elif defined( ABC_USE_STDINT_H )
+typedef intptr_t ABC_PTRINT_T;
+#elif defined( LIN64 )
+typedef long ABC_PTRINT_T;
+#elif defined( NT64 )
+typedef long long ABC_PTRINT_T;
+#elif defined( NT ) || defined( LIN ) || defined( WIN32 )
+typedef int ABC_PTRINT_T;
+#else
+#error unknown platform
+#endif /* defined(PLATFORM) */
+
+/**
+ * 64-bit signed integral type.
+ */
+#if defined( __ccdoc__ )
+typedef platform_dependent_type ABC_INT64_T;
+#elif defined( ABC_USE_STDINT_H )
+typedef int64_t ABC_INT64_T;
+#elif defined( LIN64 )
+typedef long ABC_INT64_T;
+#elif defined( NT64 ) || defined( LIN )
+typedef long long ABC_INT64_T;
+#elif defined( WIN32 ) || defined( NT )
+typedef signed __int64 ABC_INT64_T;
+#else
+#error unknown platform
+#endif /* defined(PLATFORM) */
+
+/**
+ * 64-bit unsigned integral type.
+ */
+#if defined( __ccdoc__ )
+typedef platform_dependent_type ABC_UINT64_T;
+#elif defined( ABC_USE_STDINT_H )
+typedef uint64_t ABC_UINT64_T;
+#elif defined( LIN64 )
+typedef unsigned long ABC_UINT64_T;
+#elif defined( NT64 ) || defined( LIN )
+typedef unsigned long long ABC_UINT64_T;
+#elif defined( WIN32 ) || defined( NT )
+typedef unsigned __int64 ABC_UINT64_T;
+#else
+#error unknown platform
+#endif /* defined(PLATFORM) */
+
+#ifdef LIN
+#define ABC_CONST( number ) number##ULL
+#else // LIN64 and windows
+#define ABC_CONST( number ) number
+#endif
+
+typedef ABC_UINT64_T word;
+typedef ABC_INT64_T iword;
 
 typedef struct Abc_Frame_t_ Abc_Frame_t;
 typedef struct Aig_Man_t_ Aig_Man_t;
@@ -19,6 +113,17 @@ typedef struct Vec_Ptr_t_ Vec_Ptr_t;
 typedef struct Vec_Wec_t_ Vec_Wec_t;
 typedef struct Vec_Int_t_ Vec_Int_t;
 typedef struct Vec_Str_t_ Vec_Str_t;
+
+typedef struct Mio_LibraryStruct_t_ Mio_Library_t;
+typedef struct Mio_GateStruct_t_ Mio_Gate_t;
+typedef struct Mio_PinStruct_t_ Mio_Pin_t;
+typedef struct Mio_Cell_t_ Mio_Cell_t;
+typedef enum
+{
+  MIO_PHASE_UNKNOWN,
+  MIO_PHASE_INV,
+  MIO_PHASE_NONINV
+} Mio_PinPhase_t;
 
 //////////////////////////////////////////////////////////////////////
 /// MAIN FRAME
@@ -649,5 +754,77 @@ Abc_Ntk_t* Abc_NtkFromAigPhase( Aig_Man_t* pMan );
 
 Vec_Ptr_t* Abc_NtkCollectCiNames( Abc_Ntk_t* pNtk );
 Vec_Ptr_t* Abc_NtkCollectCoNames( Abc_Ntk_t* pNtk );
+
+//////////////////////////////////////////////////////////////////////
+/// STANDARD CELL LIBRARY
+//////////////////////////////////////////////////////////////////////
+char* Mio_LibraryReadName( Mio_Library_t* pLib );
+int Mio_LibraryReadGateNum( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadGates( Mio_Library_t* pLib );
+Mio_Gate_t** Mio_LibraryReadGateArray( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadGateById( Mio_Library_t* pLib, int iD );
+Mio_Gate_t* Mio_LibraryReadGateByName( Mio_Library_t* pLib, char* pName, char* pOutName );
+char* Mio_LibraryReadSopByName( Mio_Library_t* pLib, char* pName );
+Mio_Gate_t* Mio_LibraryReadGateByTruth( Mio_Library_t* pLib, word t );
+Mio_Gate_t* Mio_LibraryReadConst0( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadConst1( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadNand2( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadAnd2( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadNor2( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadOr2( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadBuf( Mio_Library_t* pLib );
+Mio_Gate_t* Mio_LibraryReadInv( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayInvRise( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayInvFall( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayInvMax( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayNand2Rise( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayNand2Fall( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayNand2Max( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayAnd2Max( Mio_Library_t* pLib );
+float Mio_LibraryReadDelayAigNode( Mio_Library_t* pLib );
+float Mio_LibraryReadAreaInv( Mio_Library_t* pLib );
+float Mio_LibraryReadAreaBuf( Mio_Library_t* pLib );
+float Mio_LibraryReadAreaNand2( Mio_Library_t* pLib );
+int Mio_LibraryReadGateNameMax( Mio_Library_t* pLib );
+void Mio_LibrarySetName( Mio_Library_t* pLib, char* pName );
+char* Mio_GateReadName( Mio_Gate_t* pGate );
+char* Mio_GateReadOutName( Mio_Gate_t* pGate );
+double Mio_GateReadArea( Mio_Gate_t* pGate );
+char* Mio_GateReadForm( Mio_Gate_t* pGate );
+Mio_Pin_t* Mio_GateReadPins( Mio_Gate_t* pGate );
+Mio_Library_t* Mio_GateReadLib( Mio_Gate_t* pGate );
+Mio_Gate_t* Mio_GateReadNext( Mio_Gate_t* pGate );
+Mio_Gate_t* Mio_GateReadTwin( Mio_Gate_t* pGate );
+int Mio_GateReadPinNum( Mio_Gate_t* pGate );
+double Mio_GateReadDelayMax( Mio_Gate_t* pGate );
+char* Mio_GateReadSop( Mio_Gate_t* pGate );
+Vec_Int_t* Mio_GateReadExpr( Mio_Gate_t* pGate );
+word Mio_GateReadTruth( Mio_Gate_t* pGate );
+word* Mio_GateReadTruthP( Mio_Gate_t* pGate );
+int Mio_GateReadValue( Mio_Gate_t* pGate );
+int Mio_GateReadCell( Mio_Gate_t* pGate );
+int Mio_GateReadProfile( Mio_Gate_t* pGate );
+int Mio_GateReadProfile2( Mio_Gate_t* pGate );
+char* Mio_GateReadPinName( Mio_Gate_t* pGate, int iPin );
+float Mio_GateReadPinDelay( Mio_Gate_t* pGate, int iPin );
+void Mio_GateSetValue( Mio_Gate_t* pGate, int Value );
+void Mio_GateSetCell( Mio_Gate_t* pGate, int Cell );
+void Mio_GateSetProfile( Mio_Gate_t* pGate, int Prof );
+void Mio_GateSetProfile2( Mio_Gate_t* pGate, int Prof );
+void Mio_GateIncProfile2( Mio_Gate_t* pGate );
+void Mio_GateDecProfile2( Mio_Gate_t* pGate );
+void Mio_GateAddToProfile( Mio_Gate_t* pGate, int Prof );
+void Mio_GateAddToProfile2( Mio_Gate_t* pGate, int Prof );
+int Mio_GateIsInv( Mio_Gate_t* pGate );
+char* Mio_PinReadName( Mio_Pin_t* pPin );
+Mio_PinPhase_t Mio_PinReadPhase( Mio_Pin_t* pPin );
+double Mio_PinReadInputLoad( Mio_Pin_t* pPin );
+double Mio_PinReadMaxLoad( Mio_Pin_t* pPin );
+double Mio_PinReadDelayBlockRise( Mio_Pin_t* pPin );
+double Mio_PinReadDelayFanoutRise( Mio_Pin_t* pPin );
+double Mio_PinReadDelayBlockFall( Mio_Pin_t* pPin );
+double Mio_PinReadDelayFanoutFall( Mio_Pin_t* pPin );
+double Mio_PinReadDelayBlockMax( Mio_Pin_t* pPin );
+Mio_Pin_t* Mio_PinReadNext( Mio_Pin_t* pPin );
 
 } // namespace ABC_NAMESPACE
