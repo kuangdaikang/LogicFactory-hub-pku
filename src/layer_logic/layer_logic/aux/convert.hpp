@@ -102,6 +102,21 @@ NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
     {
       old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xnor( new_c0, new_c1 ) );
     }
+    else if ( ntk_src.is_maj( g ) )
+    {
+      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
+      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_maj( new_c0, new_c1, new_c2 ) );
+    }
+    else if ( ntk_src.is_ite( g ) )
+    {
+      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
+      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_ite( new_c0, new_c1, new_c2 ) );
+    }
+    else if ( ntk_src.is_xor3( g ) )
+    {
+      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
+      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xor3( new_c0, new_c1, new_c2 ) );
+    }
     else
     {
       assert( false );
@@ -137,7 +152,7 @@ babc::Abc_Ntk_t* convert_lsils_2_abc( Ntk const& ntk_src )
 
   babc::Vec_Ptr_t* vNodes;
   babc::Abc_Ntk_t* pNtk;
-  babc::Abc_Obj_t *pObj, *pNode0, *pNode1, *pConst1;
+  babc::Abc_Obj_t *pObj, *pNode0, *pNode1, *pNode2, *pConst1;
 
   std::unordered_map<SNode, DNode> old_2_new;
 
@@ -181,7 +196,7 @@ babc::Abc_Ntk_t* convert_lsils_2_abc( Ntk const& ntk_src )
       children.push_back( c );
     } );
 
-    assert( children.size() <= 2 );
+    assert( children.size() <= 3 );
     pNode0 = babc::Abc_ObjNotCond( old_2_new[children[0].index], ntk_src.is_complemented( children[0] ) ? 1 : 0 );
     pNode1 = babc::Abc_ObjNotCond( old_2_new[children[1].index], ntk_src.is_complemented( children[1] ) ? 1 : 0 );
 
@@ -223,7 +238,27 @@ babc::Abc_Ntk_t* convert_lsils_2_abc( Ntk const& ntk_src )
     }
     else if ( ntk_src.is_maj( g ) )
     {
-      assert( false );
+      pNode2 = babc::Abc_ObjNotCond( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
+      babc::Abc_Obj_t* c1 = babc::Abc_AigXor( (babc::Abc_Aig_t*)pNtk->pManFunc, pNode0, pNode1 );
+      babc::Abc_Obj_t* c2 = babc::Abc_AigXor( (babc::Abc_Aig_t*)pNtk->pManFunc, pNode0, pNode2 );
+      babc::Abc_Obj_t* c3 = babc::Abc_AigAnd( (babc::Abc_Aig_t*)pNtk->pManFunc, c1, c2 );
+      old_2_new[g] = babc::Abc_AigXor( (babc::Abc_Aig_t*)pNtk->pManFunc, pNode0, c3 );
+      assert( Vec_PtrSize( vNodes ) == index + 1 + ntk_src.num_pis() );
+      Vec_PtrPush( vNodes, old_2_new[g] );
+    }
+    else if ( ntk_src.is_ite( g ) )
+    {
+      pNode2 = babc::Abc_ObjNotCond( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
+      old_2_new[g] = babc::Abc_AigMux( (babc::Abc_Aig_t*)pNtk->pManFunc, pNode0, pNode1, pNode2 );
+      assert( Vec_PtrSize( vNodes ) == index + 1 + ntk_src.num_pis() );
+      Vec_PtrPush( vNodes, old_2_new[g] );
+    }
+    else if ( ntk_src.is_xor3( g ) )
+    {
+      pNode2 = babc::Abc_ObjNotCond( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
+      old_2_new[g] = babc::Abc_AigXor( (babc::Abc_Aig_t*)pNtk->pManFunc, babc::Abc_AigXor( (babc::Abc_Aig_t*)pNtk->pManFunc, pNode0, pNode1 ), pNode2 );
+      assert( Vec_PtrSize( vNodes ) == index + 1 + ntk_src.num_pis() );
+      Vec_PtrPush( vNodes, old_2_new[g] );
     }
     else
     {
