@@ -27,15 +27,18 @@ namespace logic
 template<class Ntk>
 void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 {
-  using NtkBase = typename Ntk::base_type;
+  using NtkBase = Ntk;
   using Node = typename Ntk::node;
   using Signal = typename Ntk::signal;
-  static_assert( std::is_same_v<NtkBase, mockturtle::aig_network> ||
-                     std::is_same_v<NtkBase, mockturtle::xag_network> ||
-                     std::is_same_v<NtkBase, mockturtle::mig_network> ||
-                     std::is_same_v<NtkBase, mockturtle::xmg_network> ||
-                     std::is_same_v<NtkBase, mockturtle::gtg_network>,
-                 "ntk is not an ntk, XAG, MIG, XMG, or GTG" );
+  static_assert( std::is_same_v<NtkBase, lf::logic::lsils::aig_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::xag_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::mig_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::xmg_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::gtg_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::cvg_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::klut_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::blut_seq_network>,
+                 "ntk is not an ntk, XAG, MIG, XMG, GTG, CVG, KLUT or BLUT" );
 
   pugi::xml_document doc;
   auto declarationNode = doc.append_child( pugi::node_declaration );
@@ -113,46 +116,66 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     xmlNode_gate.append_attribute( "id" ) = g_id;
     auto dataNode_gate = xmlNode_gate.append_child( "data" );
     dataNode_gate.append_attribute( "key" ) = "nodeType";
-    if ( ntk.is_and( g ) )
+    if constexpr ( std::is_same_v<NtkBase, lf::logic::lsils::aig_seq_network> ||
+                   std::is_same_v<NtkBase, lf::logic::lsils::xag_seq_network> ||
+                   std::is_same_v<NtkBase, lf::logic::lsils::mig_seq_network> ||
+                   std::is_same_v<NtkBase, lf::logic::lsils::xmg_seq_network> ||
+                   std::is_same_v<NtkBase, lf::logic::lsils::gtg_seq_network> )
     {
-      dataNode_gate.text().set( "AND2" );
+      if ( ntk.is_and( g ) )
+      {
+        dataNode_gate.text().set( "AND2" );
+      }
+      else if ( ntk.is_nand( g ) )
+      {
+        dataNode_gate.text().set( "NAND2" );
+      }
+      else if ( ntk.is_or( g ) )
+      {
+        dataNode_gate.text().set( "OR2" );
+      }
+      else if ( ntk.is_nor( g ) )
+      {
+        dataNode_gate.text().set( "NOR2" );
+      }
+      else if ( ntk.is_xor( g ) )
+      {
+        dataNode_gate.text().set( "XOR2" );
+      }
+      else if ( ntk.is_xnor( g ) )
+      {
+        dataNode_gate.text().set( "XNOR2" );
+      }
+      else if ( ntk.is_maj( g ) )
+      {
+        dataNode_gate.text().set( "MAJ3" );
+      }
+      else if ( ntk.is_xor3( g ) )
+      {
+        dataNode_gate.text().set( "XOR3" );
+      }
+      else if ( ntk.is_xor3( g ) )
+      {
+        dataNode_gate.text().set( "XOR3" );
+      }
+      else
+      {
+        assert( false );
+      }
     }
-    else if ( ntk.is_nand( g ) )
+    else if constexpr ( std::is_same_v<NtkBase, lf::logic::lsils::klut_seq_network> )
     {
-      dataNode_gate.text().set( "NAND2" );
+      std::string node_name = "LUT" + std::to_string( ntk.fanin_size( g ) );
+      dataNode_gate.text().set( node_name.c_str() );
     }
-    else if ( ntk.is_or( g ) )
+    else if constexpr ( std::is_same_v<NtkBase, lf::logic::lsils::blut_seq_network> )
     {
-      dataNode_gate.text().set( "OR2" );
+      assert( ntk.has_binding( g ) );
+      auto gate = ntk.get_binding( g );
+
+      dataNode_gate.text().set( gate.name.c_str() );
     }
-    else if ( ntk.is_nor( g ) )
-    {
-      dataNode_gate.text().set( "NOR2" );
-    }
-    else if ( ntk.is_xor( g ) )
-    {
-      dataNode_gate.text().set( "XOR2" );
-    }
-    else if ( ntk.is_xnor( g ) )
-    {
-      dataNode_gate.text().set( "XNOR2" );
-    }
-    else if ( ntk.is_maj( g ) )
-    {
-      dataNode_gate.text().set( "MAJ3" );
-    }
-    else if ( ntk.is_xor3( g ) )
-    {
-      dataNode_gate.text().set( "XOR3" );
-    }
-    else if ( ntk.is_xor3( g ) )
-    {
-      dataNode_gate.text().set( "XOR3" );
-    }
-    else
-    {
-      assert( false );
-    }
+
     auto dataName_gate = xmlNode_gate.append_child( "data" );
     dataName_gate.append_attribute( "key" ) = "nodeName";
     dataName_gate.text().set( g_id );
@@ -522,13 +545,13 @@ void write_graphml( const std::string& file )
             ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA )
   {
     lf::logic::lsils::klut_seq_network ntk = lfLmINST->current<lf::logic::lsils::klut_seq_network>();
-    std::cerr << "TODO ing!\n";
+    lsils_to_graphml( ntk, file );
   }
   else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_ASIC ||
             ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC )
   {
     lf::logic::lsils::blut_seq_network ntk = lfLmINST->current<lf::logic::lsils::blut_seq_network>();
-    std::cerr << "TODO ing!\n";
+    lsils_to_graphml( ntk, file );
   }
   else
   {
