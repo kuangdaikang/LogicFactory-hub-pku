@@ -25,6 +25,7 @@ namespace lsils
  */
 void rewrite( bool is_preserve_depth = false, bool is_zero_gain = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false, bool is_very_verbose = false )
 {
+  printf( "rewrite\n" );
   mockturtle::cut_rewriting_params ps;
   ps.cut_enumeration_ps.cut_size = 4;
   if ( is_zero_gain )
@@ -41,7 +42,13 @@ void rewrite( bool is_preserve_depth = false, bool is_zero_gain = false, bool is
     ps.very_verbose = is_very_verbose;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();

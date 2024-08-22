@@ -22,6 +22,7 @@ namespace lsils
 void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -1, int AreaIter = -1, int PowerIter = -1, int logic_Sharing_cut_limit = -1, int Window_size = -1,
                bool is_min_truth = false, bool is_skip_delay_round = false, bool is_logic_sharing = false, bool is_dont_cares = false, bool is_verbose = false )
 {
+  printf( "map asic\n" );
   mockturtle::map_params ps;
   if ( Cut_limit > 0 )
     ps.cut_enumeration_ps.cut_limit = Cut_limit;
@@ -53,7 +54,13 @@ void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -
   lib_techlib_np techlib( gates );
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
@@ -99,7 +106,7 @@ void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -
     std::cerr << "unsupport network type!\n";
     assert( false );
   }
-  
+
   lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC );
 }
 

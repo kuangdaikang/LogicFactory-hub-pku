@@ -17,14 +17,18 @@ namespace lsils
  */
 void read_cnf( const std::string& file )
 {
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XAG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG );
 
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
   mockturtle::read_verilog_params ports;
   lorina::return_code rc;
 
-  auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk;

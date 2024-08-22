@@ -31,9 +31,9 @@ void read_cnf( const std::string& file, bool is_multi_output = false )
     assert( false );
     return;
   }
-
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_SOP );
-  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_SOP );
+  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the network from shared_ptr
 
   int argc = 1; // command name
   argc += 1;    // file name

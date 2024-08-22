@@ -70,6 +70,8 @@ public:
 
   void set_ntktype( E_LF_LOGIC_NTK_TYPE ntktype )
   {
+    if ( ntktype == ntktype_curr_ ) // no need to update the ntktype
+      return;
     ntktype_prev_ = ntktype_curr_;
     ntktype_curr_ = ntktype;
   }

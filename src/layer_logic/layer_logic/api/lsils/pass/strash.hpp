@@ -14,6 +14,7 @@ namespace lsils
  */
 void strash()
 {
+  printf( "strash\n" );
   auto ntktype = lfLntINST->get_ntktype_curr();
 
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||

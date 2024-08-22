@@ -31,7 +31,9 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
                bool is_out_buffers = false, bool is_jcheck = false, bool is_i_cofactor = false, bool is_k_dsd_manager = false, bool is_t_average = false,
                bool is_n_dsd_cutfunc = false, bool is_cut_new_truth = false, bool is_z_derive_luts = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG ); // AIG for technology mapping
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
+  lfLmINST->update_logic();
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

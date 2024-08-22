@@ -28,6 +28,7 @@ namespace lsils
 void balancing( int K_feasible_cut = -1, int Cut_limit = -1, int Fanin_limit = -1,
                 bool is_min_truth = false, bool is_only_critical_path = false, bool is_progress = false, bool is_verbose = false )
 {
+  printf("balance\n");
   mockturtle::balancing_params ps;
   if ( K_feasible_cut > 0 )
     ps.cut_enumeration_ps.cut_size = K_feasible_cut;
@@ -45,7 +46,13 @@ void balancing( int K_feasible_cut = -1, int Cut_limit = -1, int Fanin_limit = -
     ps.verbose = true;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
@@ -108,7 +115,10 @@ void balancing( int K_feasible_cut = -1, int Cut_limit = -1, int Fanin_limit = -
 void balance( bool is_minimize_levels = false, bool is_fast_mode = false )
 {
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();

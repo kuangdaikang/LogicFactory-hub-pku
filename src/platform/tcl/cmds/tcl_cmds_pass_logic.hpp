@@ -84,8 +84,7 @@ public:
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     lfLntINST->set_ntktype( strOptionsValue["-tool"], strOptionsValue["-type"], strOptionsValue["-ntk"] );
-    auto ntktype = lfLntINST->get_ntktype_curr();
-    lfLmINST->update_logic( ntktype ); // update the ntk
+    lfLmINST->update_logic(); // update the ntk
 
     return 1;
   }

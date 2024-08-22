@@ -25,7 +25,9 @@ namespace abc
  */
 void balance( bool is_level_preserved = false, bool is_dump_logic = false, bool is_dump_critical = false, bool is_multi_exors = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
+  lfLmINST->update_logic();
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

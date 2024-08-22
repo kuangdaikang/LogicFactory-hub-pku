@@ -28,6 +28,7 @@ namespace lsils
 void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, int AreaIter = -1,
                bool is_verbose = false )
 {
+  printf("map fpga\n");
   mockturtle::lut_mapping_params ps;
   if ( K_feasible_cut > 0 )
     ps.cut_enumeration_ps.cut_size = K_feasible_cut;
@@ -41,7 +42,13 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
     ps.verbose = true;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();

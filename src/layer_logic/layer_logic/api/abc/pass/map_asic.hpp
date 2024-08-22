@@ -29,7 +29,9 @@ void map_asic( double DelayGlobal = -1.0f, double AreaMulti = -1.0f, double BDel
                bool is_area_only = false, bool is_recovery_area = false, bool is_sweep = false, bool is_power_aware = false, bool is_fanout_high_skip = false,
                bool is_use_stdcell_profile = false, bool is_output_buffer = false, bool is_verbose = false )
 {
-  lfLmINST->update_logic( lf::misc::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG ); // AIG for technology mapping
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
+  lfLmINST->update_logic();
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

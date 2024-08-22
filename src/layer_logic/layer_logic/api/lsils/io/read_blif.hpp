@@ -17,11 +17,10 @@ namespace lsils
  */
 void read_blif( const std::string& file )
 {
-  cvg_seq_network ntk; // sequential cover network
-
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_CVG );
 
+  cvg_seq_network ntk; // sequential cover network
   lorina::text_diagnostics consumer;
   lorina::diagnostic_engine diag( &consumer );
   mockturtle::read_verilog_params ports;

@@ -46,7 +46,13 @@ void resubing( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, 
     ps.verbose = true;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
@@ -98,6 +104,7 @@ template<typename Ntk = aig_seq_network>
 void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int fanout_limit_Root = -1, int Fanout_limit_divisor = -1, int Window_size = -1,
             bool is_preserve_depth = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
+  printf("resub\n");
   mockturtle::resubstitution_params ps;
   if ( NInputMax > 0 )
     ps.max_pis = NInputMax;
@@ -121,7 +128,10 @@ void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int
     ps.verbose = true;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  lfLmINST->update_logic( ntktype );
+  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG );
+  lfLmINST->update_logic();
+
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
@@ -131,15 +141,7 @@ void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int
 
     lfLmINST->set_current<lf::logic::lsils::aig_seq_network>( ntk );
   }
-  // else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG )
-  // {
-  //   lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
 
-  //   mockturtle::resubstitution_minmc_withDC( ntk, ps );
-  //   lfLmINST->set_current( ntk );
-
-  //   lfLmINST->set_current<lf::logic::lsils::xag_seq_network>( ntk );
-  // }
   else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG )
   {
     lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
@@ -149,15 +151,6 @@ void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int
 
     lfLmINST->set_current<lf::logic::lsils::xmg_seq_network>( ntk );
   }
-  // else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG )
-  // {
-  //   lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
-
-  //   mockturtle::mig_resubstitution( ntk, ps );
-  //   lfLmINST->set_current( ntk );
-
-  //   lfLmINST->set_current<lf::logic::lsils::mig_seq_network>( ntk );
-  // }
   else
   {
     std::cerr << "unsupport network type!\n";
