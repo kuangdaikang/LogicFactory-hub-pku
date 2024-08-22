@@ -2176,6 +2176,9 @@ public:
                                      boolOptionsValue["-a"],
                                      boolOptionsValue["-m"] );
       break;
+    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+      lf::logic::lsils::write_verilog(strOptionsValue["-file"]);
+      break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
       return 0;
