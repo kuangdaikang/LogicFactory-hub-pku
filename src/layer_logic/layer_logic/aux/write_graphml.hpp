@@ -356,7 +356,7 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
         int child_id = babc::Abc_ObjId( pFanin );
-        if ( babc::Abc_ObjIsComplement( pFanin ) )
+        if ( babc::Abc_ObjFaninC( pObj, k ) )
         {
           inverter_index_map[pFanin] = ++current_index;
           // create the inverter node
@@ -406,7 +406,7 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
         int child_id = babc::Abc_ObjId( pFanin );
-        if ( babc::Abc_ObjIsComplement( pFanin ) )
+        if ( babc::Abc_ObjFaninC( pObj, k ) )
         {
           inverter_index_map[pFanin] = ++current_index;
           // create the inverter node
@@ -453,7 +453,7 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
     Abc_ObjForEachFanin( pObj, pFanin, k )
     {
       int child_id = babc::Abc_ObjId( pFanin );
-      if ( babc::Abc_ObjIsComplement( pFanin ) )
+      if ( babc::Abc_ObjFaninC( pObj, k ) )
       {
         inverter_index_map[pFanin] = ++current_index;
         // create the inverter node
