@@ -24,6 +24,7 @@ using xag_comb_network = mockturtle::xag_network;
 using mig_comb_network = mockturtle::mig_network;
 using xmg_comb_network = mockturtle::xmg_network;
 using gtg_comb_network = mockturtle::gtg_network;
+using primary_comb_network = mockturtle::primary_network;
 using cvg_comb_network = mockturtle::cover_network;
 
 using klut_comb_network = mockturtle::klut_network;
@@ -37,6 +38,7 @@ using xag_seq_network = mockturtle::sequential<xag_comb_network>;
 using mig_seq_network = mockturtle::sequential<mig_comb_network>;
 using xmg_seq_network = mockturtle::sequential<xmg_comb_network>;
 using gtg_seq_network = mockturtle::sequential<gtg_comb_network>;
+using primary_seq_network = mockturtle::sequential<primary_comb_network>;
 using cvg_seq_network = mockturtle::sequential<cvg_comb_network>;
 
 using klut_seq_network = mockturtle::sequential<klut_comb_network>;
@@ -60,6 +62,7 @@ struct Lsils_Frame_t
   mig_seq_network curr_mig;
   xmg_seq_network curr_xmg;
   gtg_seq_network curr_gtg;
+  primary_seq_network curr_primary;
   cvg_seq_network curr_cvg;
 
   // technology-dependent netlist
@@ -75,6 +78,7 @@ struct Lsils_Frame_t
   bool has_logic_mig{ false };
   bool has_logic_xmg{ false };
   bool has_logic_gtg{ false };
+  bool has_logic_primary{ false };
   bool has_libs{ false };
   bool has_netlist_asic{ false };
   bool has_netlist_fpga{ false };

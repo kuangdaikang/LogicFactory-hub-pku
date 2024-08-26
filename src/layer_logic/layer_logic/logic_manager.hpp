@@ -260,6 +260,10 @@ public:
     {
       return frame_lsils_.curr_xmg;
     }
+    else if constexpr ( std::is_same_v<T, lsils::primary_seq_network> )
+    {
+      return frame_lsils_.curr_primary;
+    }
     else if constexpr ( std::is_same_v<T, lsils::gtg_seq_network> )
     {
       return frame_lsils_.curr_gtg;
