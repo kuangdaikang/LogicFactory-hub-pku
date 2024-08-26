@@ -9,6 +9,7 @@
 #include "layer_arch/arch_manager.hpp"
 #include "layer_logic/logic_manager.hpp"
 #include "layer_logic/wrapper/arch_to_logic.hpp"
+#include "layer_logic/aux/cover.hpp"
 
 #include "layer_logic/api/abc/pass/strash.hpp"
 #include "layer_logic/api/abc/pass/balance.hpp"
@@ -152,6 +153,63 @@ public:
     return 1;
   }
 }; // class CmdLfArch2Logic
+
+class CmdLfLogicCover : public TclCmd
+{
+public:
+  explicit CmdLfLogicCover( const char* cmd_name )
+      : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "";
+    this->set_description( description );
+    std::string domain = "logic";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-from", "all", "string", "" },
+        { "-to", "all", "string", "" } };
+
+    setOptions( this, options );
+  }
+
+  ~CmdLfLogicCover() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = { "-from", "-to" };
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = { "-from", "-to" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    lf::logic::cover( strOptionsValue["-from"], strOptionsValue["-to"] );
+    lfLntINST->set_ntktype( "lsils", "strash", strOptionsValue["-to"] );
+    return 1;
+  }
+}; // class CmdLfLogicCover
 
 class CmdLfLogicStrash : public TclCmd
 {
