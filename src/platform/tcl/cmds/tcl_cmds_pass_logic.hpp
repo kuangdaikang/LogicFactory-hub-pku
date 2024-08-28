@@ -237,7 +237,7 @@ public:
 
   unsigned check() override
   {
-    std::vector<std::string> essential = { "-from", "-to" };
+    std::vector<std::string> essential = {};
     return checkEssentialOptions( this, essential );
   }
 
