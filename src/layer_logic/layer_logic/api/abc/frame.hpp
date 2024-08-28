@@ -828,3 +828,8 @@ double Mio_PinReadDelayBlockMax( Mio_Pin_t* pPin );
 Mio_Pin_t* Mio_PinReadNext( Mio_Pin_t* pPin );
 
 } // namespace ABC_NAMESPACE
+
+#include "misc/util/abc_namespaces.h"
+#include "misc/util/abc_global.h"
+#include "base/abc/abc.h"
+#include "misc/vec/vec.h"

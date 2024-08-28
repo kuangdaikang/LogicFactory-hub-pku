@@ -35,10 +35,11 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
                      std::is_same_v<NtkBase, lf::logic::lsils::mig_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::xmg_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::gtg_seq_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::primary_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::cvg_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::klut_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::blut_seq_network>,
-                 "ntk is not an ntk, XAG, MIG, XMG, GTG, CVG, KLUT or BLUT" );
+                 "ntk is not an ntk, XAG, MIG, XMG, PRIMARY, GTG, CVG, KLUT or BLUT" );
 
   pugi::xml_document doc;
   auto declarationNode = doc.append_child( pugi::node_declaration );
@@ -120,6 +121,7 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
                    std::is_same_v<NtkBase, lf::logic::lsils::xag_seq_network> ||
                    std::is_same_v<NtkBase, lf::logic::lsils::mig_seq_network> ||
                    std::is_same_v<NtkBase, lf::logic::lsils::xmg_seq_network> ||
+                   std::is_same_v<NtkBase, lf::logic::lsils::primary_seq_network> ||
                    std::is_same_v<NtkBase, lf::logic::lsils::gtg_seq_network> )
     {
       if ( ntk.is_and( g ) )
@@ -324,7 +326,7 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
     dataName_constant.text().set( const_id );
   }
 
-  // output the PIs
+  // PIs
   Abc_NtkForEachPi( pNtk, pObj, i )
   {
     int pi_id = babc::Abc_ObjId( pObj );
@@ -338,7 +340,7 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
     dataName_pi.text().set( pi_id );
   }
 
-  // output the nodes
+  // internal gates / POs
   if ( !Abc_NtkHasMapping( pNtk ) ) // AIG
   {
     Abc_AigForEachAnd( pNtk, pObj, i )
@@ -386,23 +388,18 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
         }
       }
     }
-  }
-  else // mapped netlist
-  {
-    Abc_NtkForEachNode( pNtk, pObj, i )
-    {
-      int g_id = babc::Abc_ObjId( pObj );
-      babc::Mio_Gate_t* pGate = (babc::Mio_Gate_t*)pObj->pData;
-      std::string gatename = babc::Mio_GateReadName( pGate );
-      auto xmlNode_gate = graphNode.append_child( "node" );
-      xmlNode_gate.append_attribute( "id" ) = g_id;
-      auto dataNode_gate = xmlNode_gate.append_child( "data" );
-      dataNode_gate.append_attribute( "key" ) = "nodeType";
-      dataNode_gate.text().set( "CELL" );
-      auto dataName_gate = xmlNode_gate.append_child( "data" );
-      dataName_gate.append_attribute( "key" ) = "nodeName";
-      dataName_gate.text().set( gatename.c_str() );
 
+    Abc_NtkForEachPo( pNtk, pObj, i )
+    {
+      auto po_id = babc::Abc_ObjId( pObj );
+      auto xmlNode_po = graphNode.append_child( "node" );
+      xmlNode_po.append_attribute( "id" ) = po_id;
+      auto dataNode_po = xmlNode_po.append_child( "data" );
+      dataNode_po.append_attribute( "key" ) = "nodeType";
+      dataNode_po.text().set( "PO" );
+      auto dataName_po = xmlNode_po.append_child( "data" );
+      dataName_po.append_attribute( "key" ) = "nodeName";
+      dataName_po.text().set( po_id );
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
         int child_id = babc::Abc_ObjId( pFanin );
@@ -426,63 +423,63 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
           // edge2: current_index -> g_id
           auto edge2 = graphNode.append_child( "edge" );
           edge2.append_attribute( "source" ) = current_index;
-          edge2.append_attribute( "target" ) = g_id;
+          edge2.append_attribute( "target" ) = po_id;
         }
         else
         {
           auto edge = graphNode.append_child( "edge" );
           edge.append_attribute( "source" ) = child_id;
-          edge.append_attribute( "target" ) = g_id;
+          edge.append_attribute( "target" ) = po_id;
         }
       }
     }
   }
-
-  // output the POs
-  Abc_NtkForEachPo( pNtk, pObj, i )
+  else // mapped netlist
   {
-    auto po_id = babc::Abc_ObjId( pObj );
-    auto xmlNode_po = graphNode.append_child( "node" );
-    xmlNode_po.append_attribute( "id" ) = po_id;
-    auto dataNode_po = xmlNode_po.append_child( "data" );
-    dataNode_po.append_attribute( "key" ) = "nodeType";
-    dataNode_po.text().set( "PO" );
-    auto dataName_po = xmlNode_po.append_child( "data" );
-    dataName_po.append_attribute( "key" ) = "nodeName";
-    dataName_po.text().set( po_id );
-    Abc_ObjForEachFanin( pObj, pFanin, k )
+    Abc_NtkForEachNode( pNtk, pObj, i )
     {
-      int child_id = babc::Abc_ObjId( pFanin );
-      if ( babc::Abc_ObjFaninC( pObj, k ) )
-      {
-        inverter_index_map[pFanin] = ++current_index;
-        // create the inverter node
-        auto xmlNode_gate_inv = graphNode.append_child( "node" );
-        xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-        auto dataNode_gate_inv = xmlNode_gate_inv.append_child( "data" );
-        dataNode_gate_inv.append_attribute( "key" ) = "nodeType";
-        dataNode_gate_inv.text().set( "INVERTER" );
-        auto dataName_gate_inv = xmlNode_gate_inv.append_child( "data" );
-        dataName_gate_inv.append_attribute( "key" ) = "nodeName";
-        dataName_gate_inv.text().set( current_index );
+      int g_id = babc::Abc_ObjId( pObj );
+      babc::Mio_Gate_t* pGate = (babc::Mio_Gate_t*)pObj->pData;
+      std::string gatename = babc::Mio_GateReadName( pGate );
+      auto xmlNode_gate = graphNode.append_child( "node" );
+      xmlNode_gate.append_attribute( "id" ) = g_id;
+      auto dataNode_gate = xmlNode_gate.append_child( "data" );
+      dataNode_gate.append_attribute( "key" ) = "nodeType";
+      dataNode_gate.text().set( "CELL" );
+      auto dataName_gate = xmlNode_gate.append_child( "data" );
+      dataName_gate.append_attribute( "key" ) = "nodeName";
+      dataName_gate.text().set( gatename.c_str() );
 
-        // edge1: child_id -> current_index
-        auto edge1 = graphNode.append_child( "edge" );
-        edge1.append_attribute( "source" ) = child_id;
-        edge1.append_attribute( "target" ) = current_index;
-        // edge2: current_index -> g_id
-        auto edge2 = graphNode.append_child( "edge" );
-        edge2.append_attribute( "source" ) = current_index;
-        edge2.append_attribute( "target" ) = po_id;
-      }
-      else
+      Abc_ObjForEachFanin( pObj, pFanin, k )
       {
+        int child_id = babc::Abc_ObjId( pFanin );
+        auto edge = graphNode.append_child( "edge" );
+        edge.append_attribute( "source" ) = child_id;
+        edge.append_attribute( "target" ) = g_id;
+      }
+    }
+    Abc_NtkForEachPo( pNtk, pObj, i )
+    {
+      auto po_id = babc::Abc_ObjId( pObj );
+      auto xmlNode_po = graphNode.append_child( "node" );
+      xmlNode_po.append_attribute( "id" ) = po_id;
+      auto dataNode_po = xmlNode_po.append_child( "data" );
+      dataNode_po.append_attribute( "key" ) = "nodeType";
+      dataNode_po.text().set( "PO" );
+      auto dataName_po = xmlNode_po.append_child( "data" );
+      dataName_po.append_attribute( "key" ) = "nodeName";
+      dataName_po.text().set( po_id );
+
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
         auto edge = graphNode.append_child( "edge" );
         edge.append_attribute( "source" ) = child_id;
         edge.append_attribute( "target" ) = po_id;
       }
     }
   }
+
   doc.save_file( file.c_str() );
 }
 
@@ -533,6 +530,12 @@ void write_graphml( const std::string& file )
             ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG )
   {
     lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
+    lsils_to_graphml( ntk, file );
+  }
+  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY ||
+            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY )
+  {
+    lf::logic::lsils::primary_seq_network ntk = lfLmINST->current<lf::logic::lsils::primary_seq_network>();
     lsils_to_graphml( ntk, file );
   }
   else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG ||

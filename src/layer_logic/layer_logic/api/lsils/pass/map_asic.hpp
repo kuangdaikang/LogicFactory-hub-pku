@@ -57,9 +57,9 @@ void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -
   assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
-  lfLmINST->update_logic();
 
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {
@@ -90,6 +90,14 @@ void map_asic( int Cut_limit = -1, double Require_time = -1.0f, int FlowIter = -
     lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
 
     blut_seq_network netlist_asic = mockturtle::seq_map<lf::logic::lsils::mig_seq_network, 6u, mockturtle::cut_enumeration_tech_map_cut, 6u, mockturtle::classification_type::np_configurations>( ntk, techlib, ps );
+
+    lfLmINST->set_current<blut_seq_network>( netlist_asic );
+  }
+  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY )
+  {
+    lf::logic::lsils::primary_seq_network ntk = lfLmINST->current<lf::logic::lsils::primary_seq_network>();
+
+    blut_seq_network netlist_asic = mockturtle::seq_map<lf::logic::lsils::primary_seq_network, 6u, mockturtle::cut_enumeration_tech_map_cut, 6u, mockturtle::classification_type::np_configurations>( ntk, techlib, ps );
 
     lfLmINST->set_current<blut_seq_network>( netlist_asic );
   }

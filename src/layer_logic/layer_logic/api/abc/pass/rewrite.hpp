@@ -27,7 +27,6 @@ void rewrite( bool is_level_preserved = false, bool is_zero_cost = false, bool i
 {
   auto ntktype = lfLntINST->get_ntktype_curr();
   assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
-  lfLmINST->update_logic();
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

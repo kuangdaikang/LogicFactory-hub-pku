@@ -1,16 +1,6 @@
 #pragma once
 
-#include "mockturtle/networks/aig.hpp"
-#include "mockturtle/networks/gtg.hpp"
-#include "mockturtle/networks/mig.hpp"
-#include "mockturtle/networks/xag.hpp"
-#include "mockturtle/networks/xmg.hpp"
-#include "mockturtle/io/write_dot.hpp"
-
-#include "misc/util/abc_namespaces.h"
-#include "misc/util/abc_global.h"
-#include "base/abc/abc.h"
-#include "misc/vec/vec.h"
+#include "layer_logic/logic_manager.hpp"
 
 #include <unordered_map>
 
@@ -35,14 +25,16 @@ NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
                      std::is_same_v<NtkSrcBase, mockturtle::xag_network> ||
                      std::is_same_v<NtkSrcBase, mockturtle::mig_network> ||
                      std::is_same_v<NtkSrcBase, mockturtle::xmg_network> ||
+                     std::is_same_v<NtkSrcBase, mockturtle::primary_network> ||
                      std::is_same_v<NtkSrcBase, mockturtle::gtg_network>,
-                 "NtkSrc is not an AIG, XAG, MIG, XMG, or GTG" );
+                 "NtkSrc is not an AIG, XAG, MIG, XMG, PRIMARY, or GTG" );
   static_assert( std::is_same_v<NtkDestBase, mockturtle::aig_network> ||
                      std::is_same_v<NtkDestBase, mockturtle::xag_network> ||
                      std::is_same_v<NtkDestBase, mockturtle::mig_network> ||
                      std::is_same_v<NtkDestBase, mockturtle::xmg_network> ||
+                     std::is_same_v<NtkDestBase, mockturtle::primary_network> ||
                      std::is_same_v<NtkDestBase, mockturtle::gtg_network>,
-                 "NtkDest is not an AIG, XAG, MIG, XMG, or GTG" );
+                 "NtkDest is not an AIG, XAG, MIG, XMG, PRIMARY, or GTG" );
   NtkDest ntk_dest;
   using DNode = typename NtkDest::node;
   using DSignal = typename NtkDest::signal;
@@ -334,6 +326,258 @@ Ntk convert_abc_2_lsils( babc::Abc_Ntk_t* pNtk )
   }
 
   return ntk_dest;
+}
+
+/**
+ * @brief convert the current type to another type without change the ntktype
+ * @param from
+ * @param to
+ * @note this function is implemented the node to node trasfomation method
+ */
+void convert_node( const std::string& from, const std::string& to )
+{
+  assert( from == "abc" || from == "aig" || from == "xag" || from == "mig" || from == "xmg" || from == "primary" || from == "gtg" );
+  assert( to == "abc" || to == "aig" || to == "xag" || to == "mig" || to == "xmg" || to == "primary" || to == "gtg" );
+
+  if ( from == to )
+    return;
+
+  lf::misc::E_LF_LOGIC_NTK_TYPE ntktype_from;
+  lf::misc::E_LF_LOGIC_NTK_TYPE ntktype_to;
+
+  if ( from == "abc" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG;
+  else if ( from == "aig" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG;
+  else if ( from == "xag" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG;
+  else if ( from == "mig" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG;
+  else if ( from == "xmg" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG;
+  else if ( from == "primary" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY;
+  else if ( from == "gtg" )
+    ntktype_from = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG;
+  else
+  {
+    std::cerr << "Error: unknown logic network type: " << from << std::endl;
+    assert( false );
+    return;
+  }
+
+  if ( to == "abc" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG;
+  else if ( to == "aig" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG;
+  else if ( to == "xag" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG;
+  else if ( to == "mig" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG;
+  else if ( to == "xmg" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG;
+  else if ( to == "primary" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY;
+  else if ( to == "gtg" )
+    ntktype_to = lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG;
+  else
+  {
+    std::cerr << "Error: unknown logic network type: " << from << std::endl;
+    assert( false );
+    return;
+  }
+
+  if ( ntktype_from == ntktype_to )
+    return;
+  if ( ntktype_from == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_NONE )
+    return;
+  if ( ntktype_to == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_ASIC ||
+       ntktype_to == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA ||
+       ntktype_to == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC ||
+       ntktype_to == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA )
+    return;
+
+  // perform the convert procedure
+  auto frame_abc_ptr = lfLmINST->current<babc::Abc_Frame_t*>();
+  auto frame_lsils_ref = lfLmINST->current<lsils::Lsils_Frame_t>();
+
+  using NtkIR = lsils::gtg_seq_network; // gtech is more general, thus the conversion will not affect the original logic
+  NtkIR ntk;
+  babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame_abc_ptr );
+
+  // step1:  previous logic-based data structure -> IR
+  switch ( ntktype_from )
+  {
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_AIG:
+  {
+    ntk = lf::logic::convert_abc_2_lsils<NtkIR>( pNtk );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_AIG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::aig_seq_network>( frame_lsils_ref.curr_aig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XAG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xag_seq_network>( frame_lsils_ref.curr_xag );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::mig_seq_network>( frame_lsils_ref.curr_mig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xmg_seq_network>( frame_lsils_ref.curr_xmg );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::primary_seq_network>( frame_lsils_ref.curr_primary );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::gtg_seq_network>( frame_lsils_ref.curr_gtg );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG:
+  {
+    ntk = lf::logic::convert_abc_2_lsils<NtkIR>( pNtk );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::aig_seq_network>( frame_lsils_ref.curr_aig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xag_seq_network>( frame_lsils_ref.curr_xag );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::mig_seq_network>( frame_lsils_ref.curr_mig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::xmg_seq_network>( frame_lsils_ref.curr_xmg );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::primary_seq_network>( frame_lsils_ref.curr_primary );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG:
+  {
+    ntk = lf::logic::convert_lsils_internal<NtkIR, lsils::gtg_seq_network>( frame_lsils_ref.curr_gtg );
+    break;
+  }
+  default:
+  {
+    assert( false );
+    break;
+  }
+  }
+
+  // step2:  IR -> current logic-based data structure
+  switch ( ntktype_to )
+  {
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_AIG:
+  {
+    pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
+    babc::Abc_FrameSetCurrentNetwork( frame_abc_ptr, pNtk );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_AIG:
+  {
+    auto aig = lf::logic::convert_lsils_internal<lsils::aig_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( aig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XAG:
+  {
+    auto xag = lf::logic::convert_lsils_internal<lsils::xag_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( xag );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG:
+  {
+    auto mig = lf::logic::convert_lsils_internal<lsils::mig_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( mig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG:
+  {
+    auto xmg = lf::logic::convert_lsils_internal<lsils::xmg_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( xmg );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY:
+  {
+    auto primary = lf::logic::convert_lsils_internal<lsils::primary_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( primary );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG:
+  {
+    auto gtg = lf::logic::convert_lsils_internal<lsils::gtg_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( gtg );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG:
+  {
+    pNtk = lf::logic::convert_lsils_2_abc<NtkIR>( ntk );
+    babc::Abc_FrameSetCurrentNetwork( frame_abc_ptr, pNtk );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG:
+  {
+    auto aig = lf::logic::convert_lsils_internal<lsils::aig_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( aig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG:
+  {
+    auto xag = lf::logic::convert_lsils_internal<lsils::xag_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( xag );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG:
+  {
+    auto mig = lf::logic::convert_lsils_internal<lsils::mig_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( mig );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG:
+  {
+    auto xmg = lf::logic::convert_lsils_internal<lsils::xmg_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( xmg );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY:
+  {
+    auto primary = lf::logic::convert_lsils_internal<lsils::primary_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( primary );
+    break;
+  }
+  case lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG:
+  {
+    auto gtg = lf::logic::convert_lsils_internal<lsils::gtg_seq_network, NtkIR>( ntk );
+    lfLmINST->set_current( gtg );
+    break;
+  }
+  default:
+  {
+    assert( false );
+    break;
+  }
+  }
 }
 
 } // end namespace logic

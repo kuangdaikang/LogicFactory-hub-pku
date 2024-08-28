@@ -20,7 +20,7 @@ namespace logic
  * @brief network transformation by cover
  */
 template<class NtkDest, class NtkSrc>
-NtkDest cover( const NtkSrc& ntk_src )
+NtkDest convert_cover( const NtkSrc& ntk_src )
 {
   static_assert( std::is_same_v<NtkSrc, lsils::aig_comb_network> ||
                      std::is_same_v<NtkSrc, lsils::xag_comb_network> ||
@@ -60,7 +60,7 @@ NtkDest cover( const NtkSrc& ntk_src )
   std::string genlib_buffer = R"(
         GATE   zero   0  O=CONST0;
         GATE   one    0  O=CONST1;
-        GATE   buf    2  O=a;                                    PIN * NONINV 1 999 1.0 0.0 1.0 0.0
+        GATE   buf    1  O=a;                                    PIN * NONINV 1 999 1.0 0.0 1.0 0.0
         GATE   not    1  O=!a;                                   PIN * INV 1 999 0.9 0.3 0.9 0.3
     )";
   if constexpr ( std::is_same_v<NtkDest, lsils::aig_seq_network> )
@@ -73,19 +73,19 @@ NtkDest cover( const NtkSrc& ntk_src )
   {
     genlib_buffer += R"(
         GATE   and2   6  O=a*b;                                  PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-        GATE   xor2   12 O=a*!b+!a*b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   xor2   6  O=a*!b+!a*b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
     )";
   }
   else if constexpr ( std::is_same_v<NtkDest, lsils::mig_seq_network> )
   {
     genlib_buffer += R"(
-        GATE   maj3   6  O=a*b + a*c + b*c;                      PIN * NONINV 1 999 1.0 0.0 1.0 0.0
+        GATE   maj3   12 O=a*b + a*c + b*c;                      PIN * NONINV 1 999 1.0 0.0 1.0 0.0
     )";
   }
   else if constexpr ( std::is_same_v<NtkDest, lsils::xmg_seq_network> )
   {
     genlib_buffer += R"(
-        GATE   maj3   6  O=a*b + a*c + b*c;                      PIN * NONINV 1 999 1.0 0.0 1.0 0.0
+        GATE   maj3   12 O=a*b + a*c + b*c;                      PIN * NONINV 1 999 1.0 0.0 1.0 0.0
         GATE   xor3   16 O=a*!b*!c + !a*b*!c + !a*!b*c + a*b*c;  PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
     )";
   }
@@ -93,23 +93,23 @@ NtkDest cover( const NtkSrc& ntk_src )
   {
     genlib_buffer += R"(
         GATE   and2   6  O=a*b;                                  PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-        GATE   nand2  4  O=!(a*b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
+        GATE   nand2  6  O=!(a*b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
         GATE   or2    6  O=a+b;                                  PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-        GATE   nor2   4  O=!(a+b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
-        GATE   xor2   12 O=a*!b+!a*b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-        GATE   xnor2  12 O=a*b+!a*!b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   nor2   6  O=!(a+b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
+        GATE   xor2   6  O=a*!b+!a*b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   xnor2  6  O=a*b+!a*!b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
     )";
   }
   else if constexpr ( std::is_same_v<NtkDest, lsils::gtg_seq_network> )
   {
     genlib_buffer += R"(
         GATE   and2   6  O=a*b;                                  PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-        GATE   nand2  4  O=!(a*b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
+        GATE   nand2  6  O=!(a*b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
         GATE   or2    6  O=a+b;                                  PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-        GATE   nor2   4  O=!(a+b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
-        GATE   xor2   12 O=a*!b+!a*b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-        GATE   xnor2  12 O=a*b+!a*!b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-        GATE   maj3   6  O=a*b + a*c + b*c;                      PIN * NONINV 1 999 1.0 0.0 1.0 0.0
+        GATE   nor2   6  O=!(a+b);                               PIN * INV 1 999 1.0 0.0 1.0 0.0
+        GATE   xor2   6  O=a*!b+!a*b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   xnor2  6  O=a*b+!a*!b;                            PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   maj3   12 O=a*b + a*c + b*c;                      PIN * NONINV 1 999 1.0 0.0 1.0 0.0
         GATE   mux    12 O=a*b + a*!c + b*c;                     PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
         GATE   xor3   16 O=a*!b*!c + !a*b*!c + !a*!b*c + a*b*c;  PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
     )";
@@ -182,11 +182,20 @@ NtkDest cover( const NtkSrc& ntk_src )
       children.push_back( c );
     } );
     auto new_c0 = DSignal( old_2_new[netlist_asic.get_node( children[0] )], netlist_asic.is_complemented( children[0] ) ? 1 : 0 );
-    auto new_c1 = DSignal( old_2_new[netlist_asic.get_node( children[0] )], netlist_asic.is_complemented( children[1] ) ? 1 : 0 );
+    auto new_c1 = DSignal( old_2_new[netlist_asic.get_node( children[1] )], netlist_asic.is_complemented( children[1] ) ? 1 : 0 );
 
     assert( netlist_asic.has_binding( g ) );
     auto gate = netlist_asic.get_binding( g );
-    if ( gate.name == "and2" )
+
+    if ( gate.name == "not" )
+    {
+      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_not( new_c0 ) );
+    }
+    else if ( gate.name == "buf" )
+    {
+      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_buf( new_c0 ) );
+    }
+    else if ( gate.name == "and2" )
     {
       old_2_new[g] = ntk_dest.get_node( ntk_dest.create_and( new_c0, new_c1 ) );
     }
@@ -242,44 +251,54 @@ NtkDest cover( const NtkSrc& ntk_src )
 }
 
 /**
- * @brief
+ * @brief convert the current type to another type without change the ntktype
+ * @param from
+ * @param to
+ * @note this function is implemented the cover algorithm
  */
-void cover( const std::string& from, const std::string& to )
+void convert_cover( const std::string& from, const std::string& to )
 {
-  assert( from == "aig" || from == "xag" || from == "mig" || from == "xmg" || from == "primary" || from == "gtg" );
-  assert( to == "aig" || to == "xag" || to == "mig" || to == "xmg" || to == "primary" || to == "gtg" );
+  assert( from == "abc" || from == "aig" || from == "xag" || from == "mig" || from == "xmg" || from == "primary" || from == "gtg" );
+  assert( to == "abc" || to == "aig" || to == "xag" || to == "mig" || to == "xmg" || to == "primary" || to == "gtg" );
 
+  if ( from == "abc" || to == "abc" )
+  {
+    std::cerr << "abc is not supported yet" << std::endl;
+    return;
+  }
+  if ( from == to )
+    return;
   if ( from == "aig" )
   {
     lf::logic::lsils::aig_seq_network ntk_from = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
     if ( to == "aig" )
     {
-      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
+      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xag" )
     {
-      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
+      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "mig" )
     {
-      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
+      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xmg" )
     {
-      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
+      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "primary" )
     {
-      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
+      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "gtg" )
     {
-      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
+      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::aig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else
@@ -293,32 +312,32 @@ void cover( const std::string& from, const std::string& to )
     lf::logic::lsils::xag_seq_network ntk_from = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
     if ( to == "aig" )
     {
-      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
+      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xag" )
     {
-      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
+      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "mig" )
     {
-      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
+      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xmg" )
     {
-      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
+      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "primary" )
     {
-      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
+      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "gtg" )
     {
-      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
+      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::xag_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else
@@ -332,32 +351,32 @@ void cover( const std::string& from, const std::string& to )
     lf::logic::lsils::mig_seq_network ntk_from = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
     if ( to == "aig" )
     {
-      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
+      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xag" )
     {
-      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
+      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "mig" )
     {
-      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
+      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xmg" )
     {
-      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
+      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "primary" )
     {
-      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
+      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "gtg" )
     {
-      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
+      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::mig_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else
@@ -371,32 +390,32 @@ void cover( const std::string& from, const std::string& to )
     lf::logic::lsils::xmg_seq_network ntk_from = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
     if ( to == "aig" )
     {
-      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
+      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xag" )
     {
-      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
+      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "mig" )
     {
-      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
+      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xmg" )
     {
-      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
+      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "primary" )
     {
-      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
+      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "gtg" )
     {
-      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
+      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::xmg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else
@@ -410,32 +429,32 @@ void cover( const std::string& from, const std::string& to )
     lf::logic::lsils::primary_seq_network ntk_from = lfLmINST->current<lf::logic::lsils::primary_seq_network>();
     if ( to == "aig" )
     {
-      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
+      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xag" )
     {
-      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
+      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "mig" )
     {
-      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
+      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xmg" )
     {
-      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
+      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "primary" )
     {
-      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
+      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "gtg" )
     {
-      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
+      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::primary_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else
@@ -449,32 +468,32 @@ void cover( const std::string& from, const std::string& to )
     lf::logic::lsils::gtg_seq_network ntk_from = lfLmINST->current<lf::logic::lsils::gtg_seq_network>();
     if ( to == "aig" )
     {
-      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
+      lf::logic::lsils::aig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::aig_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xag" )
     {
-      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
+      lf::logic::lsils::xag_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xag_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "mig" )
     {
-      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
+      lf::logic::lsils::mig_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::mig_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "xmg" )
     {
-      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
+      lf::logic::lsils::xmg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::xmg_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "primary" )
     {
-      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
+      lf::logic::lsils::primary_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::primary_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else if ( to == "gtg" )
     {
-      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
+      lf::logic::lsils::gtg_seq_network ntk_to = lf::logic::convert_cover<lf::logic::lsils::gtg_seq_network, lf::logic::lsils::gtg_seq_network>( ntk_from );
       lfLmINST->set_current( ntk_to );
     }
     else

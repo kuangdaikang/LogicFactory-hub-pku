@@ -38,6 +38,7 @@ enum E_LF_LOGIC_NTK_TYPE
   E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XAG,
   E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG,
   E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG,
+  E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY,
   E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG,
   E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_CVG,
   E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_BLG,
@@ -47,6 +48,7 @@ enum E_LF_LOGIC_NTK_TYPE
   E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG,
   E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG,
   E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG,
+  E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY,
   E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG,
   E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA,
   E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC,
@@ -68,15 +70,7 @@ public:
     return instance_;
   }
 
-  void set_ntktype( E_LF_LOGIC_NTK_TYPE ntktype )
-  {
-    if ( ntktype == ntktype_curr_ ) // no need to update the ntktype
-      return;
-    ntktype_prev_ = ntktype_curr_;
-    ntktype_curr_ = ntktype;
-  }
-
-  void set_ntktype( const std::string& tool, const std::string& type, const std::string& ntk )
+  E_LF_LOGIC_NTK_TYPE gen_ntktype( const std::string& tool, const std::string& type, const std::string& ntk )
   {
     static const std::unordered_map<std::string, E_LF_LOGIC_NTK_TYPE> type_map = {
         { "abc_logic_aig", E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_AIG },
@@ -92,6 +86,7 @@ public:
         { "lsils_logic_mig", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG },
         { "lsils_logic_xmg", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG },
         { "lsils_logic_gtg", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG },
+        { "lsils_logic_primary", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY },
         { "lsils_logic_cvg", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_CVG },
         { "lsils_logic_fpga", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_FPGA },
         { "lsils_logic_asic", E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_ASIC },
@@ -100,6 +95,7 @@ public:
         { "lsils_strash_mig", E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG },
         { "lsils_strash_xmg", E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG },
         { "lsils_strash_gtg", E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG },
+        { "lsils_strash_primary", E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY },
         { "lsils_netlist_fpga", E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA },
         { "lsils_netlist_asic", E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC } };
 
@@ -107,7 +103,30 @@ public:
     auto it = type_map.find( key );
     if ( it != type_map.end() )
     {
-      set_ntktype( it->second );
+      return it->second;
+    }
+    else
+    {
+      std::cerr << "Unhandled logic network type provided." << std::endl;
+      assert( false );
+      return E_LF_LOGIC_NTK_TYPE_NONE;
+    }
+  }
+
+  void set_ntktype( E_LF_LOGIC_NTK_TYPE ntktype )
+  {
+    if ( ntktype == ntktype_curr_ ) // no need to update the ntktype
+      return;
+    ntktype_prev_ = ntktype_curr_;
+    ntktype_curr_ = ntktype;
+  }
+
+  void set_ntktype( const std::string& tool, const std::string& type, const std::string& ntk )
+  {
+    auto ntktype = gen_ntktype( tool, type, ntk );
+    if ( ntktype != E_LF_LOGIC_NTK_TYPE_NONE )
+    {
+      set_ntktype( ntktype );
     }
     else
     {
@@ -116,7 +135,11 @@ public:
     }
   }
 
-  E_LF_LOGIC_NTK_TYPE get_ntktype_prev() const { return ntktype_prev_; }
+  E_LF_LOGIC_NTK_TYPE
+  get_ntktype_prev() const
+  {
+    return ntktype_prev_;
+  }
   E_LF_LOGIC_NTK_TYPE get_ntktype_curr() const { return ntktype_curr_; }
 
 private:

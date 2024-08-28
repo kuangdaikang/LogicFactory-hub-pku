@@ -23,6 +23,7 @@ void read_pla( const std::string& file )
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XAG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG ||
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG );
 
   lorina::text_diagnostics consumer;
@@ -51,6 +52,12 @@ void read_pla( const std::string& file )
   else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG )
   {
     lf::logic::lsils::mig_seq_network ntk;
+    rc = lorina::read_pla( file, mockturtle::pla_reader( ntk ), &diag );
+    lfLmINST->set_current( ntk );
+  }
+  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY )
+  {
+    lf::logic::lsils::primary_seq_network ntk;
     rc = lorina::read_pla( file, mockturtle::pla_reader( ntk ), &diag );
     lfLmINST->set_current( ntk );
   }

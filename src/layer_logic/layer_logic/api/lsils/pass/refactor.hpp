@@ -23,7 +23,7 @@ namespace lsils
 void refactor( int Max_pis = -1,
                bool is_zero_cost = false, bool is_reconvergence_cut = false, bool is_dont_cares = false, bool is_progress = false, bool is_verbose = false )
 {
-  printf("refactor\n");
+  printf( "refactor\n" );
   mockturtle::refactoring_params ps;
   if ( Max_pis > 0 )
     ps.max_pis = Max_pis;
@@ -42,9 +42,7 @@ void refactor( int Max_pis = -1,
   assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
           ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
-          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG ||
-          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG );
-  lfLmINST->update_logic();
+          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG );
 
   if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
   {

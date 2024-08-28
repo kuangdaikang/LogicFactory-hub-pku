@@ -77,7 +77,8 @@ int registerCmds()
   //////////////////////////////////////////////////////////
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArch2Logic, "arch2logic" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicNtktype, "ntktype" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicCover, "cover" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicConvert, "convert" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicUpdate, "update" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicStrash, "strash" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicBalance, "balance" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicRewrite, "rewrite" );

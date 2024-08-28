@@ -9,7 +9,9 @@
 #include "layer_arch/arch_manager.hpp"
 #include "layer_logic/logic_manager.hpp"
 #include "layer_logic/wrapper/arch_to_logic.hpp"
-#include "layer_logic/aux/cover.hpp"
+#include "layer_logic/aux/convert_node.hpp"
+#include "layer_logic/aux/convert_update.hpp"
+#include "layer_logic/aux/convert_cover.hpp"
 
 #include "layer_logic/api/abc/pass/strash.hpp"
 #include "layer_logic/api/abc/pass/balance.hpp"
@@ -85,7 +87,6 @@ public:
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     lfLntINST->set_ntktype( strOptionsValue["-tool"], strOptionsValue["-type"], strOptionsValue["-ntk"] );
-    lfLmINST->update_logic(); // update the ntk
 
     return 1;
   }
@@ -154,10 +155,10 @@ public:
   }
 }; // class CmdLfArch2Logic
 
-class CmdLfLogicCover : public TclCmd
+class CmdLfLogicConvert : public TclCmd
 {
 public:
-  explicit CmdLfLogicCover( const char* cmd_name )
+  explicit CmdLfLogicConvert( const char* cmd_name )
       : TclCmd( cmd_name )
   {
     // set the description
@@ -168,12 +169,13 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-from", "all", "string", "" },
-        { "-to", "all", "string", "" } };
+        { "-to", "all", "string", "" },
+        { "-n", "all", "bool", "convert by node to node" } };
 
     setOptions( this, options );
   }
 
-  ~CmdLfLogicCover() override = default;
+  ~CmdLfLogicConvert() override = default;
 
   unsigned check() override
   {
@@ -195,7 +197,7 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     std::vector<std::string> strOptions = { "-from", "-to" };
-    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> boolOptions = { "-n" };
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
     std::vector<std::string> strvecOptions = {};
@@ -205,11 +207,68 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lf::logic::cover( strOptionsValue["-from"], strOptionsValue["-to"] );
-    lfLntINST->set_ntktype( "lsils", "strash", strOptionsValue["-to"] );
+    if ( boolOptionsValue["-n"] )
+      lf::logic::convert_node( strOptionsValue["-from"], strOptionsValue["-to"] );
+    else
+      lf::logic::convert_cover( strOptionsValue["-from"], strOptionsValue["-to"] );
     return 1;
   }
-}; // class CmdLfLogicCover
+}; // class CmdLfLogicConvert
+
+class CmdLfLogicUpdate : public TclCmd
+{
+public:
+  explicit CmdLfLogicUpdate( const char* cmd_name )
+      : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "";
+    this->set_description( description );
+    std::string domain = "logic";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-n", "all", "bool", "convert by node to node" } };
+
+    setOptions( this, options );
+  }
+
+  ~CmdLfLogicUpdate() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = { "-from", "-to" };
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = {};
+    std::vector<std::string> boolOptions = { "-n" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    lf::logic::convert_update( boolOptionsValue["-n"] );
+    return 1;
+  }
+}; // class CmdLfLogicUpdate
 
 class CmdLfLogicStrash : public TclCmd
 {
