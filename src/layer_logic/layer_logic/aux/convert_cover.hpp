@@ -54,7 +54,7 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
   using DSignal = typename NtkDest::signal;
   using SNode = typename lsils::blut_seq_network::node;
   using SSignal = typename lsils::blut_seq_network::signal;
-  std::unordered_map<SNode, DNode> old_2_new;
+  std::unordered_map<SNode, DSignal> old_2_new;
 
   // load genlib file
   std::string genlib_buffer = R"(
@@ -166,14 +166,14 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
   auto d_one = ntk_dest.get_constant( true );
   auto c_zero = netlist_asic.get_constant( false );
   auto c_one = netlist_asic.get_constant( true );
-  old_2_new[netlist_asic.get_node( c_zero )] = ntk_dest.get_node( d_zero );
+  old_2_new[netlist_asic.get_node( c_zero )] = d_zero;
   if ( c_zero != c_one )
   {
-    old_2_new[netlist_asic.get_node( c_one )] = ntk_dest.get_node( d_one );
+    old_2_new[netlist_asic.get_node( c_one )] = d_one;
   }
   /// inputs
   netlist_asic.foreach_pi( [&]( auto const& pi ) {
-    old_2_new[pi] = ntk_dest.get_node( ntk_dest.create_pi() );
+    old_2_new[pi] = ntk_dest.create_pi();
   } );
 
   netlist_asic.foreach_gate( [&]( auto const& g, uint32_t index ) {
@@ -181,58 +181,69 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
     netlist_asic.foreach_fanin( g, [&]( auto const& c ) {
       children.push_back( c );
     } );
-    auto new_c0 = DSignal( old_2_new[netlist_asic.get_node( children[0] )], netlist_asic.is_complemented( children[0] ) ? 1 : 0 );
-    auto new_c1 = DSignal( old_2_new[netlist_asic.get_node( children[1] )], netlist_asic.is_complemented( children[1] ) ? 1 : 0 );
+    auto new_c0 = old_2_new[netlist_asic.get_node( children[0] )];
+    auto new_c1 = old_2_new[netlist_asic.get_node( children[1] )];
 
     assert( netlist_asic.has_binding( g ) );
     auto gate = netlist_asic.get_binding( g );
 
     if ( gate.name == "not" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_not( new_c0 ) );
+      auto new_sig = ntk_dest.create_not( new_c0 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "buf" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_buf( new_c0 ) );
+      auto new_sig = ntk_dest.create_buf( new_c0 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "and2" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_and( new_c0, new_c1 ) );
+      auto new_sig = ntk_dest.create_and( new_c0, new_c1 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "nand2" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nand( new_c0, new_c1 ) );
+      auto new_sig = ntk_dest.create_nand( new_c0, new_c1 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "or2" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_or( new_c0, new_c1 ) );
+      auto new_sig = ntk_dest.create_or( new_c0, new_c1 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "nor2" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nor( new_c0, new_c1 ) );
+      auto new_sig = ntk_dest.create_nor( new_c0, new_c1 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "xor2" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xor( new_c0, new_c1 ) );
+      auto new_sig = ntk_dest.create_xor( new_c0, new_c1 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "xnor2" )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xnor( new_c0, new_c1 ) );
+      auto new_sig = ntk_dest.create_xnor( new_c0, new_c1 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "maj3" )
     {
-      auto new_c2 = DSignal( old_2_new[netlist_asic.get_node( children[2] )], netlist_asic.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_maj( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = old_2_new[netlist_asic.get_node( children[2] )];
+      auto new_sig = ntk_dest.create_maj( new_c0, new_c1, new_c2 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "mux" )
     {
-      auto new_c2 = DSignal( old_2_new[netlist_asic.get_node( children[2] )], netlist_asic.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_ite( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = old_2_new[netlist_asic.get_node( children[2] )];
+      auto new_sig = ntk_dest.create_ite( new_c0, new_c1, new_c2 );
+      old_2_new[g] = new_sig;
     }
     else if ( gate.name == "xor3" )
     {
-      auto new_c2 = DSignal( old_2_new[netlist_asic.get_node( children[2] )], netlist_asic.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xor3( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = old_2_new[netlist_asic.get_node( children[2] )];
+      auto new_sig = ntk_dest.create_xor3( new_c0, new_c1, new_c2 );
+      old_2_new[g] = new_sig;
     }
     else
     {
@@ -243,7 +254,7 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
 
   /// outputs
   netlist_asic.foreach_po( [&]( auto const& po ) {
-    auto new_po = DSignal( old_2_new[netlist_asic.get_node( po )], netlist_asic.is_complemented( po ) ? 1 : 0 );
+    auto new_po = old_2_new[netlist_asic.get_node( po )];
     ntk_dest.create_po( new_po );
   } );
 
