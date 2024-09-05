@@ -47,7 +47,6 @@ public:
         { "-top", "yosys", "string", "" },
         { "-auto-top", "yosys", "bool", "" },
         { "-chparam", "yosys", "strvec", "" } };
-
     setOptions( this, options );
   }
 
@@ -84,7 +83,7 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     std::map<std::string, std::string> chparam;
     for ( size_t i = 0u; i < strvecOptionsValue["-chparam"].size(); i += 2 )
@@ -93,7 +92,7 @@ public:
     }
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::hierarchy( boolOptionsValue["-check"], boolOptionsValue["-simcheck"], boolOptionsValue["-smtcheck"], boolOptionsValue["-purge_lib"], strvecOptionsValue["-libdir"],
                                   boolOptionsValue["-keep_positionals"], boolOptionsValue["-keep_portwidths"], boolOptionsValue["-nodefaults"], boolOptionsValue["-nokeep_prints"],
                                   boolOptionsValue["-nokeep_asserts"], strOptionsValue["-top"], boolOptionsValue["-auto-top"], chparam );
@@ -122,7 +121,6 @@ public:
         { "-wb", "yosys", "bool", "" },
         { "-noscopeinfo", "yosys", "bool", "" },
         { "-scopename", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -158,11 +156,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::flatten( boolOptionsValue["-wb"], boolOptionsValue["-noscopeinfo"], boolOptionsValue["-scopename"] );
       break;
     default:
@@ -194,7 +192,6 @@ public:
         { "-fm_set_fsm_file", "yosys", "string", "" },
         { "-encfile", "yosys", "string", "" },
         { "-encoding", "yosys", "string", "" } };
-
     setOptions( this, options );
   }
 
@@ -230,11 +227,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::fsm( boolOptionsValue["-expand"], boolOptionsValue["-norecode"], boolOptionsValue["-export"], boolOptionsValue["-nomap"], boolOptionsValue["-fullexpand"],
                             strOptionsValue["-fm_set_fsm_file"], strOptionsValue["-encfile"], strOptionsValue["-encoding"] );
       break;
@@ -273,7 +270,6 @@ public:
         { "-share_all", "yosys", "bool", "" },
         { "-fast", "yosys", "bool", "" },
         { "-noff", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -312,11 +308,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::opt( boolOptionsValue["-purge"], boolOptionsValue["-mux_undef"], boolOptionsValue["-mux_bool"], boolOptionsValue["-undriven"], boolOptionsValue["-noclkinv"],
                             boolOptionsValue["-fine"], boolOptionsValue["-full"], boolOptionsValue["-keepdc"], boolOptionsValue["-nodffe"], boolOptionsValue["-nosdff"], boolOptionsValue["-sat"],
                             boolOptionsValue["-share_all"], boolOptionsValue["-fast"], boolOptionsValue["-noff"] );
@@ -349,7 +345,6 @@ public:
         { "-extern", "yosys", "bool", "" },
         { "-wb", "yosys", "bool", "" },
         { "-assert", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -385,11 +380,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::techmap( strOptionsValue["-map"],
                                 boolOptionsValue["-extern"], intOptionsValue["-max_iter"], boolOptionsValue["-recursive"], boolOptionsValue["-wb"], boolOptionsValue["-assert"] );
       break;
@@ -416,7 +411,6 @@ public:
     std::vector<lfCmdOption> options = {
         { "-nand", "yosys", "bool", "" },
         { "-select", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -452,11 +446,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::aigmap( boolOptionsValue["-nand"], boolOptionsValue["-select"] );
       break;
     default:
@@ -502,7 +496,6 @@ public:
         { "-showtmp", "yosys", "bool", "" },
         { "-markgroups", "yosys", "bool", "" },
         { "-dress", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -538,11 +531,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::abc( strOptionsValue["-exe"], strOptionsValue["-script"],
                             strvecOptionsValue["-liberty"], strvecOptionsValue["-genlib"], strOptionsValue["-constr"], strvecOptionsValue["-dont_use"],
                             boolOptionsValue["-fast"],
@@ -571,7 +564,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -607,7 +599,7 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     // TODO: add the gtechmap
     std::cerr << "node support now!" << std::endl;
@@ -615,7 +607,7 @@ public:
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       // lf::arch::yosys::gtechmap( );
       break;
     default:
@@ -640,7 +632,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-top", "yosys", "string", "" } };
-
     setOptions( this, options );
   }
 
@@ -676,11 +667,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::rename( strOptionsValue["-top"] );
       break;
     default:

@@ -25,13 +25,6 @@ namespace abc
  */
 void write_bench( const std::string& file, bool is_lut = false )
 {
-  if ( !lf::utility::endsWith( file, ".bench" ) )
-  {
-    std::cerr << "Unmatched bench suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

@@ -25,13 +25,6 @@ namespace abc
  */
 void write_pla( const std::string& file, int M = -1, bool is_multi_output = false )
 {
-  if ( !lf::utility::endsWith( file, ".pla" ) )
-  {
-    std::cerr << "Unmatched pla suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

@@ -25,15 +25,13 @@ namespace abc
  */
 void read_verilog( const std::string& file, bool is_mapped = false, bool is_checking = false, bool is_barrier_buffer = false )
 {
-  if ( !lf::utility::endsWith( file, ".v" ) )
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_SOP );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_SOP )
   {
-    std::cerr << "Unmatched verilog suffix type." << std::endl;
-    assert( false );
+    std::cerr << "Unmatched logic network type." << std::endl;
     return;
   }
-
-  auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_SOP );
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

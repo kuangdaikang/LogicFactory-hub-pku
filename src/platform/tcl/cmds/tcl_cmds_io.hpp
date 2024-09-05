@@ -59,6 +59,9 @@
 #include "layer_logic/api/lsils/io/write_verilog.hpp"
 #include "layer_logic/aux/write_graphml.hpp"
 
+#include "layer_logic/aux/write_qor.hpp"
+#include "layer_netlist/aux/write_qor.hpp"
+
 namespace lf
 {
 
@@ -87,7 +90,6 @@ public:
         { "-wideports", "yosys", "bool", "" },
         { "-xaiger", "yosys", "bool", "" },
         { "-c", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -124,11 +126,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       std::cout << "yosys" << std::endl;
       lf::arch::yosys::read_aiger( strOptionsValue["-file"],
                                    strOptionsValue["-module_name"],
@@ -137,12 +139,12 @@ public:
                                    boolOptionsValue["-wideports"],
                                    boolOptionsValue["-xaiger"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       std::cout << "abc" << std::endl;
       lf::logic::abc::read_aiger( strOptionsValue["-file"],
                                   boolOptionsValue["-c"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
       lf::logic::lsils::read_aiger( strOptionsValue["-file"] );
       break;
@@ -210,23 +212,23 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::read_blif( strOptionsValue["-file"],
                                   boolOptionsValue["-sop"],
                                   boolOptionsValue["-wideports"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_blif( strOptionsValue["-file"],
                                  boolOptionsValue["-n"],
                                  boolOptionsValue["-m"],
                                  boolOptionsValue["-a"],
                                  boolOptionsValue["-c"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::read_blif( strOptionsValue["-file"] );
       break;
     default:
@@ -291,9 +293,7 @@ public:
         { "-noautowire", "yosys", "bool", "Disable automatic wiring." },
         { "-m", "abc", "bool", "" },
         { "-c", "abc", "bool", "" },
-        { "-b", "abc", "bool", "" }
-
-    };
+        { "-b", "abc", "bool", "" } };
     setOptions( this, options );
   }
 
@@ -336,11 +336,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::read_verilog( strOptionsValue["-file"],
                                      boolOptionsValue["-sv"],
                                      boolOptionsValue["-formal"],
@@ -381,7 +381,7 @@ public:
                                      strOptionsValue["-Dname"],
                                      strOptionsValue["-Idir"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_verilog( strOptionsValue["-file"],
                                     boolOptionsValue["-m"],
                                     boolOptionsValue["-c"],
@@ -446,15 +446,15 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_bench( strOptionsValue["-file"],
                                   boolOptionsValue["-c"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::read_bench( strOptionsValue["-file"] );
       break;
     default:
@@ -516,15 +516,15 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_cnf( strOptionsValue["-file"],
                                 boolOptionsValue["-m"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::read_cnf( strOptionsValue["-file"] );
       break;
     default:
@@ -590,11 +590,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_pla( strOptionsValue["-file"],
                                 boolOptionsValue["-z"],
                                 boolOptionsValue["-b"],
@@ -602,7 +602,7 @@ public:
                                 boolOptionsValue["-x"],
                                 boolOptionsValue["-c"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::read_pla( strOptionsValue["-file"] );
       break;
     default:
@@ -663,11 +663,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::read_gtech( strOptionsValue["-file"] );
       break;
     default:
@@ -728,11 +728,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_formula( strOptionsValue["-file"] );
       break;
     default:
@@ -793,11 +793,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::read_json( strOptionsValue["-file"] );
       break;
     default:
@@ -861,11 +861,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::read_rtlil( strOptionsValue["-file"], boolOptionsValue["-nooverwrite"], boolOptionsValue["-overwrite"], boolOptionsValue["-lib"] );
       break;
     default:
@@ -926,14 +926,14 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_genlib( strOptionsValue["-file"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::read_genlib( strOptionsValue["-file"] );
       break;
     default:
@@ -1002,11 +1002,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::read_liberty( strOptionsValue["-file"],
                                      boolOptionsValue["-lib"],
                                      boolOptionsValue["-wb"],
@@ -1017,7 +1017,7 @@ public:
                                      boolOptionsValue["-is_ignore_miss_data_latch"],
                                      strOptionsValue["-setattr"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::read_liberty( strOptionsValue["-file"] );
       break;
     default:
@@ -1060,7 +1060,6 @@ public:
         { "-c", "abc", "bool", "" },
         { "-u", "abc", "bool", "" },
         { "-v", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1097,11 +1096,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       std::cout << "yosys" << std::endl;
       lf::arch::yosys::write_aiger( strOptionsValue["-file"],
                                     boolOptionsValue["-ascii"],
@@ -1117,7 +1116,7 @@ public:
                                     boolOptionsValue["-B"],
                                     boolOptionsValue["-L"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       std::cout << "abc" << std::endl;
       lf::logic::abc::write_aiger( strOptionsValue["-file"],
                                    boolOptionsValue["-s"],
@@ -1125,7 +1124,7 @@ public:
                                    boolOptionsValue["-u"],
                                    boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
       lf::logic::lsils::write_aiger( strOptionsValue["-file"] );
       break;
@@ -1153,7 +1152,6 @@ public:
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
         { "-l", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1190,16 +1188,16 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       std::cout << "abc" << std::endl;
       lf::logic::abc::write_bench( strOptionsValue["-file"],
                                    boolOptionsValue["-l"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       std::cout << "lsils" << std::endl;
       lf::logic::lsils::write_bench( strOptionsValue["-file"] );
       break;
@@ -1246,7 +1244,6 @@ public:
         { "-S", "abc", "string", "" },
         { "-j", "abc", "bool", "" },
         { "-a", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1283,11 +1280,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_blif( strOptionsValue["-file"],
                                    strOptionsValue["-top"],
                                    strvecOptionsValue["-buf"],
@@ -1307,13 +1304,13 @@ public:
                                    boolOptionsValue["-blackbox"],
                                    boolOptionsValue["-impltf"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::write_blif( strOptionsValue["-file"],
                                   strOptionsValue["-S"],
                                   boolOptionsValue["-j"],
                                   boolOptionsValue["-a"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::write_blif( strOptionsValue["-file"] );
       break;
     default:
@@ -1344,7 +1341,6 @@ public:
         { "-p", "abc", "bool", "" },
         { "-c", "abc", "bool", "" },
         { "-v", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1381,11 +1377,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::write_cnf( strOptionsValue["-file"],
                                  boolOptionsValue["-n"],
                                  boolOptionsValue["-f"],
@@ -1393,7 +1389,7 @@ public:
                                  boolOptionsValue["-c"],
                                  boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::write_cnf( strOptionsValue["-file"] );
       break;
     default:
@@ -1419,7 +1415,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." } };
-
     setOptions( this, options );
   }
 
@@ -1456,14 +1451,14 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::write_dot( strOptionsValue["-file"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::write_dot( strOptionsValue["-file"] );
       break;
     default:
@@ -1490,9 +1485,7 @@ public:
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
         { "-M", "abc", "int", "" },
-        { "-m", "abc", "bool", "" },
-    };
-
+        { "-m", "abc", "bool", "" } };
     setOptions( this, options );
   }
 
@@ -1529,11 +1522,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::write_pla( strOptionsValue["-file"],
                                  intOptionsValue["-M"],
                                  boolOptionsValue["-m"] );
@@ -1563,7 +1556,6 @@ public:
         { "-file", "all", "string", "The file to write." },
         { "-x", "abc", "bool", "" },
         { "-r", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1600,11 +1592,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::write_truth( strOptionsValue["-file"],
                                    boolOptionsValue["-x"],
                                    boolOptionsValue["-r"] );
@@ -1637,9 +1629,7 @@ public:
         { "-c", "yosys", "bool", "" },
         { "-i", "yosys", "bool", "" },
         { "-x", "yosys", "bool", "" },
-        { "-ywmap", "yosys", "string", "" },
-    };
-
+        { "-ywmap", "yosys", "string", "" } };
     setOptions( this, options );
   }
 
@@ -1676,11 +1666,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_btor( strOptionsValue["-file"],
                                    boolOptionsValue["-v"],
                                    boolOptionsValue["-s"],
@@ -1719,7 +1709,6 @@ public:
         { "-keep", "yosys", "bool", "" },
         { "-pvector", "yosys", "string", "" },
         { "-lsbidx", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1756,11 +1745,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_edif( strOptionsValue["-file"],
                                    strOptionsValue["-top"],
                                    boolOptionsValue["-nogndvcc"],
@@ -1793,7 +1782,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." } };
-
     setOptions( this, options );
   }
 
@@ -1830,11 +1818,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_firrtl( strOptionsValue["-file"] );
       break;
     default:
@@ -1862,7 +1850,6 @@ public:
         { "-file", "all", "string", "The file to write." },
         { "is_aig", "yosys", "bool", "" },
         { "-compat-int", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1899,11 +1886,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_json( strOptionsValue["-file"],
                                    boolOptionsValue["-is_aig"],
                                    boolOptionsValue["-compat-int"] );
@@ -1932,7 +1919,6 @@ public:
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "The file to write." },
         { "-selected", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -1969,11 +1955,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_json( strOptionsValue["-file"],
                                    boolOptionsValue["-selected"] );
       break;
@@ -2007,7 +1993,6 @@ public:
         { "-buf", "yosys", "string", "" },
         { "-nc_prefix", "yosys", "string", "" },
         { "-inames", "yosys", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -2044,11 +2029,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_spice( strOptionsValue["-file"],
                                     strOptionsValue["-top"],
                                     boolOptionsValue["-big_endian"],
@@ -2101,9 +2086,7 @@ public:
         { "-K", "abc", "int", "" },
         { "-f", "abc", "bool", "" },
         { "-a", "abc", "bool", "" },
-        { "-m", "abc", "bool", "" }
-
-    };
+        { "-m", "abc", "bool", "" } };
     setOptions( this, options );
   }
 
@@ -2144,11 +2127,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::write_verilog( strOptionsValue["-file"],
                                       boolOptionsValue["-sv"],
                                       boolOptionsValue["-norename"],
@@ -2169,15 +2152,15 @@ public:
                                       boolOptionsValue["-selected"],
                                       boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::write_verilog( strOptionsValue["-file"],
                                      intOptionsValue["-K"],
                                      boolOptionsValue["-f"],
                                      boolOptionsValue["-a"],
                                      boolOptionsValue["-m"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
-      lf::logic::lsils::write_verilog(strOptionsValue["-file"]);
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+      lf::logic::lsils::write_verilog( strOptionsValue["-file"] );
       break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
@@ -2237,17 +2220,15 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       std::cerr << "TODO ing!" << std::endl;
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
-      lf::logic::write_graphml( strOptionsValue["-file"] );
-      break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::write_graphml( strOptionsValue["-file"] );
       break;
     default:
@@ -2257,6 +2238,78 @@ public:
     return 1;
   }
 }; // class CmdLfIoWriteGraphml
+
+class CmdLfIoWriteQor : public TclCmd
+{
+public:
+  explicit CmdLfIoWriteQor( const char* cmd_name ) : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    this->set_description( description );
+    // set the domain
+    std::string domain = "io";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "" } };
+    setOptions( this, options );
+  }
+
+  ~CmdLfIoWriteQor() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = {
+        "-file" };
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = { "-file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
+      std::cerr << "TODO ing!" << std::endl;
+      break;
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+      lf::logic::write_qor( strOptionsValue["-file"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
+      std::cerr << "TODO ing!" << std::endl;
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
+}; // class CmdLfIoWriteQor
 
 } // namespace tcl
 

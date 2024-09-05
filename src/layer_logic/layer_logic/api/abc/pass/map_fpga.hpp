@@ -32,7 +32,12 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
                bool is_n_dsd_cutfunc = false, bool is_cut_new_truth = false, bool is_z_derive_luts = false, bool is_verbose = false )
 {
   auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_STRASH_AIG );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_STRASH_AIG )
+  {
+    std::cerr << "Error: The current network is not a strash aig network." << std::endl;
+    return;
+  }
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
@@ -194,7 +199,7 @@ void map_fpga( int KCut = -1, int CPriority = -1, int FlowIter = -1, int AreaIte
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -v " ).c_str() );
 
   babc::Abc_CommandIf( ntk_ptr, argc, argv );
-  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA );
+  lfLntINST->set_ntktype( lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_NETLIST_FPGA );
 }
 
 } // namespace abc

@@ -25,13 +25,6 @@ namespace abc
  */
 void write_dot( const std::string& file )
 {
-  if ( !lf::utility::endsWith( file, ".dot" ) )
-  {
-    std::cerr << "Unmatched dot suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

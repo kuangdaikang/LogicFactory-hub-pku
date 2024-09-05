@@ -25,15 +25,14 @@ namespace abc
  */
 void read_pla( const std::string& file, bool is_zeors = false, bool is_both = false, bool is_dont_care = false, bool is_exor_sop = false, bool is_checking = false )
 {
-  if ( !lf::utility::endsWith( file, ".pla" ) )
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_SOP );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_SOP )
   {
-    std::cerr << "Unmatched pla suffix type." << std::endl;
-    assert( false );
+    std::cerr << "Unmatched pla ntk type." << std::endl;
     return;
   }
-  auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_SOP );
-  
+
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

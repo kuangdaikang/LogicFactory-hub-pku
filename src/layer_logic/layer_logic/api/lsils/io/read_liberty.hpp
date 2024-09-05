@@ -26,12 +26,6 @@ namespace lsils
 // template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
 void read_liberty( std::string file )
 {
-  if ( !lf::utility::endsWith( file, ".lib" ) )
-  {
-    std::cerr << "Unmatched lib suffix type." << std::endl;
-    assert( false );
-    return;
-  }
   std::cerr << "Not support now." << std::endl;
   assert( false );
   return;

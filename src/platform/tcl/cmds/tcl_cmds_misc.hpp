@@ -4,7 +4,6 @@
 #include "tcl/engine/tcl_option.hpp"
 #include "tcl/cmds/utils.hpp"
 
-
 #include "misc/anchor.hpp"
 
 #include "layer_arch/api/yosys/pass/print_stat.hpp"
@@ -31,6 +30,9 @@ public:
     // set the domain
     std::string domain = "misc";
     this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {};
+    setOptions( this, options );
   }
 
   ~CmdLfHelp() override = default;
@@ -115,13 +117,13 @@ public:
 
 }; // class CmdLfHelp
 
-class CmdLfStat : public TclCmd
+class CmdLfPrintStat : public TclCmd
 {
 public:
-  explicit CmdLfStat( const char* cmd_name ) : TclCmd( cmd_name )
+  explicit CmdLfPrintStat( const char* cmd_name ) : TclCmd( cmd_name )
   {
     // set the description
-    std::string description = "Read the blif file and store the data in the current design. please note the current anchor when use this command!";
+    std::string description = "";
     this->set_description( description );
     // set the domain
     std::string domain = "io";
@@ -148,7 +150,7 @@ public:
     setOptions( this, options );
   }
 
-  ~CmdLfStat() override = default;
+  ~CmdLfPrintStat() override = default;
 
   unsigned check() override
   {
@@ -180,21 +182,23 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::arch::yosys::print_stat( strOptionsValue["-top"], strOptionsValue["-liberty"], strOptionsValue["-tech"],
                                    boolOptionsValue["-width"], boolOptionsValue["-json"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::print_stat( boolOptionsValue["-f"], boolOptionsValue["-b"], boolOptionsValue["-d"], boolOptionsValue["-l"],
                                   boolOptionsValue["-t"], boolOptionsValue["-m"], boolOptionsValue["-p"], boolOptionsValue["-g"],
                                   boolOptionsValue["-s"], boolOptionsValue["-c"], boolOptionsValue["-u"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::print_stat( boolOptionsValue["-lib"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
@@ -202,7 +206,7 @@ public:
     }
     return 1;
   }
-}; // class CmdLfStat
+}; // class CmdLfPrintStat
 
 } // namespace tcl
 

@@ -46,47 +46,55 @@ void resubing( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, 
     ps.verbose = true;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
-          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG ||
-          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG ||
-          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG );
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XAG ||
+          ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG ||
+          ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_MIG );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG &&
+       ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XAG &&
+       ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG &&
+       ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_MIG )
+  {
+    std::cerr << "[ERROR] write_bench: wrong ntk type!" << std::endl;
+    return;
+  }
 
-  if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
+  switch ( ntktype )
+  {
+  case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG:
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
-
     mockturtle::default_resubstitution( ntk, ps );
-
     lfLmINST->set_current<lf::logic::lsils::aig_seq_network>( ntk );
+    break;
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG )
+  case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XAG:
   {
     lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
-
     mockturtle::default_resubstitution( ntk, ps );
-
     lfLmINST->set_current<lf::logic::lsils::xag_seq_network>( ntk );
+    break;
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG )
+  case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG:
   {
     lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
-
     mockturtle::default_resubstitution( ntk, ps );
-
     lfLmINST->set_current<lf::logic::lsils::xmg_seq_network>( ntk );
+    break;
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG )
+  case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_MIG:
   {
     lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
-
     mockturtle::default_resubstitution( ntk, ps );
-
     lfLmINST->set_current<lf::logic::lsils::mig_seq_network>( ntk );
+    break;
   }
-  else
+  default:
   {
     std::cerr << "unsupport network type!\n";
     assert( false );
+    break;
+  }
   }
 }
 
@@ -118,32 +126,39 @@ void resub( int NInputMax = -1, int Max_divisors = -1, int Max_inserts = -1, int
     ps.verbose = true;
 
   auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG ||
-          ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG );
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG ||
+          ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG &&
+       ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG )
+  {
+    std::cerr << "[ERROR] write_bench: wrong ntk type!" << std::endl;
+    return;
+  }
 
-  if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
+  switch ( ntktype )
+  {
+  case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG:
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
-
     mockturtle::aig_resubstitution( ntk, ps );
     lfLmINST->set_current( ntk );
-
     lfLmINST->set_current<lf::logic::lsils::aig_seq_network>( ntk );
+    break;
   }
-
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG )
+  case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG:
   {
     lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
-
     mockturtle::xmg_resubstitution( ntk, ps );
     lfLmINST->set_current( ntk );
-
     lfLmINST->set_current<lf::logic::lsils::xmg_seq_network>( ntk );
+    break;
   }
-  else
+  default:
   {
     std::cerr << "unsupport network type!\n";
     assert( false );
+    break;
+  }
   }
 }
 

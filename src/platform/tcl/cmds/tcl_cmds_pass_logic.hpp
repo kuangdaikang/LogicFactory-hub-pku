@@ -48,9 +48,8 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-tool", "all", "string", "" },
-        { "-type", "all", "string", "" },
-        { "-ntk", "all", "string", "" } };
-
+        { "-stat", "all", "string", "" },
+        { "-type", "all", "string", "" } };
     setOptions( this, options );
   }
 
@@ -58,7 +57,7 @@ public:
 
   unsigned check() override
   {
-    std::vector<std::string> essential = { "-tool", "-type", "-ntk" };
+    std::vector<std::string> essential = { "-tool", "-stat", "-type" };
     return checkEssentialOptions( this, essential );
   }
 
@@ -75,7 +74,7 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = { "-tool", "-type", "-ntk" };
+    std::vector<std::string> strOptions = { "-tool", "-stat", "-type" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -86,7 +85,7 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    lfLntINST->set_ntktype( strOptionsValue["-tool"], strOptionsValue["-type"], strOptionsValue["-ntk"] );
+    lfLntINST->set_ntktype( strOptionsValue["-tool"], strOptionsValue["-stat"], strOptionsValue["-type"] );
 
     return 1;
   }
@@ -105,7 +104,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -141,10 +139,10 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
     // transform arch into logic
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
-    switch ( anchor_domain )
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_ARCH_YOSYS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
       lf::logic::arch_to_logic( lfAmINST->current<Yosys::RTLIL::Design*>() );
       break;
     default:
@@ -171,7 +169,6 @@ public:
         { "-from", "all", "string", "" },
         { "-to", "all", "string", "" },
         { "-n", "all", "bool", "convert by node to node" } };
-
     setOptions( this, options );
   }
 
@@ -229,7 +226,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-n", "all", "bool", "convert by node to node" } };
-
     setOptions( this, options );
   }
 
@@ -287,7 +283,6 @@ public:
         { "-c", "abc", "bool", "" },
         { "-r", "abc", "bool", "" },
         { "-i", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -323,14 +318,14 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::strash( boolOptionsValue["-a"], boolOptionsValue["-c"], boolOptionsValue["-r"], boolOptionsValue["-i"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::strash();
       break;
     default:
@@ -361,7 +356,6 @@ public:
         { "-v", "abc", "bool", "" },
         { "-m", "lsils", "bool", "minimize level" },
         { "-f", "lsils", "bool", "fast mode" } };
-
     setOptions( this, options );
   }
 
@@ -397,14 +391,14 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::balance( boolOptionsValue["-l"], boolOptionsValue["-d"], boolOptionsValue["-s"], boolOptionsValue["-x"], boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::balance( boolOptionsValue["-m"], boolOptionsValue["-f"] );
       break;
     default:
@@ -434,7 +428,6 @@ public:
         { "-p", "lsils", "bool", "" },
         { "-v", "all", "bool", "" },
         { "-w", "all", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -470,14 +463,14 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::rewrite( boolOptionsValue["-l"], boolOptionsValue["-z"], boolOptionsValue["-v"], boolOptionsValue["-w"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::rewrite( boolOptionsValue["-l"], boolOptionsValue["-z"], boolOptionsValue["-d"], boolOptionsValue["-p"], boolOptionsValue["-v"], boolOptionsValue["-w"] );
       break;
     default:
@@ -509,7 +502,6 @@ public:
         { "-r", "lsils", "bool", "" },
         { "-d", "lsils", "bool", "" },
         { "-p", "lsils", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -545,14 +537,14 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::refactor( intOptionsValue["-N"], intOptionsValue["-M"], boolOptionsValue["-l"], boolOptionsValue["-z"], boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::refactor( intOptionsValue["-N"], boolOptionsValue["-z"], boolOptionsValue["-r"], boolOptionsValue["-d"], boolOptionsValue["-p"], boolOptionsValue["-v"] );
       break;
     default:
@@ -592,7 +584,6 @@ public:
         { "-W", "lsils", "int", "window size" },
         { "-d", "lsils", "bool", "" },
         { "-p", "lsils", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -628,15 +619,15 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::resub( intOptionsValue["-K"], intOptionsValue["-N"], intOptionsValue["-M"], intOptionsValue["-F"],
                              boolOptionsValue["-l"], boolOptionsValue["-z"], boolOptionsValue["-v"], boolOptionsValue["-w"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::resub( intOptionsValue["-NI"], intOptionsValue["-MD"], intOptionsValue["-MI"], intOptionsValue["-FLR"], intOptionsValue["-FLD"], intOptionsValue["-W"],
                                boolOptionsValue["-l"], boolOptionsValue["-d"], boolOptionsValue["-p"], boolOptionsValue["-v"] );
       break;
@@ -674,16 +665,13 @@ public:
         { "-Y", "abc", "int", "Area of AND-gate in LUT library units." },
         { "-U", "abc", "int", "Number of LUT inputs for delay-driven LUT decomposition." },
         { "-Z", "abc", "int", "Number of LUT inputs for delay-driven LUT decomposition." },
-
         // double options with descriptions
         { "-D", "abc", "double", "Sets the delay constraint for the mapping." },
         { "-E", "abc", "double", "Sets epsilon used for tie-breaking." },
         { "-W", "abc", "double", "Sets wire delay between adjacent LUTs." },
-
         // String options with descriptions
         { "-S", "abc", "string", "String representing the LUT structure." },
         { "-J", "abc", "string", "String representing the LUT structure (new method)." },
-
         // Boolean switches with descriptions
         { "-q", "abc", "bool", "Toggles preprocessing using several starting points." },
         { "-a", "abc", "bool", "Toggles area-oriented mapping." },
@@ -707,7 +695,6 @@ public:
         { "-n", "abc", "bool", "Toggles computing DSDs of the cut functions." },
         { "-c", "abc", "bool", "Toggles computing truth tables in a new way." },
         { "-v", "all", "bool", "Toggles verbose output." } };
-
     setOptions( this, options );
   }
 
@@ -743,11 +730,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::map_fpga( intOptionsValue["-K"], intOptionsValue["-C"], intOptionsValue["-F"], intOptionsValue["-A"],
                                 intOptionsValue["-G"], intOptionsValue["-R"], intOptionsValue["-N"], intOptionsValue["-T"],
                                 intOptionsValue["-X"], intOptionsValue["-Y"],
@@ -760,7 +747,7 @@ public:
                                 boolOptionsValue["-i"], boolOptionsValue["-k"], boolOptionsValue["-t"], boolOptionsValue["-n"],
                                 boolOptionsValue["-c"], boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::map_fpga( intOptionsValue["-K"], intOptionsValue["-C"], intOptionsValue["-F"], intOptionsValue["-A"], boolOptionsValue["-v"] );
       break;
     default:
@@ -799,7 +786,6 @@ public:
         { "-u", "abc", "bool", "Use standard-cell profile. Default is no." },
         { "-o", "abc", "bool", "Toggles using buffers to decouple combinational outputs. Default is no." },
         { "-v", "abc", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -835,17 +821,17 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    switch ( anchor_domain )
+    switch ( anchor_tool_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_ABC:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::map_asic( doubleOptionsValue["-D"], doubleOptionsValue["-A"], doubleOptionsValue["-B"], doubleOptionsValue["-F"], doubleOptionsValue["-S"], doubleOptionsValue["-G"],
                                 intOptionsValue["-M"],
                                 boolOptionsValue["-a"], boolOptionsValue["-r"], boolOptionsValue["-s"], boolOptionsValue["-p"], boolOptionsValue["-f"], boolOptionsValue["-u"], boolOptionsValue["-o"],
                                 boolOptionsValue["-v"] );
       break;
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_LOGIC_LSILS:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
       lf::logic::lsils::map_asic();
       break;
     default:

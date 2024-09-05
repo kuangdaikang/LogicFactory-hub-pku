@@ -4,6 +4,8 @@
 #include "layer_logic/api/abc/frame.hpp"
 #include "utility/string.hpp"
 
+#include "layer_logic/api/abc/io/write_lut.hpp"
+
 #include <cstdio>
 #include <string>
 
@@ -25,22 +27,18 @@ namespace abc
  */
 void write_verilog( const std::string& file, int K = -1, bool is_fixed_format = false, bool is_only_ands = false, bool is_modules = false )
 {
-  if ( !lf::utility::endsWith( file, ".v" ) )
+  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
+
+  if ( K > 0 )
   {
-    std::cerr << "Unmatched verilog suffix type." << std::endl;
-    assert( false );
+    lf::logic::abc::write_lut( file, is_fixed_format );
     return;
   }
-
-  auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name
   argc += 1;    // file name
   if ( K > 0 )
-  {
-    assert( K >= 2 && K <= 4 );
     argc += 1;
-  }
   if ( is_fixed_format )
     argc += 1;
   if ( is_only_ands )

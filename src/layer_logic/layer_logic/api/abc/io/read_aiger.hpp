@@ -25,15 +25,14 @@ namespace abc
  */
 void read_aiger( const std::string& file, bool is_checking = false )
 {
-  if ( !lf::utility::endsWith( file, ".aig" ) )
+  // check the current network type
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_AIG );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_AIG )
   {
-    std::cerr << "Unmatched aig suffix type." << std::endl;
-    assert( false );
+    std::cerr << "Unmatched network type." << std::endl;
     return;
   }
-
-  auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_AIG );
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

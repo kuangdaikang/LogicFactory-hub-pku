@@ -25,8 +25,6 @@ namespace abc
  */
 void strash( bool is_all_nodes, bool is_cleanup, bool is_record_used, bool is_inverted_pos )
 {
-  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG );
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name
@@ -55,6 +53,8 @@ void strash( bool is_all_nodes, bool is_cleanup, bool is_record_used, bool is_in
     argv[pos++] = babc::Extra_UtilStrsav( std::string( " -i " ).c_str() );
 
   babc::Abc_CommandStrash( ntk_ptr, argc, argv );
+
+  lfLntINST->set_ntktype( lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_STRASH_AIG );
 }
 
 } // namespace abc

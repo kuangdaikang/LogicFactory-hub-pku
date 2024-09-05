@@ -37,7 +37,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -74,10 +73,10 @@ public:
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     // transform arch into logic
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::arch_to_netlist( lfAmINST->current<Yosys::RTLIL::Design*>() );
       break;
     default:
@@ -102,7 +101,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -139,14 +137,14 @@ public:
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     // transform arch into logic
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
     auto ntktype = lfLntINST->get_ntktype_curr();
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
-      if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_ASIC )
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
+      if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_NETLIST_ASIC )
         lf::netlist::logic_to_netlist( lfLmINST->current<babc::Abc_Frame_t*>() );
-      else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC )
+      else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_NETLIST_ASIC )
         lf::netlist::logic_to_netlist( lfLmINST->current<lf::logic::lsils::blut_seq_network>() );
       else
         std::cerr << "Unsupported netlist type, please use netlist to set the netlist type!" << std::endl;
@@ -174,7 +172,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-file", "all", "string", "" } };
-
     setOptions( this, options );
   }
 
@@ -211,10 +208,10 @@ public:
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     // transform arch into logic
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lfNmINST->set_config_ieda( strOptionsValue["-file"] );
       break;
     default:
@@ -239,7 +236,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -275,11 +271,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::ieda::run_init();
       break;
     default:
@@ -304,7 +300,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-r", "ieda", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -340,11 +335,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::ieda::run_sta( boolOptionsValue["-r"] );
       break;
     default:
@@ -368,7 +363,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -404,11 +398,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::ieda::run_floorplan();
       break;
     default:
@@ -433,7 +427,6 @@ public:
     // set the options
     std::vector<lfCmdOption> options = {
         { "-r", "ieda", "bool", "" } };
-
     setOptions( this, options );
   }
 
@@ -469,11 +462,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::ieda::run_placement( boolOptionsValue["-r"] );
       break;
     default:
@@ -497,7 +490,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -533,11 +525,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::ieda::run_cts();
       break;
     default:
@@ -561,7 +553,6 @@ public:
     this->set_domain( domain );
     // set the options
     std::vector<lfCmdOption> options = {};
-
     setOptions( this, options );
   }
 
@@ -597,11 +588,11 @@ public:
     extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    auto anchor_domain = lfAnchorINST->get_anchor_domain();
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
 
     switch ( anchor_domain )
     {
-    case lf::misc::E_LF_ANCHOR_DOMAIN::E_LF_ANCHOR_DOMAIN_NETLIST_IEDA:
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       lf::netlist::ieda::run_routing();
       break;
     default:

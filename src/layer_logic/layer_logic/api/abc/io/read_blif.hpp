@@ -25,15 +25,13 @@ namespace abc
  */
 void read_blif( const std::string& file, bool is_old_parser = false, bool is_aig_created = false, bool is_saving_names = false, bool is_checking = false )
 {
-  if ( !lf::utility::endsWith( file, ".blif" ) )
+  auto ntktype = lfLntINST->get_ntktype_curr();
+  assert( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_SOP );
+  if ( ntktype != lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_SOP )
   {
-    std::cerr << "Unmatched blif suffix type." << std::endl;
-    assert( false );
+    std::cerr << "Unmatched ntk type." << std::endl;
     return;
   }
-  
-  auto ntktype = lfLntINST->get_ntktype_curr();
-  assert( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_SOP );
 
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 

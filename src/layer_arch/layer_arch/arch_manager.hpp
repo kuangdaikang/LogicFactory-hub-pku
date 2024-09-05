@@ -1,6 +1,10 @@
 #pragma once
 #include "kernel/yosys.h"
 
+#include "misc/anchor.hpp"
+#include "misc/ntktye.hpp"
+
+// arch manager instance
 #define lfAmINST lf::arch::ArchManager::get_instance()
 
 namespace lf
@@ -8,12 +12,9 @@ namespace lf
 namespace arch
 {
 
-enum class E_ToolArchType
-{
-  E_ARCH_YOSYS,
-  E_ARCH_IVERILOG,
-};
-
+/**
+ * @brief ArchManager
+ */
 class ArchManager
 {
 public:
@@ -48,6 +49,15 @@ public:
     }
   }
 
+  template<typename T>
+  void set_current( T obj )
+  {
+    if constexpr ( std::is_same_v<T, Yosys::RTLIL::Design*> )
+    {
+      frame_yosys_ = obj;
+    }
+  }
+
 private:
   ArchManager() = default;
   ~ArchManager() = default;
@@ -58,9 +68,6 @@ private:
   static ArchManager* instance_;
 
   Yosys::RTLIL::Design* frame_yosys_;
-  E_ToolArchType type_prev_ = { E_ToolArchType::E_ARCH_YOSYS };
-  E_ToolArchType type_curr_ = { E_ToolArchType::E_ARCH_YOSYS };
-
 }; // class ArchManager
 
 ArchManager* ArchManager::instance_ = nullptr;

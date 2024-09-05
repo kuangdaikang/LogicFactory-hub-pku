@@ -69,9 +69,21 @@ public:
     {
       return frame_lsils_.curr_aig;
     }
+    else if constexpr ( std::is_same_v<T, lsils::oig_seq_network> )
+    {
+      return frame_lsils_.curr_oig;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::aog_seq_network> )
+    {
+      return frame_lsils_.curr_aog;
+    }
     else if constexpr ( std::is_same_v<T, lsils::xag_seq_network> )
     {
       return frame_lsils_.curr_xag;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::xog_seq_network> )
+    {
+      return frame_lsils_.curr_xog;
     }
     else if constexpr ( std::is_same_v<T, lsils::mig_seq_network> )
     {
@@ -89,13 +101,17 @@ public:
     {
       return frame_lsils_.curr_gtg;
     }
+    else if constexpr ( std::is_same_v<T, lsils::cvg_seq_network> )
+    {
+      return frame_lsils_.curr_cvg;
+    }
     else if constexpr ( std::is_same_v<T, lsils::blut_seq_network> )
     {
-      return frame_lsils_.netlist_asic;
+      return frame_lsils_.curr_asic;
     }
     else if constexpr ( std::is_same_v<T, lsils::klut_seq_network> )
     {
-      return frame_lsils_.netlist_fpga;
+      return frame_lsils_.curr_fpga;
     }
     else if constexpr ( std::is_same_v<T, lsils::lib_gates> )
     {
@@ -121,9 +137,21 @@ public:
     {
       frame_lsils_.curr_aig = obj;
     }
+    else if constexpr ( std::is_same_v<T, lsils::oig_seq_network> )
+    {
+      frame_lsils_.curr_oig = obj;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::aog_seq_network> )
+    {
+      frame_lsils_.curr_aog = obj;
+    }
     else if constexpr ( std::is_same_v<T, lsils::xag_seq_network> )
     {
       frame_lsils_.curr_xag = obj;
+    }
+    else if constexpr ( std::is_same_v<T, lsils::xog_seq_network> )
+    {
+      frame_lsils_.curr_xog = obj;
     }
     else if constexpr ( std::is_same_v<T, lsils::mig_seq_network> )
     {
@@ -147,11 +175,11 @@ public:
     }
     else if constexpr ( std::is_same_v<T, lsils::blut_seq_network> )
     {
-      frame_lsils_.netlist_asic = obj;
+      frame_lsils_.curr_asic = obj;
     }
     else if constexpr ( std::is_same_v<T, lsils::klut_seq_network> )
     {
-      frame_lsils_.netlist_fpga = obj;
+      frame_lsils_.curr_fpga = obj;
     }
     else if constexpr ( std::is_same_v<T, lsils::lib_gates> )
     {

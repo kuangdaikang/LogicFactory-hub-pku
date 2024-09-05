@@ -25,13 +25,6 @@ namespace abc
  */
 void write_cnf( const std::string& file, bool is_new = false, bool is_fast = false, bool is_primes = false, bool is_adjast = false, bool is_verbose = false )
 {
-  if ( !lf::utility::endsWith( file, ".cnf" ) )
-  {
-    std::cerr << "Unmatched cnf suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

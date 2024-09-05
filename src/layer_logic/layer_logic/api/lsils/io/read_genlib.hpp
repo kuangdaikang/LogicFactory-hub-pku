@@ -31,13 +31,6 @@ namespace lsils
 // template<class Ntk, class RewritingFn = {}, class NodeCostFn = unit_cost<Ntk>>
 void read_genlib( std::string file )
 {
-  if ( !lf::utility::endsWith( file, ".genlib" ) )
-  {
-    std::cerr << "Unmatched genlib suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   std::ifstream in( file );
   lib_gates gates;
   lorina::read_genlib( in, mockturtle::genlib_reader( gates ) );

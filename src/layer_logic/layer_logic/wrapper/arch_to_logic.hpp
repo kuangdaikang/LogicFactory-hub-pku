@@ -10,8 +10,8 @@ namespace logic
 
 void arch_to_logic( const Yosys::RTLIL::Design* frame_yosys )
 {
-  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_NTK_LOGIC_GTG );
-  lfLntINST->set_ntktype( lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG ); // hard code
+  lfAnchorINST->set_anchor( lf::misc::E_LF_ANCHOR::E_LF_ANCHOR_LOGIC_LSILS_LOGIC );
+  lfLntINST->set_ntktype( lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_GTG ); // hard code
 
   mockturtle::read_verilog_params ports;
   lf::logic::lsils::gtg_seq_network ntk;

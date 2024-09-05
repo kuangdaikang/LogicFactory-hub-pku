@@ -827,6 +827,11 @@ double Mio_PinReadDelayFanoutFall( Mio_Pin_t* pPin );
 double Mio_PinReadDelayBlockMax( Mio_Pin_t* pPin );
 Mio_Pin_t* Mio_PinReadNext( Mio_Pin_t* pPin );
 
+//////////////////////////////////////////////////////////////////////
+/// FPGA
+//////////////////////////////////////////////////////////////////////
+void Io_WriteVerilogLut( Abc_Ntk_t* pNtk, char* pFileName, int nLutSize, int fFixed, int fNoModules );
+
 } // namespace ABC_NAMESPACE
 
 #include "misc/util/abc_namespaces.h"

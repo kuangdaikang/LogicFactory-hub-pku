@@ -25,13 +25,6 @@ namespace abc
  */
 void write_aiger( const std::string& file, bool is_save_names = false, bool is_compact = false, bool is_unique = false, bool is_verbose = false )
 {
-  if ( !lf::utility::endsWith( file, ".aig" ) )
-  {
-    std::cerr << "Unmatched aig suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

@@ -25,13 +25,6 @@ namespace abc
  */
 void write_blif( const std::string& file, const std::string& str_lut = "", bool is_special = false, bool is_hierarchy = false )
 {
-  if ( !lf::utility::endsWith( file, ".blif" ) )
-  {
-    std::cerr << "Unmatched blif suffix type." << std::endl;
-    assert( false );
-    return;
-  }
-
   auto ntk_ptr = lfLmINST->current<babc::Abc_Frame_t*>(); // the the network from shared_ptr
 
   int argc = 1; // command name

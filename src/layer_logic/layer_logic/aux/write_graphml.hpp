@@ -1,13 +1,6 @@
 #pragma once
 
 #include "layer_logic/logic_manager.hpp"
-
-#include "mockturtle/networks/aig.hpp"
-#include "mockturtle/networks/gtg.hpp"
-#include "mockturtle/networks/mig.hpp"
-#include "mockturtle/networks/xag.hpp"
-#include "mockturtle/networks/xmg.hpp"
-
 #include "pugixml.hpp"
 
 #include <unordered_map>
@@ -30,16 +23,29 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
   using NtkBase = Ntk;
   using Node = typename Ntk::node;
   using Signal = typename Ntk::signal;
-  static_assert( std::is_same_v<NtkBase, lf::logic::lsils::aig_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::xag_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::mig_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::xmg_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::gtg_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::primary_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::cvg_seq_network> ||
+  static_assert( std::is_same_v<Ntk, lsils::aig_comb_network> ||
+                     std::is_same_v<Ntk, lsils::oig_comb_network> ||
+                     std::is_same_v<Ntk, lsils::aog_comb_network> ||
+                     std::is_same_v<Ntk, lsils::xag_comb_network> ||
+                     std::is_same_v<Ntk, lsils::xog_comb_network> ||
+                     std::is_same_v<Ntk, lsils::mig_comb_network> ||
+                     std::is_same_v<Ntk, lsils::xmg_comb_network> ||
+                     std::is_same_v<Ntk, lsils::primary_comb_network> ||
+                     std::is_same_v<Ntk, lsils::gtg_comb_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::klut_comb_network> ||
+                     std::is_same_v<NtkBase, lf::logic::lsils::blut_comb_network> ||
+                     std::is_same_v<Ntk, lsils::aig_seq_network> ||
+                     std::is_same_v<Ntk, lsils::oig_seq_network> ||
+                     std::is_same_v<Ntk, lsils::aog_seq_network> ||
+                     std::is_same_v<Ntk, lsils::xag_seq_network> ||
+                     std::is_same_v<Ntk, lsils::xog_seq_network> ||
+                     std::is_same_v<Ntk, lsils::mig_seq_network> ||
+                     std::is_same_v<Ntk, lsils::xmg_seq_network> ||
+                     std::is_same_v<Ntk, lsils::primary_seq_network> ||
+                     std::is_same_v<Ntk, lsils::gtg_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::klut_seq_network> ||
                      std::is_same_v<NtkBase, lf::logic::lsils::blut_seq_network>,
-                 "ntk is not an ntk, XAG, MIG, XMG, PRIMARY, GTG, CVG, KLUT or BLUT" );
+                 "Ntk is not an AIG, OIG, AOG, XAG, XOG, MIG, XMG, Primary, GTG, KLUT or BLUT" );
 
   pugi::xml_document doc;
   auto declarationNode = doc.append_child( pugi::node_declaration );
@@ -117,12 +123,25 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     xmlNode_gate.append_attribute( "id" ) = g_id;
     auto dataNode_gate = xmlNode_gate.append_child( "data" );
     dataNode_gate.append_attribute( "key" ) = "nodeType";
-    if constexpr ( std::is_same_v<NtkBase, lf::logic::lsils::aig_seq_network> ||
-                   std::is_same_v<NtkBase, lf::logic::lsils::xag_seq_network> ||
-                   std::is_same_v<NtkBase, lf::logic::lsils::mig_seq_network> ||
-                   std::is_same_v<NtkBase, lf::logic::lsils::xmg_seq_network> ||
-                   std::is_same_v<NtkBase, lf::logic::lsils::primary_seq_network> ||
-                   std::is_same_v<NtkBase, lf::logic::lsils::gtg_seq_network> )
+
+    if constexpr ( std::is_same_v<Ntk, lsils::aig_comb_network> ||
+                   std::is_same_v<Ntk, lsils::oig_comb_network> ||
+                   std::is_same_v<Ntk, lsils::aog_comb_network> ||
+                   std::is_same_v<Ntk, lsils::xag_comb_network> ||
+                   std::is_same_v<Ntk, lsils::xog_comb_network> ||
+                   std::is_same_v<Ntk, lsils::mig_comb_network> ||
+                   std::is_same_v<Ntk, lsils::xmg_comb_network> ||
+                   std::is_same_v<Ntk, lsils::primary_comb_network> ||
+                   std::is_same_v<Ntk, lsils::gtg_comb_network> ||
+                   std::is_same_v<Ntk, lsils::aig_seq_network> ||
+                   std::is_same_v<Ntk, lsils::oig_seq_network> ||
+                   std::is_same_v<Ntk, lsils::aog_seq_network> ||
+                   std::is_same_v<Ntk, lsils::xag_seq_network> ||
+                   std::is_same_v<Ntk, lsils::xog_seq_network> ||
+                   std::is_same_v<Ntk, lsils::mig_seq_network> ||
+                   std::is_same_v<Ntk, lsils::xmg_seq_network> ||
+                   std::is_same_v<Ntk, lsils::primary_seq_network> ||
+                   std::is_same_v<Ntk, lsils::gtg_seq_network> )
     {
       if ( ntk.is_and( g ) )
       {
@@ -156,9 +175,45 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
       {
         dataNode_gate.text().set( "XOR3" );
       }
-      else if ( ntk.is_xor3( g ) )
+      else if ( ntk.is_nand3( g ) )
       {
-        dataNode_gate.text().set( "XOR3" );
+        dataNode_gate.text().set( "NAND3" );
+      }
+      else if ( ntk.is_nor3( g ) )
+      {
+        dataNode_gate.text().set( "NOR3" );
+      }
+      else if ( ntk.is_mux21( g ) || ntk.is_ite( g ) )
+      {
+        dataNode_gate.text().set( "MUX21" );
+      }
+      else if ( ntk.is_nmux21( g ) )
+      {
+        dataNode_gate.text().set( "NMUX21" );
+      }
+      else if ( ntk.is_aoi21( g ) )
+      {
+        dataNode_gate.text().set( "AOI21" );
+      }
+      else if ( ntk.is_oai21( g ) )
+      {
+        dataNode_gate.text().set( "OAI21" );
+      }
+      else if ( ntk.is_axi21( g ) )
+      {
+        dataNode_gate.text().set( "AXI21" );
+      }
+      else if ( ntk.is_xai21( g ) )
+      {
+        dataNode_gate.text().set( "XAI21" );
+      }
+      else if ( ntk.is_oxi21( g ) )
+      {
+        dataNode_gate.text().set( "OXI21" );
+      }
+      else if ( ntk.is_xoi21( g ) )
+      {
+        dataNode_gate.text().set( "XOI21" );
       }
       else
       {
@@ -267,7 +322,7 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 }
 
 /**
- *
+ * @brief write the abc network into graphml file
  */
 void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
 {
@@ -312,7 +367,7 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
   // start the output stream
 
   // constant node
-  if ( babc::Abc_NtkIsStrash( pNtk ) )
+  if ( babc::Abc_NtkIsStrash( pNtk ) ) // AIG
   {
     pObj = babc::Abc_AigConst1( pNtk );
     int const_id = babc::Abc_ObjId( pObj );
@@ -341,7 +396,137 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
   }
 
   // internal gates / POs
-  if ( !Abc_NtkHasMapping( pNtk ) ) // AIG
+  if ( Abc_NtkIsMappedLogic( pNtk ) ) // ASIC netlist
+  {
+    Abc_NtkForEachNode( pNtk, pObj, i )
+    {
+      int g_id = babc::Abc_ObjId( pObj );
+      babc::Mio_Gate_t* pGate = (babc::Mio_Gate_t*)pObj->pData;
+      std::string gatename = babc::Mio_GateReadName( pGate );
+      auto xmlNode_gate = graphNode.append_child( "node" );
+      xmlNode_gate.append_attribute( "id" ) = g_id;
+      auto dataNode_gate = xmlNode_gate.append_child( "data" );
+      dataNode_gate.append_attribute( "key" ) = "nodeType";
+      dataNode_gate.text().set( "CELL" );
+      auto dataName_gate = xmlNode_gate.append_child( "data" );
+      dataName_gate.append_attribute( "key" ) = "nodeName";
+      dataName_gate.text().set( gatename.c_str() );
+
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        auto edge = graphNode.append_child( "edge" );
+        edge.append_attribute( "source" ) = child_id;
+        edge.append_attribute( "target" ) = g_id;
+      }
+    }
+    Abc_NtkForEachPo( pNtk, pObj, i )
+    {
+      auto po_id = babc::Abc_ObjId( pObj );
+      auto xmlNode_po = graphNode.append_child( "node" );
+      xmlNode_po.append_attribute( "id" ) = po_id;
+      auto dataNode_po = xmlNode_po.append_child( "data" );
+      dataNode_po.append_attribute( "key" ) = "nodeType";
+      dataNode_po.text().set( "PO" );
+      auto dataName_po = xmlNode_po.append_child( "data" );
+      dataName_po.append_attribute( "key" ) = "nodeName";
+      dataName_po.text().set( po_id );
+
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        auto edge = graphNode.append_child( "edge" );
+        edge.append_attribute( "source" ) = child_id;
+        edge.append_attribute( "target" ) = po_id;
+      }
+    }
+  }
+  else if ( Abc_NtkIsAigLogic( pNtk ) ) // fpga netlist from AIG
+  {
+    // create _const0_ and _const1_
+    int fpga_const0_id = babc::Abc_NtkObjNum( pNtk ) + 2;
+    int fpga_const1_id = babc::Abc_NtkObjNum( pNtk ) + 3;
+    std::string fpga_const0_name = "_const0_"; // keep same with sky130 library
+    std::string fpga_const1_name = "_const1_";
+    auto xmlNode_const0 = graphNode.append_child( "node" );
+    xmlNode_const0.append_attribute( "id" ) = fpga_const0_id;
+    auto dataNode_const0 = xmlNode_const0.append_child( "data" );
+    dataNode_const0.append_attribute( "key" ) = "nodeType";
+    dataNode_const0.text().set( "CELL" );
+    auto dataName_const0 = xmlNode_const0.append_child( "data" );
+    dataName_const0.append_attribute( "key" ) = "nodeName";
+    dataName_const0.text().set( fpga_const0_name.c_str() );
+
+    auto xmlNode_const1 = graphNode.append_child( "node" );
+    xmlNode_const1.append_attribute( "id" ) = fpga_const1_id;
+    auto dataNode_const1 = xmlNode_const1.append_child( "data" );
+    dataNode_const1.append_attribute( "key" ) = "nodeType";
+    dataNode_const1.text().set( "CELL" );
+    auto dataName_const1 = xmlNode_const1.append_child( "data" );
+    dataName_const1.append_attribute( "key" ) = "nodeName";
+    dataName_const1.text().set( fpga_const1_name.c_str() );
+
+    Abc_NtkForEachNode( pNtk, pObj, i )
+    {
+      int g_id = babc::Abc_ObjId( pObj );
+      std::string gatename = "LUT" + std::to_string( babc::Abc_ObjFaninNum( pObj ) );
+      // constant condition
+      if ( Abc_ObjFaninNum( pObj ) == 0 )
+      {
+        if ( Abc_NodeIsConst1( pObj ) )
+        {
+          auto edge = graphNode.append_child( "edge" );
+          edge.append_attribute( "source" ) = fpga_const1_id;
+          edge.append_attribute( "target" ) = g_id;
+        }
+        else
+        {
+          auto edge = graphNode.append_child( "edge" );
+          edge.append_attribute( "source" ) = fpga_const0_id;
+          edge.append_attribute( "target" ) = g_id;
+        }
+        continue;
+      }
+
+      // standard LUT
+      auto xmlNode_gate = graphNode.append_child( "node" );
+      xmlNode_gate.append_attribute( "id" ) = g_id;
+      auto dataNode_gate = xmlNode_gate.append_child( "data" );
+      dataNode_gate.append_attribute( "key" ) = "nodeType";
+      dataNode_gate.text().set( "LUT" );
+      auto dataName_gate = xmlNode_gate.append_child( "data" );
+      dataName_gate.append_attribute( "key" ) = "nodeName";
+      dataName_gate.text().set( gatename.c_str() );
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        auto edge = graphNode.append_child( "edge" );
+        edge.append_attribute( "source" ) = child_id;
+        edge.append_attribute( "target" ) = g_id;
+      }
+    }
+    Abc_NtkForEachPo( pNtk, pObj, i )
+    {
+      auto po_id = babc::Abc_ObjId( pObj );
+      auto xmlNode_po = graphNode.append_child( "node" );
+      xmlNode_po.append_attribute( "id" ) = po_id;
+      auto dataNode_po = xmlNode_po.append_child( "data" );
+      dataNode_po.append_attribute( "key" ) = "nodeType";
+      dataNode_po.text().set( "PO" );
+      auto dataName_po = xmlNode_po.append_child( "data" );
+      dataName_po.append_attribute( "key" ) = "nodeName";
+      dataName_po.text().set( po_id );
+
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        auto edge = graphNode.append_child( "edge" );
+        edge.append_attribute( "source" ) = child_id;
+        edge.append_attribute( "target" ) = po_id;
+      }
+    }
+  }
+  else if ( Abc_NtkHasAig( pNtk ) ) // AIG
   {
     Abc_AigForEachAnd( pNtk, pObj, i )
     {
@@ -434,50 +619,10 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       }
     }
   }
-  else // mapped netlist
+  else
   {
-    Abc_NtkForEachNode( pNtk, pObj, i )
-    {
-      int g_id = babc::Abc_ObjId( pObj );
-      babc::Mio_Gate_t* pGate = (babc::Mio_Gate_t*)pObj->pData;
-      std::string gatename = babc::Mio_GateReadName( pGate );
-      auto xmlNode_gate = graphNode.append_child( "node" );
-      xmlNode_gate.append_attribute( "id" ) = g_id;
-      auto dataNode_gate = xmlNode_gate.append_child( "data" );
-      dataNode_gate.append_attribute( "key" ) = "nodeType";
-      dataNode_gate.text().set( "CELL" );
-      auto dataName_gate = xmlNode_gate.append_child( "data" );
-      dataName_gate.append_attribute( "key" ) = "nodeName";
-      dataName_gate.text().set( gatename.c_str() );
-
-      Abc_ObjForEachFanin( pObj, pFanin, k )
-      {
-        int child_id = babc::Abc_ObjId( pFanin );
-        auto edge = graphNode.append_child( "edge" );
-        edge.append_attribute( "source" ) = child_id;
-        edge.append_attribute( "target" ) = g_id;
-      }
-    }
-    Abc_NtkForEachPo( pNtk, pObj, i )
-    {
-      auto po_id = babc::Abc_ObjId( pObj );
-      auto xmlNode_po = graphNode.append_child( "node" );
-      xmlNode_po.append_attribute( "id" ) = po_id;
-      auto dataNode_po = xmlNode_po.append_child( "data" );
-      dataNode_po.append_attribute( "key" ) = "nodeType";
-      dataNode_po.text().set( "PO" );
-      auto dataName_po = xmlNode_po.append_child( "data" );
-      dataName_po.append_attribute( "key" ) = "nodeName";
-      dataName_po.text().set( po_id );
-
-      Abc_ObjForEachFanin( pObj, pFanin, k )
-      {
-        int child_id = babc::Abc_ObjId( pFanin );
-        auto edge = graphNode.append_child( "edge" );
-        edge.append_attribute( "source" ) = child_id;
-        edge.append_attribute( "target" ) = po_id;
-      }
-    }
+    std::cerr << "unsupported ntk type" << std::endl;
+    assert( false );
   }
 
   doc.save_file( file.c_str() );
@@ -489,69 +634,86 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
 void write_graphml( const std::string& file )
 {
   auto ntktype = lfLntINST->get_ntktype_curr();
-  if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_AIG ||
-       ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_STRASH_AIG ||
-       ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_AIG )
+  if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_AIG ||
+       ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_STRASH_AIG )
   {
     babc::Abc_Frame_t* frame = lfLmINST->current<babc::Abc_Frame_t*>();
     abc_to_graphml( frame, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_FPGA ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_FPGA )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_FPGA ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_NETLIST_FPGA )
   {
     babc::Abc_Frame_t* frame = lfLmINST->current<babc::Abc_Frame_t*>();
     abc_to_graphml( frame, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_LOGIC_ASIC ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_ABC_NETLIST_ASIC )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_LOGIC_ASIC ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_NETLIST_ASIC )
   {
     babc::Abc_Frame_t* frame = lfLmINST->current<babc::Abc_Frame_t*>();
     abc_to_graphml( frame, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_AIG ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_AIG )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_AIG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG )
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XAG ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XAG )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_OIG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_OIG )
+  {
+    lf::logic::lsils::oig_seq_network ntk = lfLmINST->current<lf::logic::lsils::oig_seq_network>();
+    lsils_to_graphml( ntk, file );
+  }
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_AOG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AOG )
+  {
+    lf::logic::lsils::aog_seq_network ntk = lfLmINST->current<lf::logic::lsils::aog_seq_network>();
+    lsils_to_graphml( ntk, file );
+  }
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_XAG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XAG )
   {
     lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_XMG ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_XMG )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_XOG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XOG )
+  {
+    lf::logic::lsils::xog_seq_network ntk = lfLmINST->current<lf::logic::lsils::xog_seq_network>();
+    lsils_to_graphml( ntk, file );
+  }
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_XMG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG )
   {
     lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_MIG ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_MIG )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_MIG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_MIG )
   {
     lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_PRIMARY ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_PRIMARY )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_PRIMARY ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_PRIMARY )
   {
     lf::logic::lsils::primary_seq_network ntk = lfLmINST->current<lf::logic::lsils::primary_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_GTG ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_STRASH_GTG )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_GTG ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_GTG )
   {
     lf::logic::lsils::gtg_seq_network ntk = lfLmINST->current<lf::logic::lsils::gtg_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_FPGA ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_FPGA )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_FPGA ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_NETLIST_FPGA )
   {
     lf::logic::lsils::klut_seq_network ntk = lfLmINST->current<lf::logic::lsils::klut_seq_network>();
     lsils_to_graphml( ntk, file );
   }
-  else if ( ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_LOGIC_ASIC ||
-            ntktype == lf::misc::E_LF_LOGIC_NTK_TYPE::E_LF_LOGIC_NTK_TYPE_LSILS_NETLIST_ASIC )
+  else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_LOGIC_ASIC ||
+            ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_NETLIST_ASIC )
   {
     lf::logic::lsils::blut_seq_network ntk = lfLmINST->current<lf::logic::lsils::blut_seq_network>();
     lsils_to_graphml( ntk, file );
