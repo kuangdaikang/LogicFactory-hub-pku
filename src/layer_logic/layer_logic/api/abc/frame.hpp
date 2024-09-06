@@ -832,9 +832,15 @@ Mio_Pin_t* Mio_PinReadNext( Mio_Pin_t* pPin );
 //////////////////////////////////////////////////////////////////////
 void Io_WriteVerilogLut( Abc_Ntk_t* pNtk, char* pFileName, int nLutSize, int fFixed, int fNoModules );
 
+//////////////////////////////////////////////////////////////////////
+/// stats
+//////////////////////////////////////////////////////////////////////
+float Abc_NtkGetArea( Abc_Ntk_t* pNtk );
+
 } // namespace ABC_NAMESPACE
 
 #include "misc/util/abc_namespaces.h"
 #include "misc/util/abc_global.h"
 #include "base/abc/abc.h"
 #include "misc/vec/vec.h"
+#include "aig/hop/hop.h"

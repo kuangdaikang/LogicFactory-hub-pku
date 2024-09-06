@@ -2,14 +2,48 @@
 
 #include "layer_logic/logic_manager.hpp"
 #include "pugixml.hpp"
+#include "kitty/kitty.hpp"
 
 #include <unordered_map>
+#include <bitset>
 
 namespace lf
 {
 
 namespace logic
 {
+
+std::string uint64_to_hex( babc::word num )
+{
+  char buffer[17]; // 16 digits for the hexadecimal representation + 1 for the null terminator
+  snprintf( buffer, sizeof( buffer ), "%016llx", num );
+  std::string hexStr( buffer );
+  return "64'\h" + hexStr;
+}
+
+std::string expand_hex( std::string hexStr )
+{
+  std::string res = hexStr;
+  while ( res.size() < 16 )
+  {
+    res += hexStr;
+  }
+  return "64'\h" + res;
+}
+
+static const std::unordered_map<std::string, std::string> NODE_FUNC_MAP = {
+    { "PI", "64'hxxxxxxxxxxxxxxxx" },
+    { "PO", "64'hxxxxxxxxxxxxxxxx" },
+    { "CONST0", "64'h0000000000000000" },
+    { "CONST1", "64'hffffffffffffffff" },
+    { "INVERTER", "64'h1111111111111111" },
+    { "BUFFER", "64'h2222222222222222" },
+    { "AND2", "64'h8888888888888888" },
+    { "NAND2", "64'h7777777777777777" },
+    { "OR2", "64'heeeeeeeeeeeeeeee" },
+    { "NOR2", "64'h1111111111111111" },
+    { "XOR2", "64'h6666666666666666" },
+    { "XNOR2", "64'h9999999999999999" } };
 
 /**
  * @brief generate the graphml file for current network.
@@ -20,7 +54,6 @@ namespace logic
 template<class Ntk>
 void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 {
-  using NtkBase = Ntk;
   using Node = typename Ntk::node;
   using Signal = typename Ntk::signal;
   static_assert( std::is_same_v<Ntk, lsils::aig_comb_network> ||
@@ -32,8 +65,8 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
                      std::is_same_v<Ntk, lsils::xmg_comb_network> ||
                      std::is_same_v<Ntk, lsils::primary_comb_network> ||
                      std::is_same_v<Ntk, lsils::gtg_comb_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::klut_comb_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::blut_comb_network> ||
+                     std::is_same_v<Ntk, lf::logic::lsils::klut_comb_network> ||
+                     std::is_same_v<Ntk, lf::logic::lsils::blut_comb_network> ||
                      std::is_same_v<Ntk, lsils::aig_seq_network> ||
                      std::is_same_v<Ntk, lsils::oig_seq_network> ||
                      std::is_same_v<Ntk, lsils::aog_seq_network> ||
@@ -43,8 +76,8 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
                      std::is_same_v<Ntk, lsils::xmg_seq_network> ||
                      std::is_same_v<Ntk, lsils::primary_seq_network> ||
                      std::is_same_v<Ntk, lsils::gtg_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::klut_seq_network> ||
-                     std::is_same_v<NtkBase, lf::logic::lsils::blut_seq_network>,
+                     std::is_same_v<Ntk, lf::logic::lsils::klut_seq_network> ||
+                     std::is_same_v<Ntk, lf::logic::lsils::blut_seq_network>,
                  "Ntk is not an AIG, OIG, AOG, XAG, XOG, MIG, XMG, Primary, GTG, KLUT or BLUT" );
 
   pugi::xml_document doc;
@@ -69,12 +102,12 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
   keyForNodeType.append_attribute( "attr.name" ) = "type";
   keyForNodeType.append_attribute( "attr.type" ) = "string";
 
-  // node attr: name
-  auto keyForNodeName = graphmlNode.append_child( "key" );
-  keyForNodeName.append_attribute( "id" ) = "nodeName";
-  keyForNodeName.append_attribute( "for" ) = "node";
-  keyForNodeName.append_attribute( "attr.name" ) = "name";
-  keyForNodeName.append_attribute( "attr.type" ) = "string";
+  // node attr: func
+  auto keyForNodeFunc = graphmlNode.append_child( "key" );
+  keyForNodeFunc.append_attribute( "id" ) = "nodeFunc";
+  keyForNodeFunc.append_attribute( "for" ) = "node";
+  keyForNodeFunc.append_attribute( "attr.name" ) = "func";
+  keyForNodeFunc.append_attribute( "attr.type" ) = "string";
 
   // id for new add gates
   uint32_t current_index = ntk.size();
@@ -85,22 +118,23 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
   auto constant_id_one = ntk.node_to_index( ntk.get_node( ntk.get_constant( true ) ) );
   auto xmlNode_constant = graphNode.append_child( "node" );
   xmlNode_constant.append_attribute( "id" ) = constant_id_zero;
-  auto dataNode_constant = xmlNode_constant.append_child( "data" );
-  dataNode_constant.append_attribute( "key" ) = "nodeType";
-  dataNode_constant.text().set( "CONST0" );
-  auto dataName_constant = xmlNode_constant.append_child( "data" );
-  dataName_constant.append_attribute( "key" ) = "nodeName";
-  dataName_constant.text().set( constant_id_zero );
+  auto dataType_constant = xmlNode_constant.append_child( "data" );
+  dataType_constant.append_attribute( "key" ) = "nodeType";
+  dataType_constant.text().set( "CONST0" );
+  auto dataFunc_constant = xmlNode_constant.append_child( "data" );
+  dataFunc_constant.append_attribute( "key" ) = "nodeFunc";
+  dataFunc_constant.text().set( NODE_FUNC_MAP.at( "CONST0" ).c_str() );
+
   if ( constant_id_one != constant_id_zero )
   {
     xmlNode_constant = graphNode.append_child( "node" );
     xmlNode_constant.append_attribute( "id" ) = constant_id_one;
-    auto dataNode_constant = xmlNode_constant.append_child( "data" );
-    dataNode_constant.append_attribute( "key" ) = "nodeType";
-    dataNode_constant.text().set( "CONST1" );
-    auto dataName_constant = xmlNode_constant.append_child( "data" );
-    dataName_constant.append_attribute( "key" ) = "nodeName";
-    dataName_constant.text().set( constant_id_one );
+    auto dataType_constant = xmlNode_constant.append_child( "data" );
+    dataType_constant.append_attribute( "key" ) = "nodeType";
+    dataType_constant.text().set( "CONST1" );
+    auto dataFunc_constant = xmlNode_constant.append_child( "data" );
+    dataFunc_constant.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_constant.text().set( NODE_FUNC_MAP.at( "CONST1" ).c_str() );
   }
 
   // primary inputs
@@ -108,12 +142,12 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     auto pi_id = ntk.node_to_index( pi );
     auto xmlNode_pi = graphNode.append_child( "node" );
     xmlNode_pi.append_attribute( "id" ) = pi_id;
-    auto dataNode_pi = xmlNode_pi.append_child( "data" );
-    dataNode_pi.append_attribute( "key" ) = "nodeType";
-    dataNode_pi.text().set( "PI" );
-    auto dataName_pi = xmlNode_pi.append_child( "data" );
-    dataName_pi.append_attribute( "key" ) = "nodeName";
-    dataName_pi.text().set( pi_id );
+    auto dataType_pi = xmlNode_pi.append_child( "data" );
+    dataType_pi.append_attribute( "key" ) = "nodeType";
+    dataType_pi.text().set( "PI" );
+    auto dataFunc_pi = xmlNode_pi.append_child( "data" );
+    dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "PI" ).c_str() );
   } );
 
   // internal gates
@@ -121,9 +155,9 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     auto g_id = ntk.node_to_index( g );
     auto xmlNode_gate = graphNode.append_child( "node" );
     xmlNode_gate.append_attribute( "id" ) = g_id;
-    auto dataNode_gate = xmlNode_gate.append_child( "data" );
-    dataNode_gate.append_attribute( "key" ) = "nodeType";
-
+    // get the node type
+    auto dataType_gate = xmlNode_gate.append_child( "data" );
+    dataType_gate.append_attribute( "key" ) = "nodeType";
     if constexpr ( std::is_same_v<Ntk, lsils::aig_comb_network> ||
                    std::is_same_v<Ntk, lsils::oig_comb_network> ||
                    std::is_same_v<Ntk, lsils::aog_comb_network> ||
@@ -145,97 +179,98 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     {
       if ( ntk.is_and( g ) )
       {
-        dataNode_gate.text().set( "AND2" );
+        dataType_gate.text().set( "AND2" );
       }
       else if ( ntk.is_nand( g ) )
       {
-        dataNode_gate.text().set( "NAND2" );
+        dataType_gate.text().set( "NAND2" );
       }
       else if ( ntk.is_or( g ) )
       {
-        dataNode_gate.text().set( "OR2" );
+        dataType_gate.text().set( "OR2" );
       }
       else if ( ntk.is_nor( g ) )
       {
-        dataNode_gate.text().set( "NOR2" );
+        dataType_gate.text().set( "NOR2" );
       }
       else if ( ntk.is_xor( g ) )
       {
-        dataNode_gate.text().set( "XOR2" );
+        dataType_gate.text().set( "XOR2" );
       }
       else if ( ntk.is_xnor( g ) )
       {
-        dataNode_gate.text().set( "XNOR2" );
+        dataType_gate.text().set( "XNOR2" );
       }
       else if ( ntk.is_maj( g ) )
       {
-        dataNode_gate.text().set( "MAJ3" );
+        dataType_gate.text().set( "MAJ3" );
       }
       else if ( ntk.is_xor3( g ) )
       {
-        dataNode_gate.text().set( "XOR3" );
+        dataType_gate.text().set( "XOR3" );
       }
       else if ( ntk.is_nand3( g ) )
       {
-        dataNode_gate.text().set( "NAND3" );
+        dataType_gate.text().set( "NAND3" );
       }
       else if ( ntk.is_nor3( g ) )
       {
-        dataNode_gate.text().set( "NOR3" );
+        dataType_gate.text().set( "NOR3" );
       }
       else if ( ntk.is_mux21( g ) || ntk.is_ite( g ) )
       {
-        dataNode_gate.text().set( "MUX21" );
+        dataType_gate.text().set( "MUX21" );
       }
       else if ( ntk.is_nmux21( g ) )
       {
-        dataNode_gate.text().set( "NMUX21" );
+        dataType_gate.text().set( "NMUX21" );
       }
       else if ( ntk.is_aoi21( g ) )
       {
-        dataNode_gate.text().set( "AOI21" );
+        dataType_gate.text().set( "AOI21" );
       }
       else if ( ntk.is_oai21( g ) )
       {
-        dataNode_gate.text().set( "OAI21" );
+        dataType_gate.text().set( "OAI21" );
       }
       else if ( ntk.is_axi21( g ) )
       {
-        dataNode_gate.text().set( "AXI21" );
+        dataType_gate.text().set( "AXI21" );
       }
       else if ( ntk.is_xai21( g ) )
       {
-        dataNode_gate.text().set( "XAI21" );
+        dataType_gate.text().set( "XAI21" );
       }
       else if ( ntk.is_oxi21( g ) )
       {
-        dataNode_gate.text().set( "OXI21" );
+        dataType_gate.text().set( "OXI21" );
       }
       else if ( ntk.is_xoi21( g ) )
       {
-        dataNode_gate.text().set( "XOI21" );
+        dataType_gate.text().set( "XOI21" );
       }
       else
       {
         assert( false );
       }
     }
-    else if constexpr ( std::is_same_v<NtkBase, lf::logic::lsils::klut_seq_network> )
+    else if constexpr ( std::is_same_v<Ntk, lf::logic::lsils::klut_seq_network> )
     {
       std::string node_name = "LUT" + std::to_string( ntk.fanin_size( g ) );
-      dataNode_gate.text().set( node_name.c_str() );
+      dataType_gate.text().set( node_name.c_str() );
     }
-    else if constexpr ( std::is_same_v<NtkBase, lf::logic::lsils::blut_seq_network> )
+    else if constexpr ( std::is_same_v<Ntk, lf::logic::lsils::blut_seq_network> )
     {
       assert( ntk.has_binding( g ) );
       auto gate = ntk.get_binding( g );
-
-      dataNode_gate.text().set( gate.name.c_str() );
+      dataType_gate.text().set( gate.name.c_str() );
     }
-
-    auto dataName_gate = xmlNode_gate.append_child( "data" );
-    dataName_gate.append_attribute( "key" ) = "nodeName";
-    dataName_gate.text().set( g_id );
+    // get the node function
+    auto dataFunc_gate = xmlNode_gate.append_child( "data" );
+    dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
+    auto func = ntk.node_function( g );
+    auto hex = expand_hex( kitty::to_hex( func ) );
+    dataFunc_gate.text().set( hex.c_str() );
 
     // edge {children[0]->g, children[1]->g}
     ntk.foreach_fanin( g, [&]( auto const& c ) {
@@ -248,12 +283,12 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
         // create the inverter node
         auto xmlNode_gate_inv = graphNode.append_child( "node" );
         xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-        auto dataNode_gate_inv = xmlNode_gate_inv.append_child( "data" );
-        dataNode_gate_inv.append_attribute( "key" ) = "nodeType";
-        dataNode_gate_inv.text().set( "INVERTER" );
-        auto dataName_gate_inv = xmlNode_gate_inv.append_child( "data" );
-        dataName_gate_inv.append_attribute( "key" ) = "nodeName";
-        dataName_gate_inv.text().set( current_index );
+        auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+        dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+        dataType_gate_inv.text().set( "INVERTER" );
+        auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+        dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+        dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
 
         // edge1: child_id -> current_index
         auto edge1 = graphNode.append_child( "edge" );
@@ -281,12 +316,12 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 
     auto xmlNode_po = graphNode.append_child( "node" );
     xmlNode_po.append_attribute( "id" ) = po_id;
-    auto dataNode_po = xmlNode_po.append_child( "data" );
-    dataNode_po.append_attribute( "key" ) = "nodeType";
-    dataNode_po.text().set( "PO" );
-    auto dataName_po = xmlNode_po.append_child( "data" );
-    dataName_po.append_attribute( "key" ) = "nodeName";
-    dataName_po.text().set( po_id );
+    auto dataType_po = xmlNode_po.append_child( "data" );
+    dataType_po.append_attribute( "key" ) = "nodeType";
+    dataType_po.text().set( "PO" );
+    auto dataFunc_po = xmlNode_po.append_child( "data" );
+    dataFunc_po.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
 
     if ( ntk.is_complemented( po ) )
     {
@@ -295,12 +330,12 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
       // create the inverter node
       auto xmlNode_gate_inv = graphNode.append_child( "node" );
       xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-      auto dataNode_gate_inv = xmlNode_gate_inv.append_child( "data" );
-      dataNode_gate_inv.append_attribute( "key" ) = "nodeType";
-      dataNode_gate_inv.text().set( "INVERTER" );
-      auto dataName_gate_inv = xmlNode_gate_inv.append_child( "data" );
-      dataName_gate_inv.append_attribute( "key" ) = "nodeName";
-      dataName_gate_inv.text().set( current_index );
+      auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+      dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+      dataType_gate_inv.text().set( "INVERTER" );
+      auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+      dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
 
       // edge1: root_id -> current_index
       auto edge1 = graphNode.append_child( "edge" );
@@ -324,9 +359,11 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 /**
  * @brief write the abc network into graphml file
  */
-void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
+void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
 {
   babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame );
+  babc::Abc_Ntk_t* pNtkTemp;
+  babc::Hop_Obj_t* pFunc;
   babc::Abc_Obj_t *pObj, *pFanin, *pNode0, *pNode1;
   int i, k;
   uint32_t current_index = babc::Abc_NtkObjNum( pNtk );
@@ -356,11 +393,11 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
   keyForNodeType.append_attribute( "attr.type" ) = "string";
 
   // node attr: name
-  auto keyForNodeName = graphmlNode.append_child( "key" );
-  keyForNodeName.append_attribute( "id" ) = "nodeName";
-  keyForNodeName.append_attribute( "for" ) = "node";
-  keyForNodeName.append_attribute( "attr.name" ) = "name";
-  keyForNodeName.append_attribute( "attr.type" ) = "string";
+  auto keyForNodeFunc = graphmlNode.append_child( "key" );
+  keyForNodeFunc.append_attribute( "id" ) = "nodeFunc";
+  keyForNodeFunc.append_attribute( "for" ) = "node";
+  keyForNodeFunc.append_attribute( "attr.name" ) = "func";
+  keyForNodeFunc.append_attribute( "attr.type" ) = "string";
 
   assert( babc::Abc_NtkIsStrash( pNtk ) || babc::Abc_NtkIsLogic( pNtk ) );
 
@@ -373,12 +410,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
     int const_id = babc::Abc_ObjId( pObj );
     auto xmlNode_constant = graphNode.append_child( "node" );
     xmlNode_constant.append_attribute( "id" ) = const_id;
-    auto dataNode_constant = xmlNode_constant.append_child( "data" );
-    dataNode_constant.append_attribute( "key" ) = "nodeType";
-    dataNode_constant.text().set( "CONST0" );
-    auto dataName_constant = xmlNode_constant.append_child( "data" );
-    dataName_constant.append_attribute( "key" ) = "nodeName";
-    dataName_constant.text().set( const_id );
+    auto dataType_constant = xmlNode_constant.append_child( "data" );
+    dataType_constant.append_attribute( "key" ) = "nodeType";
+    dataType_constant.text().set( "CONST0" );
+    auto dataFunc_constant = xmlNode_constant.append_child( "data" );
+    dataFunc_constant.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_constant.text().set( NODE_FUNC_MAP.at( "CONST0" ).c_str() );
   }
 
   // PIs
@@ -387,30 +424,35 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
     int pi_id = babc::Abc_ObjId( pObj );
     auto xmlNode_pi = graphNode.append_child( "node" );
     xmlNode_pi.append_attribute( "id" ) = pi_id;
-    auto dataNode_pi = xmlNode_pi.append_child( "data" );
-    dataNode_pi.append_attribute( "key" ) = "nodeType";
-    dataNode_pi.text().set( "PI" );
-    auto dataName_pi = xmlNode_pi.append_child( "data" );
-    dataName_pi.append_attribute( "key" ) = "nodeName";
-    dataName_pi.text().set( pi_id );
+    auto dataType_pi = xmlNode_pi.append_child( "data" );
+    dataType_pi.append_attribute( "key" ) = "nodeType";
+    dataType_pi.text().set( "PI" );
+    auto dataFunc_pi = xmlNode_pi.append_child( "data" );
+    dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "PI" ).c_str() );
   }
 
   // internal gates / POs
   if ( Abc_NtkIsMappedLogic( pNtk ) ) // ASIC netlist
   {
+    /**
+     * @note constant is seemed as cell in ASIC netlist
+     */
     Abc_NtkForEachNode( pNtk, pObj, i )
     {
       int g_id = babc::Abc_ObjId( pObj );
       babc::Mio_Gate_t* pGate = (babc::Mio_Gate_t*)pObj->pData;
+      babc::word func = babc::Mio_GateReadTruth( pGate );
+      std::string hex = uint64_to_hex( func );
       std::string gatename = babc::Mio_GateReadName( pGate );
       auto xmlNode_gate = graphNode.append_child( "node" );
       xmlNode_gate.append_attribute( "id" ) = g_id;
-      auto dataNode_gate = xmlNode_gate.append_child( "data" );
-      dataNode_gate.append_attribute( "key" ) = "nodeType";
-      dataNode_gate.text().set( "CELL" );
-      auto dataName_gate = xmlNode_gate.append_child( "data" );
-      dataName_gate.append_attribute( "key" ) = "nodeName";
-      dataName_gate.text().set( gatename.c_str() );
+      auto dataType_gate = xmlNode_gate.append_child( "data" );
+      dataType_gate.append_attribute( "key" ) = "nodeType";
+      dataType_gate.text().set( gatename.c_str() );
+      auto dataFunc_gate = xmlNode_gate.append_child( "data" );
+      dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_gate.text().set( hex.c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -425,12 +467,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       auto po_id = babc::Abc_ObjId( pObj );
       auto xmlNode_po = graphNode.append_child( "node" );
       xmlNode_po.append_attribute( "id" ) = po_id;
-      auto dataNode_po = xmlNode_po.append_child( "data" );
-      dataNode_po.append_attribute( "key" ) = "nodeType";
-      dataNode_po.text().set( "PO" );
-      auto dataName_po = xmlNode_po.append_child( "data" );
-      dataName_po.append_attribute( "key" ) = "nodeName";
-      dataName_po.text().set( po_id );
+      auto dataType_po = xmlNode_po.append_child( "data" );
+      dataType_po.append_attribute( "key" ) = "nodeType";
+      dataType_po.text().set( "PO" );
+      auto dataFunc_po = xmlNode_po.append_child( "data" );
+      dataFunc_po.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -443,66 +485,99 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
   }
   else if ( Abc_NtkIsAigLogic( pNtk ) ) // fpga netlist from AIG
   {
-    // create _const0_ and _const1_
-    int fpga_const0_id = babc::Abc_NtkObjNum( pNtk ) + 2;
-    int fpga_const1_id = babc::Abc_NtkObjNum( pNtk ) + 3;
-    std::string fpga_const0_name = "_const0_"; // keep same with sky130 library
-    std::string fpga_const1_name = "_const1_";
-    auto xmlNode_const0 = graphNode.append_child( "node" );
-    xmlNode_const0.append_attribute( "id" ) = fpga_const0_id;
-    auto dataNode_const0 = xmlNode_const0.append_child( "data" );
-    dataNode_const0.append_attribute( "key" ) = "nodeType";
-    dataNode_const0.text().set( "CELL" );
-    auto dataName_const0 = xmlNode_const0.append_child( "data" );
-    dataName_const0.append_attribute( "key" ) = "nodeName";
-    dataName_const0.text().set( fpga_const0_name.c_str() );
-
-    auto xmlNode_const1 = graphNode.append_child( "node" );
-    xmlNode_const1.append_attribute( "id" ) = fpga_const1_id;
-    auto dataNode_const1 = xmlNode_const1.append_child( "data" );
-    dataNode_const1.append_attribute( "key" ) = "nodeType";
-    dataNode_const1.text().set( "CELL" );
-    auto dataName_const1 = xmlNode_const1.append_child( "data" );
-    dataName_const1.append_attribute( "key" ) = "nodeName";
-    dataName_const1.text().set( fpga_const1_name.c_str() );
-
+    // get the truth table first
+    pNtkTemp = babc::Abc_NtkToNetlist( pNtk ); // 在原始aig后面增加LUT， 所以是： const0， PI， PI, ANDs, LUTs， 对该fpga netlist节点遍历从LUTs开始
+    babc::Abc_NtkToSop( pNtkTemp, -1, ABC_INFINITY );
+    std::vector<std::string> gates_func;
+    gates_func.reserve( babc::Abc_NtkObjNum( pNtkTemp ) );
+    Abc_NtkForEachNode( pNtkTemp, pObj, i )
+    {
+      if ( Abc_ObjFaninNum( pObj ) == 0 )
+      {
+        continue;
+      }
+      else
+      {
+        babc::word func = babc::Abc_SopToTruth( (char*)pObj->pData, Abc_ObjFaninNum( pObj ) );
+        auto hex = uint64_to_hex( func );
+        gates_func.push_back( hex );
+      }
+    }
+    babc::Abc_NtkDelete( pNtkTemp );
+    int count = 0; // for index the truth table
+    /**
+     * @note constant is seemed as node in FPGA netlist, but need to find its id
+     */
+    // make sure the constant id, and create the constant node
+    int fpga_const0_id = -1;
+    int fpga_const1_id = -1;
     Abc_NtkForEachNode( pNtk, pObj, i )
     {
-      int g_id = babc::Abc_ObjId( pObj );
-      std::string gatename = "LUT" + std::to_string( babc::Abc_ObjFaninNum( pObj ) );
-      // constant condition
       if ( Abc_ObjFaninNum( pObj ) == 0 )
       {
         if ( Abc_NodeIsConst1( pObj ) )
         {
-          auto edge = graphNode.append_child( "edge" );
-          edge.append_attribute( "source" ) = fpga_const1_id;
-          edge.append_attribute( "target" ) = g_id;
+          fpga_const0_id = babc::Abc_ObjId( babc::Abc_ObjFanout( pObj, 0 ) );
         }
         else
         {
-          auto edge = graphNode.append_child( "edge" );
-          edge.append_attribute( "source" ) = fpga_const0_id;
-          edge.append_attribute( "target" ) = g_id;
+          fpga_const1_id = babc::Abc_ObjId( babc::Abc_ObjFanout( pObj, 0 ) );
         }
+      }
+    }
+    if ( fpga_const0_id >= 0 )
+    {
+      auto xmlNode_const0 = graphNode.append_child( "node" );
+      xmlNode_const0.append_attribute( "id" ) = fpga_const0_id;
+      auto dataType_const0 = xmlNode_const0.append_child( "data" );
+      dataType_const0.append_attribute( "key" ) = "nodeType";
+      dataType_const0.text().set( "CONST0" );
+      auto dataFunc_const0 = xmlNode_const0.append_child( "data" );
+      dataFunc_const0.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_const0.text().set( NODE_FUNC_MAP.at( "CONST0" ).c_str() );
+    }
+    if ( fpga_const1_id >= 0 )
+    {
+      auto xmlNode_const1 = graphNode.append_child( "node" );
+      xmlNode_const1.append_attribute( "id" ) = fpga_const1_id;
+      auto dataType_const1 = xmlNode_const1.append_child( "data" );
+      dataType_const1.append_attribute( "key" ) = "nodeType";
+      dataType_const1.text().set( "CONST1" );
+      auto dataFunc_const1 = xmlNode_const1.append_child( "data" );
+      dataFunc_const1.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_const1.text().set( NODE_FUNC_MAP.at( "CONST1" ).c_str() );
+    }
+
+    // write the gates
+    Abc_NtkForEachNode( pNtk, pObj, i )
+    {
+      int g_id = babc::Abc_ObjId( pObj );
+      // constant condition
+      if ( Abc_ObjFaninNum( pObj ) == 0 )
+      {
         continue;
       }
-
-      // standard LUT
-      auto xmlNode_gate = graphNode.append_child( "node" );
-      xmlNode_gate.append_attribute( "id" ) = g_id;
-      auto dataNode_gate = xmlNode_gate.append_child( "data" );
-      dataNode_gate.append_attribute( "key" ) = "nodeType";
-      dataNode_gate.text().set( "LUT" );
-      auto dataName_gate = xmlNode_gate.append_child( "data" );
-      dataName_gate.append_attribute( "key" ) = "nodeName";
-      dataName_gate.text().set( gatename.c_str() );
-      Abc_ObjForEachFanin( pObj, pFanin, k )
+      else
       {
-        int child_id = babc::Abc_ObjId( pFanin );
-        auto edge = graphNode.append_child( "edge" );
-        edge.append_attribute( "source" ) = child_id;
-        edge.append_attribute( "target" ) = g_id;
+        std::string hex = gates_func[count++];
+        std::string gatename = "LUT" + std::to_string( babc::Abc_ObjFaninNum( pObj ) );
+        // standard LUT
+        auto xmlNode_gate = graphNode.append_child( "node" );
+        xmlNode_gate.append_attribute( "id" ) = g_id;
+        auto dataType_gate = xmlNode_gate.append_child( "data" );
+        dataType_gate.append_attribute( "key" ) = "nodeType";
+        dataType_gate.text().set( gatename.c_str() );
+        auto dataFunc_gate = xmlNode_gate.append_child( "data" );
+        dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
+        dataFunc_gate.text().set( hex.c_str() );
+
+        Abc_ObjForEachFanin( pObj, pFanin, k )
+        {
+          int child_id = babc::Abc_ObjId( pFanin );
+          auto edge = graphNode.append_child( "edge" );
+          edge.append_attribute( "source" ) = child_id;
+          edge.append_attribute( "target" ) = g_id;
+        }
       }
     }
     Abc_NtkForEachPo( pNtk, pObj, i )
@@ -510,12 +585,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       auto po_id = babc::Abc_ObjId( pObj );
       auto xmlNode_po = graphNode.append_child( "node" );
       xmlNode_po.append_attribute( "id" ) = po_id;
-      auto dataNode_po = xmlNode_po.append_child( "data" );
-      dataNode_po.append_attribute( "key" ) = "nodeType";
-      dataNode_po.text().set( "PO" );
-      auto dataName_po = xmlNode_po.append_child( "data" );
-      dataName_po.append_attribute( "key" ) = "nodeName";
-      dataName_po.text().set( po_id );
+      auto dataType_po = xmlNode_po.append_child( "data" );
+      dataType_po.append_attribute( "key" ) = "nodeType";
+      dataType_po.text().set( "PO" );
+      auto dataFunc_po = xmlNode_po.append_child( "data" );
+      dataFunc_po.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -533,12 +608,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       int g_id = babc::Abc_ObjId( pObj );
       auto xmlNode_gate = graphNode.append_child( "node" );
       xmlNode_gate.append_attribute( "id" ) = g_id;
-      auto dataNode_gate = xmlNode_gate.append_child( "data" );
-      dataNode_gate.append_attribute( "key" ) = "nodeType";
-      dataNode_gate.text().set( "AND2" );
-      auto dataName_gate = xmlNode_gate.append_child( "data" );
-      dataName_gate.append_attribute( "key" ) = "nodeName";
-      dataName_gate.text().set( g_id );
+      auto dataType_gate = xmlNode_gate.append_child( "data" );
+      dataType_gate.append_attribute( "key" ) = "nodeType";
+      dataType_gate.text().set( "AND2" );
+      auto dataFunc_gate = xmlNode_gate.append_child( "data" );
+      dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_gate.text().set( NODE_FUNC_MAP.at( "AND2" ).c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -549,12 +624,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
           // create the inverter node
           auto xmlNode_gate_inv = graphNode.append_child( "node" );
           xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-          auto dataNode_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataNode_gate_inv.append_attribute( "key" ) = "nodeType";
-          dataNode_gate_inv.text().set( "INVERTER" );
-          auto dataName_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataName_gate_inv.append_attribute( "key" ) = "nodeName";
-          dataName_gate_inv.text().set( current_index );
+          auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+          dataType_gate_inv.text().set( "INVERTER" );
+          auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
 
           // edge1: child_id -> current_index
           auto edge1 = graphNode.append_child( "edge" );
@@ -579,12 +654,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
       auto po_id = babc::Abc_ObjId( pObj );
       auto xmlNode_po = graphNode.append_child( "node" );
       xmlNode_po.append_attribute( "id" ) = po_id;
-      auto dataNode_po = xmlNode_po.append_child( "data" );
-      dataNode_po.append_attribute( "key" ) = "nodeType";
-      dataNode_po.text().set( "PO" );
-      auto dataName_po = xmlNode_po.append_child( "data" );
-      dataName_po.append_attribute( "key" ) = "nodeName";
-      dataName_po.text().set( po_id );
+      auto dataType_po = xmlNode_po.append_child( "data" );
+      dataType_po.append_attribute( "key" ) = "nodeType";
+      dataType_po.text().set( "PO" );
+      auto dataFunc_po = xmlNode_po.append_child( "data" );
+      dataFunc_po.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
         int child_id = babc::Abc_ObjId( pFanin );
@@ -594,12 +669,12 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
           // create the inverter node
           auto xmlNode_gate_inv = graphNode.append_child( "node" );
           xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-          auto dataNode_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataNode_gate_inv.append_attribute( "key" ) = "nodeType";
-          dataNode_gate_inv.text().set( "INVERTER" );
-          auto dataName_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataName_gate_inv.append_attribute( "key" ) = "nodeName";
-          dataName_gate_inv.text().set( current_index );
+          auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+          dataType_gate_inv.text().set( "INVERTER" );
+          auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
 
           // edge1: child_id -> current_index
           auto edge1 = graphNode.append_child( "edge" );
@@ -624,7 +699,6 @@ void abc_to_graphml( babc::Abc_Frame_t* frame, const std::string& file )
     std::cerr << "unsupported ntk type" << std::endl;
     assert( false );
   }
-
   doc.save_file( file.c_str() );
 }
 
