@@ -2,6 +2,8 @@
 
 #include "layer_logic/logic_manager.hpp"
 #include "layer_logic/aux/type_map.hpp"
+#include "layer_logic/aux/write_graphml.hpp"
+#include "layer_logic/api/lsils/io/write_dot.hpp"
 
 #include "lorina/genlib.hpp"
 #include "mockturtle/io/genlib_reader.hpp"
@@ -82,13 +84,13 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
         GATE   and2   3  O=a*b;                          PIN * NONINV 1 999 1.0 0.0 1.0 0.0
     )";
   }
-  if constexpr ( std::is_same_v<NtkDest, lsils::oig_seq_network> )
+  else if constexpr ( std::is_same_v<NtkDest, lsils::oig_seq_network> )
   {
     genlib_buffer += R"(
         GATE   or2    3  O=a+b;                          PIN * NONINV 1 999 1.0 0.0 1.0 0.0
     )";
   }
-  if constexpr ( std::is_same_v<NtkDest, lsils::aog_seq_network> )
+  else if constexpr ( std::is_same_v<NtkDest, lsils::aog_seq_network> )
   {
     genlib_buffer += R"(
         GATE   and2   3  O=a*b;                          PIN * NONINV 1 999 1.0 0.0 1.0 0.0
@@ -211,6 +213,10 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
     std::cerr << "Unsupported network type" << std::endl;
     assert( false );
   }
+
+  // // for debug
+  // lsils_to_graphml( netlist_asic, "/workspace/LogicFactory/debug/debug.asic.graphml" );
+  // mockturtle::write_dot( netlist_asic, "/workspace/LogicFactory/debug/debug.asic.dot" );
 
   // transformation
   /// constant
@@ -350,6 +356,7 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
       auto new_c2 = old_2_new[netlist_asic.get_node( children[2] )];
       auto new_sig = ntk_dest.create_oai21( new_c0, new_c1, new_c2 );
       old_2_new[g] = new_sig;
+      break;
     }
     case E_LF_GATE_TYPE::E_LF_GATE_TYPE_AXI21:
     {
