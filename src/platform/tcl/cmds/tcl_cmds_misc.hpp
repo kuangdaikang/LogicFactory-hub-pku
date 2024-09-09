@@ -146,7 +146,7 @@ public:
         { "-s", "abc", "bool", "" },
         { "-c", "abc", "bool", "" },
         { "-u", "abc", "bool", "" },
-        { "-lib", "lsils", "bool", "" } };
+        { "-file", "all", "string", "" } };
     setOptions( this, options );
   }
 
@@ -171,8 +171,8 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = { "-top", "-liberty", "-tech" };
-    std::vector<std::string> boolOptions = { "-width", "-json", "-f", "-b", "-d", "-l", "-t", "-m", "-p", "-g", "-s", "-c", "-u", "-lib" };
+    std::vector<std::string> strOptions = { "-top", "-liberty", "-tech", "-file" };
+    std::vector<std::string> boolOptions = { "-width", "-json", "-f", "-b", "-d", "-l", "-t", "-m", "-p", "-g", "-s", "-c", "-u" };
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
     std::vector<std::string> strvecOptions = {};
@@ -193,10 +193,10 @@ public:
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
       lf::logic::abc::print_stat( boolOptionsValue["-f"], boolOptionsValue["-b"], boolOptionsValue["-d"], boolOptionsValue["-l"],
                                   boolOptionsValue["-t"], boolOptionsValue["-m"], boolOptionsValue["-p"], boolOptionsValue["-g"],
-                                  boolOptionsValue["-s"], boolOptionsValue["-c"], boolOptionsValue["-u"] );
+                                  boolOptionsValue["-s"], boolOptionsValue["-c"], boolOptionsValue["-u"], strOptionsValue["-file"] );
       break;
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
-      lf::logic::lsils::print_stat( boolOptionsValue["-lib"] );
+      lf::logic::lsils::print_stat( strOptionsValue["-file"] );
       break;
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       break;

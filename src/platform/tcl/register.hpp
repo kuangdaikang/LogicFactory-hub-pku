@@ -20,7 +20,7 @@ int registerCmds()
   // misc
   //////////////////////////////////////////////////////////
   LF_MACOR_REGISTER_TCL_CMD( CmdLfHelp, "help" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfPrintStat, "print_stat" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfPrintStat, "print_stats" );
   //////////////////////////////////////////////////////////
   // flow
   //////////////////////////////////////////////////////////
@@ -57,6 +57,7 @@ int registerCmds()
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteTruth, "write_truth" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteRtlil, "write_rtlil" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteSpice, "write_spice" );
+
   LF_MACOR_REGISTER_TCL_CMD( CmdLfIoWriteGraphml, "write_graphml" );
 
   //////////////////////////////////////////////////////////
