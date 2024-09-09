@@ -32,18 +32,18 @@ std::string expand_hex( std::string hexStr )
 }
 
 static const std::unordered_map<std::string, std::string> NODE_FUNC_MAP = {
-    { "PI", "64'hxxxxxxxxxxxxxxxx" },
-    { "PO", "64'hxxxxxxxxxxxxxxxx" },
-    { "CONST0", "64'h0000000000000000" },   // {0} * 64
-    { "CONST1", "64'hffffffffffffffff" },   // {1} * 64
-    { "INVERTER", "64'h5555555555555555" }, // {01} * 32
-    { "BUFFER", "64'haaaaaaaaaaaaaaaa" },   // {10} * 32
-    { "AND2", "64'h8888888888888888" },     // {1000} * 16
-    { "NAND2", "64'h7777777777777777" },    // {0111} * 16
-    { "OR2", "64'heeeeeeeeeeeeeeee" },      // {1110} * 16
-    { "NOR2", "64'h1111111111111111" },     // {0001} * 16
-    { "XOR2", "64'h6666666666666666" },     // {0110} * 16
-    { "XNOR2", "64'h9999999999999999" } };  // {1001} * 16
+    { "GTECH_PI", "64'hxxxxxxxxxxxxxxxx" },
+    { "GTECH_PO", "64'hxxxxxxxxxxxxxxxx" },
+    { "GTECH_CONST0", "64'h0000000000000000" },  // {0} * 64
+    { "GTECH_CONST1", "64'hffffffffffffffff" },  // {1} * 64
+    { "GTECH_INV", "64'h5555555555555555" },     // {01} * 32
+    { "GTECH_BUF", "64'haaaaaaaaaaaaaaaa" },     // {10} * 32
+    { "GTECH_AND2", "64'h8888888888888888" },    // {1000} * 16
+    { "GTECH_NAND2", "64'h7777777777777777" },   // {0111} * 16
+    { "GTECH_OR2", "64'heeeeeeeeeeeeeeee" },     // {1110} * 16
+    { "GTECH_NOR2", "64'h1111111111111111" },    // {0001} * 16
+    { "GTECH_XOR2", "64'h6666666666666666" },    // {0110} * 16
+    { "GTECH_XNOR2", "64'h9999999999999999" } }; // {1001} * 16
 
 /**
  * @brief generate the graphml file for current network.
@@ -120,10 +120,10 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
   xmlNode_constant.append_attribute( "id" ) = constant_id_zero;
   auto dataType_constant = xmlNode_constant.append_child( "data" );
   dataType_constant.append_attribute( "key" ) = "nodeType";
-  dataType_constant.text().set( "CONST0" );
+  dataType_constant.text().set( "GTECH_CONST0" );
   auto dataFunc_constant = xmlNode_constant.append_child( "data" );
   dataFunc_constant.append_attribute( "key" ) = "nodeFunc";
-  dataFunc_constant.text().set( NODE_FUNC_MAP.at( "CONST0" ).c_str() );
+  dataFunc_constant.text().set( NODE_FUNC_MAP.at( "GTECH_CONST0" ).c_str() );
 
   if ( constant_id_one != constant_id_zero )
   {
@@ -131,10 +131,10 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     xmlNode_constant.append_attribute( "id" ) = constant_id_one;
     auto dataType_constant = xmlNode_constant.append_child( "data" );
     dataType_constant.append_attribute( "key" ) = "nodeType";
-    dataType_constant.text().set( "CONST1" );
+    dataType_constant.text().set( "GTECH_CONST1" );
     auto dataFunc_constant = xmlNode_constant.append_child( "data" );
     dataFunc_constant.append_attribute( "key" ) = "nodeFunc";
-    dataFunc_constant.text().set( NODE_FUNC_MAP.at( "CONST1" ).c_str() );
+    dataFunc_constant.text().set( NODE_FUNC_MAP.at( "GTECH_CONST1" ).c_str() );
   }
 
   // primary inputs
@@ -144,10 +144,10 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     xmlNode_pi.append_attribute( "id" ) = pi_id;
     auto dataType_pi = xmlNode_pi.append_child( "data" );
     dataType_pi.append_attribute( "key" ) = "nodeType";
-    dataType_pi.text().set( "PI" );
+    dataType_pi.text().set( "GTECH_PI" );
     auto dataFunc_pi = xmlNode_pi.append_child( "data" );
     dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
-    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "PI" ).c_str() );
+    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "GTECH_PI" ).c_str() );
   } );
 
   // internal gates
@@ -168,10 +168,10 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
         xmlNode_gate_inv.append_attribute( "id" ) = current_index;
         auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
         dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-        dataType_gate_inv.text().set( "INVERTER" );
+        dataType_gate_inv.text().set( "GTECH_INV" );
         auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
         dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-        dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+        dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "GTECH_INV" ).c_str() );
       }
       else
       {
@@ -205,75 +205,75 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     {
       if ( ntk.is_and( g ) )
       {
-        dataType_gate.text().set( "AND2" );
+        dataType_gate.text().set( "GTECH_AND2" );
       }
       else if ( ntk.is_nand( g ) )
       {
-        dataType_gate.text().set( "NAND2" );
+        dataType_gate.text().set( "GTECH_NAND2" );
       }
       else if ( ntk.is_or( g ) )
       {
-        dataType_gate.text().set( "OR2" );
+        dataType_gate.text().set( "GTECH_OR2" );
       }
       else if ( ntk.is_nor( g ) )
       {
-        dataType_gate.text().set( "NOR2" );
+        dataType_gate.text().set( "GTECH_NOR2" );
       }
       else if ( ntk.is_xor( g ) )
       {
-        dataType_gate.text().set( "XOR2" );
+        dataType_gate.text().set( "GTECH_XOR2" );
       }
       else if ( ntk.is_xnor( g ) )
       {
-        dataType_gate.text().set( "XNOR2" );
+        dataType_gate.text().set( "GTECH_XNOR2" );
       }
       else if ( ntk.is_maj( g ) )
       {
-        dataType_gate.text().set( "MAJ3" );
+        dataType_gate.text().set( "GTECH_MAJ3" );
       }
       else if ( ntk.is_xor3( g ) )
       {
-        dataType_gate.text().set( "XOR3" );
+        dataType_gate.text().set( "GTECH_XOR3" );
       }
       else if ( ntk.is_nand3( g ) )
       {
-        dataType_gate.text().set( "NAND3" );
+        dataType_gate.text().set( "GTECH_NAND3" );
       }
       else if ( ntk.is_nor3( g ) )
       {
-        dataType_gate.text().set( "NOR3" );
+        dataType_gate.text().set( "GTECH_NOR3" );
       }
       else if ( ntk.is_mux21( g ) || ntk.is_ite( g ) )
       {
-        dataType_gate.text().set( "MUX21" );
+        dataType_gate.text().set( "GTECH_MUX21" );
       }
       else if ( ntk.is_nmux21( g ) )
       {
-        dataType_gate.text().set( "NMUX21" );
+        dataType_gate.text().set( "GTECH_NMUX21" );
       }
       else if ( ntk.is_aoi21( g ) )
       {
-        dataType_gate.text().set( "AOI21" );
+        dataType_gate.text().set( "GTECH_AOI21" );
       }
       else if ( ntk.is_oai21( g ) )
       {
-        dataType_gate.text().set( "OAI21" );
+        dataType_gate.text().set( "GTECH_OAI21" );
       }
       else if ( ntk.is_axi21( g ) )
       {
-        dataType_gate.text().set( "AXI21" );
+        dataType_gate.text().set( "GTECH_AXI21" );
       }
       else if ( ntk.is_xai21( g ) )
       {
-        dataType_gate.text().set( "XAI21" );
+        dataType_gate.text().set( "GTECH_XAI21" );
       }
       else if ( ntk.is_oxi21( g ) )
       {
-        dataType_gate.text().set( "OXI21" );
+        dataType_gate.text().set( "GTECH_OXI21" );
       }
       else if ( ntk.is_xoi21( g ) )
       {
-        dataType_gate.text().set( "XOI21" );
+        dataType_gate.text().set( "GTECH_XOI21" );
       }
       else
       {
@@ -340,20 +340,20 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
       xmlNode_gate_inv.append_attribute( "id" ) = current_index;
       auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
       dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-      dataType_gate_inv.text().set( "INVERTER" );
+      dataType_gate_inv.text().set( "GTECH_INV" );
       auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
       dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+      dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "GTECH_INV" ).c_str() );
     }
 
     auto xmlNode_po = graphNode.append_child( "node" );
     xmlNode_po.append_attribute( "id" ) = po_id;
     auto dataType_po = xmlNode_po.append_child( "data" );
     dataType_po.append_attribute( "key" ) = "nodeType";
-    dataType_po.text().set( "PO" );
+    dataType_po.text().set( "GTECH_PO" );
     auto dataFunc_po = xmlNode_po.append_child( "data" );
     dataFunc_po.append_attribute( "key" ) = "nodeFunc";
-    dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
+    dataFunc_po.text().set( NODE_FUNC_MAP.at( "GTECH_PO" ).c_str() );
 
     if ( ntk.is_complemented( po ) )
     {
@@ -432,10 +432,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
     xmlNode_constant.append_attribute( "id" ) = const_id;
     auto dataType_constant = xmlNode_constant.append_child( "data" );
     dataType_constant.append_attribute( "key" ) = "nodeType";
-    dataType_constant.text().set( "CONST0" );
+    dataType_constant.text().set( "GTECH_CONST0" );
     auto dataFunc_constant = xmlNode_constant.append_child( "data" );
     dataFunc_constant.append_attribute( "key" ) = "nodeFunc";
-    dataFunc_constant.text().set( NODE_FUNC_MAP.at( "CONST0" ).c_str() );
+    dataFunc_constant.text().set( NODE_FUNC_MAP.at( "GTECH_CONST0" ).c_str() );
   }
 
   // PIs
@@ -446,10 +446,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
     xmlNode_pi.append_attribute( "id" ) = pi_id;
     auto dataType_pi = xmlNode_pi.append_child( "data" );
     dataType_pi.append_attribute( "key" ) = "nodeType";
-    dataType_pi.text().set( "PI" );
+    dataType_pi.text().set( "GTECH_PI" );
     auto dataFunc_pi = xmlNode_pi.append_child( "data" );
     dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
-    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "PI" ).c_str() );
+    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "GTECH_PI" ).c_str() );
   }
 
   // internal gates / POs
@@ -489,10 +489,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       xmlNode_po.append_attribute( "id" ) = po_id;
       auto dataType_po = xmlNode_po.append_child( "data" );
       dataType_po.append_attribute( "key" ) = "nodeType";
-      dataType_po.text().set( "PO" );
+      dataType_po.text().set( "GTECH_PO" );
       auto dataFunc_po = xmlNode_po.append_child( "data" );
       dataFunc_po.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
+      dataFunc_po.text().set( NODE_FUNC_MAP.at( "GTECH_PO" ).c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -506,7 +506,7 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
   else if ( Abc_NtkIsAigLogic( pNtk ) ) // fpga netlist from AIG
   {
     // get the truth table first
-    pNtkTemp = babc::Abc_NtkToNetlist( pNtk ); // 在原始aig后面增加LUT， 所以是： const0， PI， PI, ANDs, LUTs， 对该fpga netlist节点遍历从LUTs开始
+    pNtkTemp = babc::Abc_NtkToNetlist( pNtk ); // 在原始aig后面增加LUT， 所以是： const0， PI， GTECH_PI, ANDs, LUTs， 对该fpga netlist节点遍历从LUTs开始
     babc::Abc_NtkToSop( pNtkTemp, -1, ABC_INFINITY );
     std::vector<std::string> gates_func;
     gates_func.reserve( babc::Abc_NtkObjNum( pNtkTemp ) );
@@ -551,10 +551,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       xmlNode_const0.append_attribute( "id" ) = fpga_const0_id;
       auto dataType_const0 = xmlNode_const0.append_child( "data" );
       dataType_const0.append_attribute( "key" ) = "nodeType";
-      dataType_const0.text().set( "CONST0" );
+      dataType_const0.text().set( "GTECH_CONST0" );
       auto dataFunc_const0 = xmlNode_const0.append_child( "data" );
       dataFunc_const0.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_const0.text().set( NODE_FUNC_MAP.at( "CONST0" ).c_str() );
+      dataFunc_const0.text().set( NODE_FUNC_MAP.at( "GTECH_CONST0" ).c_str() );
     }
     if ( fpga_const1_id >= 0 )
     {
@@ -562,10 +562,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       xmlNode_const1.append_attribute( "id" ) = fpga_const1_id;
       auto dataType_const1 = xmlNode_const1.append_child( "data" );
       dataType_const1.append_attribute( "key" ) = "nodeType";
-      dataType_const1.text().set( "CONST1" );
+      dataType_const1.text().set( "GTECH_CONST1" );
       auto dataFunc_const1 = xmlNode_const1.append_child( "data" );
       dataFunc_const1.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_const1.text().set( NODE_FUNC_MAP.at( "CONST1" ).c_str() );
+      dataFunc_const1.text().set( NODE_FUNC_MAP.at( "GTECH_CONST1" ).c_str() );
     }
 
     // write the gates
@@ -607,10 +607,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       xmlNode_po.append_attribute( "id" ) = po_id;
       auto dataType_po = xmlNode_po.append_child( "data" );
       dataType_po.append_attribute( "key" ) = "nodeType";
-      dataType_po.text().set( "PO" );
+      dataType_po.text().set( "GTECH_PO" );
       auto dataFunc_po = xmlNode_po.append_child( "data" );
       dataFunc_po.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
+      dataFunc_po.text().set( NODE_FUNC_MAP.at( "GTECH_PO" ).c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -640,10 +640,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
           xmlNode_gate_inv.append_attribute( "id" ) = current_index;
           auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
           dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-          dataType_gate_inv.text().set( "INVERTER" );
+          dataType_gate_inv.text().set( "GTECH_INV" );
           auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
           dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "GTECH_INV" ).c_str() );
         }
         else
         {
@@ -658,10 +658,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       xmlNode_gate.append_attribute( "id" ) = g_id;
       auto dataType_gate = xmlNode_gate.append_child( "data" );
       dataType_gate.append_attribute( "key" ) = "nodeType";
-      dataType_gate.text().set( "AND2" );
+      dataType_gate.text().set( "GTECH_AND2" );
       auto dataFunc_gate = xmlNode_gate.append_child( "data" );
       dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_gate.text().set( NODE_FUNC_MAP.at( "AND2" ).c_str() );
+      dataFunc_gate.text().set( NODE_FUNC_MAP.at( "GTECH_AND2" ).c_str() );
 
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
@@ -703,10 +703,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
           xmlNode_gate_inv.append_attribute( "id" ) = current_index;
           auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
           dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-          dataType_gate_inv.text().set( "INVERTER" );
+          dataType_gate_inv.text().set( "GTECH_INV" );
           auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
           dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "GTECH_INV" ).c_str() );
         }
       }
 
@@ -714,10 +714,10 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       xmlNode_po.append_attribute( "id" ) = po_id;
       auto dataType_po = xmlNode_po.append_child( "data" );
       dataType_po.append_attribute( "key" ) = "nodeType";
-      dataType_po.text().set( "PO" );
+      dataType_po.text().set( "GTECH_PO" );
       auto dataFunc_po = xmlNode_po.append_child( "data" );
       dataFunc_po.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_po.text().set( NODE_FUNC_MAP.at( "PO" ).c_str() );
+      dataFunc_po.text().set( NODE_FUNC_MAP.at( "GTECH_PO" ).c_str() );
       Abc_ObjForEachFanin( pObj, pFanin, k )
       {
         int child_id = babc::Abc_ObjId( pFanin );
