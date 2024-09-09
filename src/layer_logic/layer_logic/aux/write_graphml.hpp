@@ -34,16 +34,16 @@ std::string expand_hex( std::string hexStr )
 static const std::unordered_map<std::string, std::string> NODE_FUNC_MAP = {
     { "PI", "64'hxxxxxxxxxxxxxxxx" },
     { "PO", "64'hxxxxxxxxxxxxxxxx" },
-    { "CONST0", "64'h0000000000000000" },
-    { "CONST1", "64'hffffffffffffffff" },
-    { "INVERTER", "64'h1111111111111111" },
-    { "BUFFER", "64'h2222222222222222" },
-    { "AND2", "64'h8888888888888888" },
-    { "NAND2", "64'h7777777777777777" },
-    { "OR2", "64'heeeeeeeeeeeeeeee" },
-    { "NOR2", "64'h1111111111111111" },
-    { "XOR2", "64'h6666666666666666" },
-    { "XNOR2", "64'h9999999999999999" } };
+    { "CONST0", "64'h0000000000000000" },   // {0} * 64
+    { "CONST1", "64'hffffffffffffffff" },   // {1} * 64
+    { "INVERTER", "64'h5555555555555555" }, // {01} * 32
+    { "BUFFER", "64'haaaaaaaaaaaaaaaa" },   // {10} * 32
+    { "AND2", "64'h8888888888888888" },     // {1000} * 16
+    { "NAND2", "64'h7777777777777777" },    // {0111} * 16
+    { "OR2", "64'heeeeeeeeeeeeeeee" },      // {1110} * 16
+    { "NOR2", "64'h1111111111111111" },     // {0001} * 16
+    { "XOR2", "64'h6666666666666666" },     // {0110} * 16
+    { "XNOR2", "64'h9999999999999999" } };  // {1001} * 16
 
 /**
  * @brief generate the graphml file for current network.
@@ -153,6 +153,32 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
   // internal gates
   ntk.foreach_gate( [&]( auto const& g, uint32_t index ) {
     auto g_id = ntk.node_to_index( g );
+
+    // add inverter before the gate
+    std::vector<uint32_t> fanins_id;
+    ntk.foreach_fanin( g, [&]( auto const& c, int index ) {
+      auto child_id = ntk.node_to_index( ntk.get_node( c ) );
+      // add inverter
+      if ( ntk.is_complemented( c ) )
+      {
+        inverter_index_map[c] = ++current_index;
+        fanins_id.push_back( inverter_index_map[c] );
+        // create the inverter node
+        auto xmlNode_gate_inv = graphNode.append_child( "node" );
+        xmlNode_gate_inv.append_attribute( "id" ) = current_index;
+        auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+        dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+        dataType_gate_inv.text().set( "INVERTER" );
+        auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+        dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+        dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+      }
+      else
+      {
+        fanins_id.push_back( child_id );
+      }
+    } );
+
     auto xmlNode_gate = graphNode.append_child( "node" );
     xmlNode_gate.append_attribute( "id" ) = g_id;
     // get the node type
@@ -273,30 +299,18 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     dataFunc_gate.text().set( hex.c_str() );
 
     // edge {children[0]->g, children[1]->g}
-    ntk.foreach_fanin( g, [&]( auto const& c ) {
+    ntk.foreach_fanin( g, [&]( auto const& c, int index_child ) {
       auto child_id = ntk.node_to_index( ntk.get_node( c ) );
       // add inverter
       if ( ntk.is_complemented( c ) )
       {
-        inverter_index_map[c] = ++current_index;
-
-        // create the inverter node
-        auto xmlNode_gate_inv = graphNode.append_child( "node" );
-        xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-        auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
-        dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-        dataType_gate_inv.text().set( "INVERTER" );
-        auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
-        dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-        dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
-
         // edge1: child_id -> current_index
         auto edge1 = graphNode.append_child( "edge" );
         edge1.append_attribute( "source" ) = child_id;
-        edge1.append_attribute( "target" ) = current_index;
+        edge1.append_attribute( "target" ) = fanins_id[index_child];
         // edge2: current_index -> g_id
         auto edge2 = graphNode.append_child( "edge" );
-        edge2.append_attribute( "source" ) = current_index;
+        edge2.append_attribute( "source" ) = fanins_id[index_child];
         edge2.append_attribute( "target" ) = g_id;
       }
       else
@@ -314,6 +328,24 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
     auto po_id = ++current_index; // each po is also a node
     auto root_id = ntk.node_to_index( npo );
 
+    // add inverter before the gate
+    uint32_t inverter_id = 0;
+    if ( ntk.is_complemented( po ) )
+    {
+      inverter_index_map[po] = ++current_index;
+      inverter_id = inverter_index_map[po];
+
+      // create the inverter node
+      auto xmlNode_gate_inv = graphNode.append_child( "node" );
+      xmlNode_gate_inv.append_attribute( "id" ) = current_index;
+      auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+      dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+      dataType_gate_inv.text().set( "INVERTER" );
+      auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+      dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+    }
+
     auto xmlNode_po = graphNode.append_child( "node" );
     xmlNode_po.append_attribute( "id" ) = po_id;
     auto dataType_po = xmlNode_po.append_child( "data" );
@@ -325,25 +357,13 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 
     if ( ntk.is_complemented( po ) )
     {
-      inverter_index_map[po] = ++current_index;
-
-      // create the inverter node
-      auto xmlNode_gate_inv = graphNode.append_child( "node" );
-      xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-      auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
-      dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-      dataType_gate_inv.text().set( "INVERTER" );
-      auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
-      dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
-
-      // edge1: root_id -> current_index
+      // edge1: root_id -> inverter_id
       auto edge1 = graphNode.append_child( "edge" );
       edge1.append_attribute( "source" ) = root_id;
-      edge1.append_attribute( "target" ) = current_index;
-      // edge2: current_index -> po_id
+      edge1.append_attribute( "target" ) = inverter_id;
+      // edge2: inverter_id -> po_id
       auto edge2 = graphNode.append_child( "edge" );
-      edge2.append_attribute( "source" ) = current_index;
+      edge2.append_attribute( "source" ) = inverter_id;
       edge2.append_attribute( "target" ) = po_id;
     }
     else
@@ -606,6 +626,34 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
     Abc_AigForEachAnd( pNtk, pObj, i )
     {
       int g_id = babc::Abc_ObjId( pObj );
+      // add inverter before the gate
+      std::vector<int> fanins_id;
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        if ( babc::Abc_ObjFaninC( pObj, k ) )
+        {
+          inverter_index_map[pFanin] = ++current_index;
+          fanins_id.push_back( inverter_index_map[pFanin] );
+          // create the inverter node
+          auto xmlNode_gate_inv = graphNode.append_child( "node" );
+          xmlNode_gate_inv.append_attribute( "id" ) = current_index;
+          auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+          dataType_gate_inv.text().set( "INVERTER" );
+          auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+        }
+        else
+        {
+          fanins_id.push_back( child_id );
+          auto edge = graphNode.append_child( "edge" );
+          edge.append_attribute( "source" ) = child_id;
+          edge.append_attribute( "target" ) = g_id;
+        }
+      }
+
       auto xmlNode_gate = graphNode.append_child( "node" );
       xmlNode_gate.append_attribute( "id" ) = g_id;
       auto dataType_gate = xmlNode_gate.append_child( "data" );
@@ -620,24 +668,13 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
         int child_id = babc::Abc_ObjId( pFanin );
         if ( babc::Abc_ObjFaninC( pObj, k ) )
         {
-          inverter_index_map[pFanin] = ++current_index;
-          // create the inverter node
-          auto xmlNode_gate_inv = graphNode.append_child( "node" );
-          xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-          auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-          dataType_gate_inv.text().set( "INVERTER" );
-          auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
-
-          // edge1: child_id -> current_index
+          // edge1: child_id -> fanins_id[k]
           auto edge1 = graphNode.append_child( "edge" );
           edge1.append_attribute( "source" ) = child_id;
-          edge1.append_attribute( "target" ) = current_index;
-          // edge2: current_index -> g_id
+          edge1.append_attribute( "target" ) = fanins_id[k];
+          // edge2: fanins_id[k] -> g_id
           auto edge2 = graphNode.append_child( "edge" );
-          edge2.append_attribute( "source" ) = current_index;
+          edge2.append_attribute( "source" ) = fanins_id[k];
           edge2.append_attribute( "target" ) = g_id;
         }
         else
@@ -652,6 +689,27 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
     Abc_NtkForEachPo( pNtk, pObj, i )
     {
       auto po_id = babc::Abc_ObjId( pObj );
+      // add inverter before the gate
+      int inverter_id = 0;
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        if ( babc::Abc_ObjFaninC( pObj, k ) )
+        {
+          inverter_index_map[pFanin] = ++current_index;
+          inverter_id = inverter_index_map[pFanin];
+          // create the inverter node
+          auto xmlNode_gate_inv = graphNode.append_child( "node" );
+          xmlNode_gate_inv.append_attribute( "id" ) = current_index;
+          auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataType_gate_inv.append_attribute( "key" ) = "nodeType";
+          dataType_gate_inv.text().set( "INVERTER" );
+          auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
+          dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
+          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
+        }
+      }
+
       auto xmlNode_po = graphNode.append_child( "node" );
       xmlNode_po.append_attribute( "id" ) = po_id;
       auto dataType_po = xmlNode_po.append_child( "data" );
@@ -665,24 +723,13 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
         int child_id = babc::Abc_ObjId( pFanin );
         if ( babc::Abc_ObjFaninC( pObj, k ) )
         {
-          inverter_index_map[pFanin] = ++current_index;
-          // create the inverter node
-          auto xmlNode_gate_inv = graphNode.append_child( "node" );
-          xmlNode_gate_inv.append_attribute( "id" ) = current_index;
-          auto dataType_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataType_gate_inv.append_attribute( "key" ) = "nodeType";
-          dataType_gate_inv.text().set( "INVERTER" );
-          auto dataFunc_gate_inv = xmlNode_gate_inv.append_child( "data" );
-          dataFunc_gate_inv.append_attribute( "key" ) = "nodeFunc";
-          dataFunc_gate_inv.text().set( NODE_FUNC_MAP.at( "INVERTER" ).c_str() );
-
-          // edge1: child_id -> current_index
+          // edge1: child_id -> inverter_id
           auto edge1 = graphNode.append_child( "edge" );
           edge1.append_attribute( "source" ) = child_id;
-          edge1.append_attribute( "target" ) = current_index;
-          // edge2: current_index -> g_id
+          edge1.append_attribute( "target" ) = inverter_id;
+          // edge2: inverter_id -> g_id
           auto edge2 = graphNode.append_child( "edge" );
-          edge2.append_attribute( "source" ) = current_index;
+          edge2.append_attribute( "source" ) = inverter_id;
           edge2.append_attribute( "target" ) = po_id;
         }
         else
