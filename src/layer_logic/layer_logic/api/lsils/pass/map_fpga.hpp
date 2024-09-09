@@ -71,8 +71,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AIG:
   {
     lf::logic::lsils::aig_seq_network ntk = lfLmINST->current<lf::logic::lsils::aig_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::aig_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::aig_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::aig_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -80,8 +80,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_OIG:
   {
     lf::logic::lsils::oig_seq_network ntk = lfLmINST->current<lf::logic::lsils::oig_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::oig_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::oig_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::oig_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -89,8 +89,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_AOG:
   {
     lf::logic::lsils::aog_seq_network ntk = lfLmINST->current<lf::logic::lsils::aog_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::aog_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::aog_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::aog_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -98,8 +98,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XAG:
   {
     lf::logic::lsils::xag_seq_network ntk = lfLmINST->current<lf::logic::lsils::xag_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::xag_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::xag_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::xag_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -107,8 +107,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XOG:
   {
     lf::logic::lsils::xog_seq_network ntk = lfLmINST->current<lf::logic::lsils::xog_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::xog_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::xog_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::xog_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -116,8 +116,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_XMG:
   {
     lf::logic::lsils::xmg_seq_network ntk = lfLmINST->current<lf::logic::lsils::xmg_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::xmg_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::xmg_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::xmg_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -125,8 +125,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_MIG:
   {
     lf::logic::lsils::mig_seq_network ntk = lfLmINST->current<lf::logic::lsils::mig_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::mig_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::mig_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::mig_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -134,8 +134,8 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_PRIMARY:
   {
     lf::logic::lsils::primary_seq_network ntk = lfLmINST->current<lf::logic::lsils::primary_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::primary_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
+    mockturtle::mapping_view<lf::logic::lsils::primary_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::primary_seq_network, true>, true>( ntk_mapped, ps );
     mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
@@ -143,9 +143,9 @@ void map_fpga( int K_feasible_cut = -1, int Cut_limit = -1, int DelayIter = -1, 
   case lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_STRASH_GTG:
   {
     lf::logic::lsils::gtg_seq_network ntk = lfLmINST->current<lf::logic::lsils::gtg_seq_network>();
-    mockturtle::mapping_view<lf::logic::lsils::gtg_seq_network> ntk_mapped{ ntk };
-    mockturtle::lut_mapping( ntk_mapped, ps );
-    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped );
+    mockturtle::mapping_view<lf::logic::lsils::gtg_seq_network, true> ntk_mapped{ ntk };
+    mockturtle::lut_mapping<mockturtle::mapping_view<lf::logic::lsils::gtg_seq_network, true>, true>( ntk_mapped, ps );
+    mockturtle::collapse_mapped_network<klut_seq_network>( netlist_fpga, ntk_mapped ); // TODO: failed at function compute by window simulate
     lfLmINST->set_current<klut_seq_network>( netlist_fpga );
     break;
   }
