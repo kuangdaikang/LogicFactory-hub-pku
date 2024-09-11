@@ -100,8 +100,8 @@ void run_routing()
 
   init_routing( routing_config_file );
 
-  dmInst->saveDef( workspace + "/irt.def" );
-  dmInst->saveGDSII( workspace + "/irt.gds" );
+  // dmInst->saveDef( workspace + "/irt.def" );
+  // dmInst->saveGDSII( workspace + "/irt.gds" );
 
   ProfileRouting* profile = lfNmINST->get_profile_routing();
 

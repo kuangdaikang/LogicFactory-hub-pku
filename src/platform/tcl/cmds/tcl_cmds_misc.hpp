@@ -9,6 +9,7 @@
 #include "layer_arch/api/yosys/pass/print_stat.hpp"
 #include "layer_logic/api/abc/pass/print_stat.hpp"
 #include "layer_logic/api/lsils/pass/print_stat.hpp"
+#include "layer_netlist/api/ieda/pass/print_stat.hpp"
 
 #include "utility/string.hpp"
 
@@ -199,6 +200,7 @@ public:
       lf::logic::lsils::print_stat( strOptionsValue["-file"] );
       break;
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
+      lf::netlist::ieda::print_stat( strOptionsValue["-file"] );
       break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;

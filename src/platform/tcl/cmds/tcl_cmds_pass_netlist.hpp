@@ -14,6 +14,7 @@
 
 #include "layer_netlist/api/ieda/pass/init.hpp"
 #include "layer_netlist/api/ieda/pass/sta.hpp"
+#include "layer_netlist/api/ieda/pass/power.hpp"
 #include "layer_netlist/api/ieda/pass/floorplan.hpp"
 #include "layer_netlist/api/ieda/pass/placement.hpp"
 #include "layer_netlist/api/ieda/pass/cts.hpp"
@@ -349,6 +350,69 @@ public:
     return 1;
   }
 }; // class CmdLfNetlistSta
+
+class CmdLfNetlistPower : public TclCmd
+{
+public:
+  explicit CmdLfNetlistPower( const char* cmd_name )
+      : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "";
+    this->set_description( description );
+    std::string domain = "netlist";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {};
+    setOptions( this, options );
+  }
+
+  ~CmdLfNetlistPower() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = {};
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = {};
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
+      lf::netlist::ieda::run_power();
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
+}; // class CmdLfNetlistPower
 
 class CmdLfNetlistFloorplan : public TclCmd
 {

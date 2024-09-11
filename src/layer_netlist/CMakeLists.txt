@@ -5,6 +5,7 @@ target_link_libraries(lf_netlist INTERFACE
     lf_3rd_json
     idm
     ista-engine
+    power
     ifp_api
     ipdn_api
     ipl-api

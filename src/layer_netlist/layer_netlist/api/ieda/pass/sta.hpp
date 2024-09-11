@@ -1,6 +1,5 @@
 #pragma once
 
-#include "operation/iSTA/api/TimingEngine.hh"
 #include "layer_netlist/netlist_manager.hpp"
 #include "layer_netlist/eval/profile_timing.hpp"
 
@@ -29,16 +28,11 @@ void init_sta( ista::TimingEngine* ista_manager )
   ista_manager->set_design_work_space( workspace_sta.c_str() );
 
   ista_manager->readLiberty( lib_files );
+  ista_manager->get_ista()->set_top_module_name( "top_module" );
   ista_manager->readDesign( verilog_file.c_str() );
   ista_manager->readSdc( sdc_file.c_str() );
-  ista_manager->initRcTree();
   ista_manager->buildGraph();
   ista_manager->updateTiming();
-}
-
-void eval_sta( ista::TimingEngine* ista_manager, ProfileTiming* profile )
-{
-  profile->set_timing_engine( ista_manager );
 }
 
 /**
@@ -51,13 +45,11 @@ void run_sta( bool is_report_timing = false )
   ista::TimingEngine* ista_manager = ista::TimingEngine::getOrCreateTimingEngine();
 
   init_sta( ista_manager );
-
   if ( is_report_timing )
     ista_manager->reportTiming();
 
   ProfileTiming* profile = lfNmINST->get_profile_timing();
-
-  eval_sta( ista_manager, profile );
+  profile->set_timing_engine( ista_manager );
 }
 
 } // namespace ieda

@@ -3,6 +3,7 @@
 #include "platform/data_manager/idm.h"
 #include "layer_netlist/api/ieda/config.hpp"
 #include "layer_netlist/eval/profile_timing.hpp"
+#include "layer_netlist/eval/profile_power.hpp"
 #include "layer_netlist/eval/profile_placement.hpp"
 #include "layer_netlist/eval/profile_routing.hpp"
 
@@ -120,6 +121,13 @@ public:
     return profile_timing_;
   }
 
+  ProfilePower* get_profile_power()
+  {
+    if ( profile_power_ == nullptr )
+      profile_power_ = new ProfilePower;
+    return profile_power_;
+  }
+
   ProfilePlacement* get_profile_place()
   {
     if ( profile_place_ == nullptr )
@@ -144,6 +152,7 @@ private:
   static NetlistManager* instance_;
   lf::netlist::ieda::ConfigiEDA* config_ieda_ = nullptr;
   ProfileTiming* profile_timing_ = nullptr;
+  ProfilePower* profile_power_ = nullptr;
   ProfilePlacement* profile_place_ = nullptr;
   ProfileRouting* profile_routing_ = nullptr;
 }; // class NelistAsicManager

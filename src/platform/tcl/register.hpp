@@ -96,6 +96,7 @@ int registerCmds()
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistConfig, "config" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistInit, "init" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistSta, "sta" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistPower, "power" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistFloorplan, "floorplan" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistPlacement, "placement" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfNetlistCts, "cts" );

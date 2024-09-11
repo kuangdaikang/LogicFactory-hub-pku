@@ -18,7 +18,7 @@ void logic_to_netlist( const lf::logic::lsils::blut_seq_network& blut )
 {
   lf::netlist::ieda::ConfigiEDA* config = lfNmINST->get_config_ieda();
   std::string workspace = config->get_workspace();
-  std::string verilog_arch = workspace + "/lf_" + lf::utility::genRandomName( 8 ) + "_logic.v";
+  std::string verilog_arch = workspace + "/lf_" + lf::utility::genRandomName( 16 ) + "_logic.v";
 
   // write the verilog file
   lf::logic::lsils::write_verilog( verilog_arch );
@@ -34,7 +34,7 @@ void logic_to_netlist( const babc::Abc_Frame_t* frame_abc )
 {
   lf::netlist::ieda::ConfigiEDA* config = lfNmINST->get_config_ieda();
   std::string workspace = config->get_workspace();
-  std::string verilog_arch = workspace + "/lf_" + lf::utility::genRandomName( 8 ) + "_logic.v";
+  std::string verilog_arch = workspace + "/lf_" + lf::utility::genRandomName( 16 ) + "_logic.v";
 
   // write the verilog file
   lf::logic::abc::write_verilog( verilog_arch );

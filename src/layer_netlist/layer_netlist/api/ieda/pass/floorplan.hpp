@@ -361,7 +361,7 @@ void run_floorplan()
   init_pdn( pdn_config_file );
 
   // save def
-  dmInst->saveDef( workspace + "/ifp.def" );
+  // dmInst->saveDef( workspace + "/ifp.def" );
 }
 
 } // namespace ieda

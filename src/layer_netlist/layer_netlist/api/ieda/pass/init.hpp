@@ -44,7 +44,7 @@ void run_init()
   // sync the unit of layout for dbu = -1 bugs
   dmInst->get_idb_design()->set_units( dmInst->get_idb_layout()->get_units() );
   // dmInst->saveVerilog( workspace + "/init.v" );
-  dmInst->saveDef( workspace + "/init.def" );
+  // dmInst->saveDef( workspace + "/init.def" );
 }
 
 } // namespace ieda
