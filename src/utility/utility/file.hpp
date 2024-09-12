@@ -66,6 +66,7 @@ bool createDirectory( const std::string& path )
     {
       std::cout << "Directories already exist or failed to create." << std::endl;
     }
+    return true;
   }
   catch ( const std::filesystem::filesystem_error& e )
   {
@@ -74,6 +75,7 @@ bool createDirectory( const std::string& path )
     {
       std::cerr << "Check if the intermediate directories exist or if the path is correct." << std::endl;
     }
+    return false;
   }
 }
 
