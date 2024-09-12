@@ -41,19 +41,9 @@ public:
   void set_tlef_file( const std::string& file ) { tlef_file_ = file; }
   void set_tlef_file( const char* file ) { tlef_file_ = file; }
 
-  void set_verilog_file( const std::string& file )
-  {
-    if ( !verilog_file_.empty() )
-      return;
-    verilog_file_ = file;
-  }
+  void set_verilog_file( const std::string& file ) { verilog_file_ = file; }
 
-  void set_verilog_file( const char* file )
-  {
-    if ( !verilog_file_.empty() )
-      return;
-    verilog_file_ = file;
-  }
+  void set_verilog_file( const char* file ) { verilog_file_ = file; }
 
   void set_top_module( const std::string& name ) { top_module_ = name; }
   void set_top_module( const char* name ) { top_module_ = name; }
