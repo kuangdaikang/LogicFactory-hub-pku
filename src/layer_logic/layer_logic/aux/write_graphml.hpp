@@ -377,14 +377,128 @@ void lsils_to_graphml( Ntk const& ntk, const std::string& file )
 }
 
 /**
+ * @brief
+ */
+void create_nodes_for_po_rec( pugi::xml_node& graphNode, babc::Abc_Ntk_t* pNtk, babc::Abc_Obj_t* pObj, int const0_id, int const1_id, int visited_flag )
+{
+  babc::Abc_Obj_t* pFanin;
+  int i, k;
+  int g_id = babc::Abc_ObjId( pObj );
+  // visited
+  if ( babc::Abc_NodeTravId( pObj ) == visited_flag )
+  {
+    return;
+  }
+  if ( g_id == const0_id || g_id == const1_id ) // const is already created
+  {
+    return;
+  }
+
+  // dfs
+  babc::Abc_NodeSetTravId( pObj, visited_flag );
+  Abc_ObjForEachFanin( pObj, pFanin, k )
+  {
+    create_nodes_for_po_rec( graphNode, pNtk, pFanin, const0_id, const1_id, visited_flag );
+  }
+
+  // create the node
+  if ( babc::Abc_ObjIsNode( pObj ) )
+  {
+    std::cout << "Node: " << g_id << std::endl;
+    if ( Abc_ObjFaninNum( pObj ) == 0 ) // CONSTANT
+    {
+      return;
+    }
+    else // LUT
+    {
+      babc::word func = babc::Abc_SopToTruth( (char*)pObj->pData, Abc_ObjFaninNum( pObj ) );
+      auto hex = uint64_to_hex( func );
+      std::string gatename = "LUT" + std::to_string( babc::Abc_ObjFaninNum( pObj ) );
+      // standard LUT
+      auto xmlNode_gate = graphNode.append_child( "node" );
+      xmlNode_gate.append_attribute( "id" ) = g_id;
+      auto dataType_gate = xmlNode_gate.append_child( "data" );
+      dataType_gate.append_attribute( "key" ) = "nodeType";
+      dataType_gate.text().set( gatename.c_str() );
+      auto dataFunc_gate = xmlNode_gate.append_child( "data" );
+      dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_gate.text().set( hex.c_str() );
+
+      Abc_ObjForEachFanin( pObj, pFanin, k )
+      {
+        int child_id = babc::Abc_ObjId( pFanin );
+        auto edge = graphNode.append_child( "edge" );
+        edge.append_attribute( "source" ) = child_id;
+        edge.append_attribute( "target" ) = g_id;
+      }
+    }
+  }
+  else if ( babc::Abc_ObjIsNet( pObj ) ) // BUFFER
+  {
+    auto xmlNode_gate = graphNode.append_child( "node" );
+    xmlNode_gate.append_attribute( "id" ) = g_id;
+    auto dataType_gate = xmlNode_gate.append_child( "data" );
+    dataType_gate.append_attribute( "key" ) = "nodeType";
+    dataType_gate.text().set( "GTECH_BUF" );
+    auto dataFunc_gate = xmlNode_gate.append_child( "data" );
+    dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_gate.text().set( NODE_FUNC_MAP["GTECH_BUF"].c_str() );
+
+    Abc_ObjForEachFanin( pObj, pFanin, k )
+    {
+      int child_id = babc::Abc_ObjId( pFanin );
+      auto edge = graphNode.append_child( "edge" );
+      edge.append_attribute( "source" ) = child_id;
+      edge.append_attribute( "target" ) = g_id;
+    }
+  }
+  else if ( babc::Abc_ObjIsPi( pObj ) )
+  {
+    std::cout << "PI: " << g_id << std::endl;
+    auto xmlNode_pi = graphNode.append_child( "node" );
+    xmlNode_pi.append_attribute( "id" ) = g_id;
+    auto dataType_pi = xmlNode_pi.append_child( "data" );
+    dataType_pi.append_attribute( "key" ) = "nodeType";
+    dataType_pi.text().set( "GTECH_PI" );
+    auto dataFunc_pi = xmlNode_pi.append_child( "data" );
+    dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "GTECH_PI" ).c_str() );
+  }
+  else if ( babc::Abc_ObjIsPo( pObj ) )
+  {
+    std::cout << "PO: " << g_id << std::endl;
+    auto xmlNode_po = graphNode.append_child( "node" );
+    xmlNode_po.append_attribute( "id" ) = g_id;
+    auto dataType_po = xmlNode_po.append_child( "data" );
+    dataType_po.append_attribute( "key" ) = "nodeType";
+    dataType_po.text().set( "GTECH_PO" );
+    auto dataFunc_po = xmlNode_po.append_child( "data" );
+    dataFunc_po.append_attribute( "key" ) = "nodeFunc";
+    dataFunc_po.text().set( NODE_FUNC_MAP.at( "GTECH_PO" ).c_str() );
+
+    Abc_ObjForEachFanin( pObj, pFanin, k )
+    {
+      int child_id = babc::Abc_ObjId( pFanin );
+      auto edge = graphNode.append_child( "edge" );
+      edge.append_attribute( "source" ) = child_id;
+      edge.append_attribute( "target" ) = g_id;
+    }
+  }
+  else
+  {
+    std::cerr << "Unknown pObj type: " << babc::Abc_ObjType( pObj ) << std::endl;
+    assert( false );
+  }
+}
+
+/**
  * @brief write the abc network into graphml file
  */
 void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
 {
   babc::Abc_Ntk_t* pNtk = babc::Abc_FrameReadNtk( frame );
   babc::Abc_Ntk_t* pNtkTemp;
-  babc::Hop_Obj_t* pFunc;
-  babc::Abc_Obj_t *pObj, *pFanin, *pNode0, *pNode1;
+  babc::Abc_Obj_t *pObj, *pFanin;
   int i, k;
   uint32_t current_index = babc::Abc_NtkObjNum( pNtk );
   std::unordered_map<babc::Abc_Obj_t*, uint32_t> inverter_index_map;
@@ -438,23 +552,23 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
     dataFunc_constant.text().set( NODE_FUNC_MAP.at( "GTECH_CONST0" ).c_str() );
   }
 
-  // PIs
-  Abc_NtkForEachPi( pNtk, pObj, i )
-  {
-    int pi_id = babc::Abc_ObjId( pObj );
-    auto xmlNode_pi = graphNode.append_child( "node" );
-    xmlNode_pi.append_attribute( "id" ) = pi_id;
-    auto dataType_pi = xmlNode_pi.append_child( "data" );
-    dataType_pi.append_attribute( "key" ) = "nodeType";
-    dataType_pi.text().set( "GTECH_PI" );
-    auto dataFunc_pi = xmlNode_pi.append_child( "data" );
-    dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
-    dataFunc_pi.text().set( NODE_FUNC_MAP.at( "GTECH_PI" ).c_str() );
-  }
-
   // internal gates / POs
   if ( Abc_NtkIsMappedLogic( pNtk ) ) // ASIC netlist
   {
+    // PIs
+    Abc_NtkForEachPi( pNtk, pObj, i )
+    {
+      int pi_id = babc::Abc_ObjId( pObj );
+      auto xmlNode_pi = graphNode.append_child( "node" );
+      xmlNode_pi.append_attribute( "id" ) = pi_id;
+      auto dataType_pi = xmlNode_pi.append_child( "data" );
+      dataType_pi.append_attribute( "key" ) = "nodeType";
+      dataType_pi.text().set( "GTECH_PI" );
+      auto dataFunc_pi = xmlNode_pi.append_child( "data" );
+      dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_pi.text().set( NODE_FUNC_MAP.at( "GTECH_PI" ).c_str() );
+    }
+
     /**
      * @note constant is seemed as cell in ASIC netlist
      */
@@ -508,30 +622,14 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
     // get the truth table first
     pNtkTemp = babc::Abc_NtkToNetlist( pNtk ); // 在原始aig后面增加LUT， 所以是： const0， PI， GTECH_PI, ANDs, LUTs， 对该fpga netlist节点遍历从LUTs开始
     babc::Abc_NtkToSop( pNtkTemp, -1, ABC_INFINITY );
-    std::vector<std::string> gates_func;
-    gates_func.reserve( babc::Abc_NtkObjNum( pNtkTemp ) );
-    Abc_NtkForEachNode( pNtkTemp, pObj, i )
-    {
-      if ( Abc_ObjFaninNum( pObj ) == 0 )
-      {
-        continue;
-      }
-      else
-      {
-        babc::word func = babc::Abc_SopToTruth( (char*)pObj->pData, Abc_ObjFaninNum( pObj ) );
-        auto hex = uint64_to_hex( func );
-        gates_func.push_back( hex );
-      }
-    }
-    babc::Abc_NtkDelete( pNtkTemp );
-    int count = 0; // for index the truth table
+
     /**
      * @note constant is seemed as node in FPGA netlist, but need to find its id
      */
     // make sure the constant id, and create the constant node
     int fpga_const0_id = -1;
     int fpga_const1_id = -1;
-    Abc_NtkForEachNode( pNtk, pObj, i )
+    Abc_NtkForEachNode( pNtkTemp, pObj, i )
     {
       if ( Abc_ObjFaninNum( pObj ) == 0 )
       {
@@ -568,61 +666,27 @@ void abc_to_graphml( const babc::Abc_Frame_t* frame, const std::string& file )
       dataFunc_const1.text().set( NODE_FUNC_MAP.at( "GTECH_CONST1" ).c_str() );
     }
 
-    // write the gates
-    Abc_NtkForEachNode( pNtk, pObj, i )
+    Abc_NtkForEachPo( pNtkTemp, pObj, i )
     {
-      int g_id = babc::Abc_ObjId( pObj );
-      // constant condition
-      if ( Abc_ObjFaninNum( pObj ) == 0 )
-      {
-        continue;
-      }
-      else
-      {
-        std::string hex = gates_func[count++];
-        std::string gatename = "LUT" + std::to_string( babc::Abc_ObjFaninNum( pObj ) );
-        // standard LUT
-        auto xmlNode_gate = graphNode.append_child( "node" );
-        xmlNode_gate.append_attribute( "id" ) = g_id;
-        auto dataType_gate = xmlNode_gate.append_child( "data" );
-        dataType_gate.append_attribute( "key" ) = "nodeType";
-        dataType_gate.text().set( gatename.c_str() );
-        auto dataFunc_gate = xmlNode_gate.append_child( "data" );
-        dataFunc_gate.append_attribute( "key" ) = "nodeFunc";
-        dataFunc_gate.text().set( hex.c_str() );
-
-        Abc_ObjForEachFanin( pObj, pFanin, k )
-        {
-          int child_id = babc::Abc_ObjId( pFanin );
-          auto edge = graphNode.append_child( "edge" );
-          edge.append_attribute( "source" ) = child_id;
-          edge.append_attribute( "target" ) = g_id;
-        }
-      }
+      create_nodes_for_po_rec( graphNode, pNtkTemp, pObj, fpga_const0_id, fpga_const1_id, 2024 );
     }
-    Abc_NtkForEachPo( pNtk, pObj, i )
-    {
-      auto po_id = babc::Abc_ObjId( pObj );
-      auto xmlNode_po = graphNode.append_child( "node" );
-      xmlNode_po.append_attribute( "id" ) = po_id;
-      auto dataType_po = xmlNode_po.append_child( "data" );
-      dataType_po.append_attribute( "key" ) = "nodeType";
-      dataType_po.text().set( "GTECH_PO" );
-      auto dataFunc_po = xmlNode_po.append_child( "data" );
-      dataFunc_po.append_attribute( "key" ) = "nodeFunc";
-      dataFunc_po.text().set( NODE_FUNC_MAP.at( "GTECH_PO" ).c_str() );
-
-      Abc_ObjForEachFanin( pObj, pFanin, k )
-      {
-        int child_id = babc::Abc_ObjId( pFanin );
-        auto edge = graphNode.append_child( "edge" );
-        edge.append_attribute( "source" ) = child_id;
-        edge.append_attribute( "target" ) = po_id;
-      }
-    }
+    babc::Abc_NtkDelete( pNtkTemp );
   }
   else if ( Abc_NtkHasAig( pNtk ) ) // AIG
   {
+    // PIs
+    Abc_NtkForEachPi( pNtk, pObj, i )
+    {
+      int pi_id = babc::Abc_ObjId( pObj );
+      auto xmlNode_pi = graphNode.append_child( "node" );
+      xmlNode_pi.append_attribute( "id" ) = pi_id;
+      auto dataType_pi = xmlNode_pi.append_child( "data" );
+      dataType_pi.append_attribute( "key" ) = "nodeType";
+      dataType_pi.text().set( "GTECH_PI" );
+      auto dataFunc_pi = xmlNode_pi.append_child( "data" );
+      dataFunc_pi.append_attribute( "key" ) = "nodeFunc";
+      dataFunc_pi.text().set( NODE_FUNC_MAP.at( "GTECH_PI" ).c_str() );
+    }
     Abc_AigForEachAnd( pNtk, pObj, i )
     {
       int g_id = babc::Abc_ObjId( pObj );
