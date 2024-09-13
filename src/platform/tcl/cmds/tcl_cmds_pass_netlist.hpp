@@ -37,7 +37,8 @@ public:
     std::string domain = "netlist";
     this->set_domain( domain );
     // set the options
-    std::vector<lfCmdOption> options = {};
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "" } };
     setOptions( this, options );
   }
 
@@ -62,7 +63,7 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = {};
+    std::vector<std::string> strOptions = { "-file" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -78,7 +79,7 @@ public:
     switch ( anchor_domain )
     {
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
-      lf::netlist::arch_to_netlist( lfAmINST->current<Yosys::RTLIL::Design*>() );
+      lf::netlist::yosys_to_netlist( strOptionsValue["-file"] );
       break;
     default:
       std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
@@ -101,7 +102,8 @@ public:
     std::string domain = "netlist";
     this->set_domain( domain );
     // set the options
-    std::vector<lfCmdOption> options = {};
+    std::vector<lfCmdOption> options = {
+        { "-file", "all", "string", "" } };
     setOptions( this, options );
   }
 
@@ -126,7 +128,7 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = {};
+    std::vector<std::string> strOptions = { "-file" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -144,9 +146,9 @@ public:
     {
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_NETLIST_IEDA:
       if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_ABC_NETLIST_ASIC )
-        lf::netlist::logic_to_netlist( lfLmINST->current<babc::Abc_Frame_t*>() );
+        lf::netlist::abc_to_netlist( strOptionsValue["-file"] );
       else if ( ntktype == lf::misc::E_LF_NTK_TYPE::E_LF_NTK_TYPE_LSILS_NETLIST_ASIC )
-        lf::netlist::logic_to_netlist( lfLmINST->current<lf::logic::lsils::blut_seq_network>() );
+        lf::netlist::lsils_to_netlist( strOptionsValue["-file"] );
       else
         std::cerr << "Unsupported netlist type, please use netlist to set the netlist type!" << std::endl;
       break;
