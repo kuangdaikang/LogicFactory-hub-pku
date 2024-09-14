@@ -21,6 +21,7 @@ int registerCmds()
   //////////////////////////////////////////////////////////
   LF_MACOR_REGISTER_TCL_CMD( CmdLfHelp, "help" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfPrintStat, "print_stats" );
+  LF_MACOR_REGISTER_TCL_CMD( CmdLfRename, "rename" );
   //////////////////////////////////////////////////////////
   // flow
   //////////////////////////////////////////////////////////
@@ -71,7 +72,6 @@ int registerCmds()
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArchAigmap, "aigmap" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArchAbc, "abc" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfArchGtechmap, "gtechmap" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfArchRename, "rename" );
 
   //////////////////////////////////////////////////////////
   // logic

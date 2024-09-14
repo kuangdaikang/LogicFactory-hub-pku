@@ -11,6 +11,9 @@
 #include "layer_logic/api/lsils/pass/print_stat.hpp"
 #include "layer_netlist/api/ieda/pass/print_stat.hpp"
 
+#include "layer_arch/api/yosys/pass/rename.hpp"
+#include "layer_logic/api/abc/pass/rename.hpp"
+
 #include "utility/string.hpp"
 
 #include <iomanip>
@@ -209,6 +212,73 @@ public:
     return 1;
   }
 }; // class CmdLfPrintStat
+
+class CmdLfRename : public TclCmd
+{
+public:
+  explicit CmdLfRename( const char* cmd_name )
+      : TclCmd( cmd_name )
+  {
+    // set the description
+    std::string description = "";
+    this->set_description( description );
+    std::string domain = "arch";
+    this->set_domain( domain );
+    // set the options
+    std::vector<lfCmdOption> options = {
+        { "-top", "all", "string", "" } };
+    setOptions( this, options );
+  }
+
+  ~CmdLfRename() override = default;
+
+  unsigned check() override
+  {
+    std::vector<std::string> essential = {};
+    return checkEssentialOptions( this, essential );
+  }
+
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
+
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
+
+    std::vector<std::string> strOptions = { "-top" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
+
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+
+    auto anchor_domain = lfAnchorINST->get_anchor_tool_domain();
+
+    switch ( anchor_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_ARCH_YOSYS:
+      lf::arch::yosys::rename( strOptionsValue["-top"] );
+      break;
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_ABC:
+      lf::logic::abc::rename( strOptionsValue["-top"] );
+      break;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
+}; // class CmdLfRename
 
 } // namespace tcl
 
