@@ -1,0 +1,16 @@
+[submodule "toolkit/lorina"]
+	path = toolkit/lorina
+	url = https://github.com/Logic-Factory/lorina.git
+[submodule "toolkit/mockturtle"]
+	path = toolkit/mockturtle
+	url = https://github.com/Logic-Factory/mockturtle.git
+[submodule "toolkit/abc"]
+	path = toolkit/abc
+	url = https://github.com/berkeley-abc/abc.git
+[submodule "toolkit/yosys"]
+	path = toolkit/yosys
+	url = https://github.com/YosysHQ/yosys.git
+	branch = main
+[submodule "toolkit/iEDA"]
+	path = toolkit/iEDA
+	url = https://gitee.com/ieda-ipd/iEDA.git
