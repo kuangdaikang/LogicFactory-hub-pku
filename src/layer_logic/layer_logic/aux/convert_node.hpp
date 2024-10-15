@@ -63,7 +63,7 @@ NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
   using SNode = typename NtkSrc::node;
   using SSignal = typename NtkSrc::signal;
 
-  std::unordered_map<SNode, DNode> old_2_new;
+  std::unordered_map<SNode, DSignal> old_2_new;
 
   auto d_zero = ntk_dest.get_constant( false );
   auto d_one = ntk_dest.get_constant( true );
@@ -72,15 +72,15 @@ NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
   auto c_one = ntk_src.get_constant( true );
 
   // constant
-  old_2_new[ntk_src.get_node( c_zero )] = ntk_dest.get_node( d_zero );
+  old_2_new[ntk_src.get_node( c_zero )] = d_zero;
   if ( c_zero != c_one )
   {
-    old_2_new[ntk_src.get_node( c_one )] = ntk_dest.get_node( d_one );
+    old_2_new[ntk_src.get_node( c_one )] = d_one;
   }
 
   // primary inputs
   ntk_src.foreach_pi( [&]( auto const& pi ) {
-    old_2_new[pi] = ntk_dest.get_node( ntk_dest.create_pi() );
+    old_2_new[pi] = ntk_dest.create_pi();
   } );
 
   // internal gates
@@ -89,92 +89,92 @@ NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
     ntk_src.foreach_fanin( g, [&]( auto const& c ) {
       children.push_back( c );
     } );
-    auto new_c0 = DSignal( old_2_new[children[0].index], ntk_src.is_complemented( children[0] ) ? 1 : 0 );
-    auto new_c1 = DSignal( old_2_new[children[1].index], ntk_src.is_complemented( children[1] ) ? 1 : 0 );
+    auto new_c0 = ntk_src.is_complemented( children[0] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[0] )] ) : old_2_new[ntk_src.get_node( children[0] )];
+    auto new_c1 = ntk_src.is_complemented( children[1] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[1] )] ) : old_2_new[ntk_src.get_node( children[1] )];
 
     if ( ntk_src.is_and( g ) )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_and( new_c0, new_c1 ) );
+      old_2_new[g] = ntk_dest.create_and( new_c0, new_c1 );
     }
     else if ( ntk_src.is_nand( g ) )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nand( new_c0, new_c1 ) );
+      old_2_new[g] = ntk_dest.create_nand( new_c0, new_c1 );
     }
     else if ( ntk_src.is_or( g ) )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_or( new_c0, new_c1 ) );
+      old_2_new[g] = ntk_dest.create_or( new_c0, new_c1 );
     }
     else if ( ntk_src.is_nor( g ) )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nor( new_c0, new_c1 ) );
+      old_2_new[g] = ntk_dest.create_nor( new_c0, new_c1 );
     }
     else if ( ntk_src.is_xor( g ) )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xor( new_c0, new_c1 ) );
+      old_2_new[g] = ntk_dest.create_xor( new_c0, new_c1 );
     }
     else if ( ntk_src.is_xnor( g ) )
     {
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xnor( new_c0, new_c1 ) );
+      old_2_new[g] = ntk_dest.create_xnor( new_c0, new_c1 );
     }
     else if ( ntk_src.is_maj( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_maj( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_maj( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_xor3( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xor3( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_xor3( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_nand3( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nand3( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_nand3( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_nor3( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nor3( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_nor3( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_mux21( g ) || ntk_src.is_ite( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_mux21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_mux21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_nmux21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_nmux21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_nmux21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_aoi21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_aoi21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_aoi21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_oai21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_oai21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_oai21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_axi21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_axi21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_axi21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_xai21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xai21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_xai21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_oxi21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_oxi21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_oxi21( new_c0, new_c1, new_c2 );
     }
     else if ( ntk_src.is_xoi21( g ) )
     {
-      auto new_c2 = DSignal( old_2_new[children[2].index], ntk_src.is_complemented( children[2] ) ? 1 : 0 );
-      old_2_new[g] = ntk_dest.get_node( ntk_dest.create_xoi21( new_c0, new_c1, new_c2 ) );
+      auto new_c2 = ntk_src.is_complemented( children[2] ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( children[2] )] ) : old_2_new[ntk_src.get_node( children[2] )];
+      old_2_new[g] = ntk_dest.create_xoi21( new_c0, new_c1, new_c2 );
     }
     else
     {
@@ -185,7 +185,7 @@ NtkDest convert_lsils_internal( NtkSrc const& ntk_src )
 
   // primary outputs
   ntk_src.foreach_po( [&]( auto const& po ) {
-    auto new_po = DSignal( old_2_new[po.index], ntk_src.is_complemented( po ) ? 1 : 0 );
+    auto new_po = ntk_src.is_complemented( po ) ? ntk_dest.create_not( old_2_new[ntk_src.get_node( po )] ) : old_2_new[ntk_src.get_node( po )];
     ntk_dest.create_po( new_po );
   } );
 
@@ -445,14 +445,14 @@ NtkDest convert_abc_2_lsils( babc::Abc_Ntk_t* pNtk )
 
   NtkDest ntk_dest;
   babc::Abc_Obj_t *pObj, *pNode0, *pNode1;
-  std::unordered_map<SNode, DNode> old_2_new;
+  std::unordered_map<SNode, DSignal> old_2_new;
   int i = 0, c0, c1;
 
   auto c_zero = babc::Abc_ObjNot( babc::Abc_AigConst1( pNtk ) );
   auto c_one = babc::Abc_AigConst1( pNtk );
 
-  auto d_zero = ntk_dest.get_node( ntk_dest.get_constant( false ) );
-  auto d_one = ntk_dest.get_node( ntk_dest.get_constant( true ) );
+  auto d_zero = ntk_dest.get_constant( false );
+  auto d_one = ntk_dest.get_constant( true );
 
   // constant
   old_2_new[c_zero] = d_zero;
@@ -461,7 +461,7 @@ NtkDest convert_abc_2_lsils( babc::Abc_Ntk_t* pNtk )
   // primary inputs
   Abc_NtkForEachPi( pNtk, pObj, i )
   {
-    old_2_new[pObj] = ntk_dest.get_node( ntk_dest.create_pi() );
+    old_2_new[pObj] = ntk_dest.create_pi();
   }
 
   // internal gates
@@ -471,8 +471,10 @@ NtkDest convert_abc_2_lsils( babc::Abc_Ntk_t* pNtk )
     c0 = babc::Abc_ObjFaninC0( pObj );
     pNode1 = babc::Abc_ObjFanin1( pObj );
     c1 = babc::Abc_ObjFaninC1( pObj );
-    auto sig = ntk_dest.create_and( DSignal( old_2_new[pNode0], c0 ), DSignal( old_2_new[pNode1], c1 ) );
-    old_2_new[pObj] = ntk_dest.get_node( sig );
+    auto new_c0 = c0 ? ntk_dest.create_not( old_2_new[pNode0] ) : old_2_new[pNode0];
+    auto new_c1 = c1 ? ntk_dest.create_not( old_2_new[pNode1] ) : old_2_new[pNode1];
+    auto sig = ntk_dest.create_and( new_c0, new_c1 );
+    old_2_new[pObj] = sig;
   }
 
   // primary outputs
@@ -480,7 +482,8 @@ NtkDest convert_abc_2_lsils( babc::Abc_Ntk_t* pNtk )
   {
     pNode0 = babc::Abc_ObjFanin0( pObj );
     c0 = babc::Abc_ObjFaninC0( pObj );
-    ntk_dest.create_po( DSignal( old_2_new[pNode0], c0 ) );
+    auto new_po = c0 ? ntk_dest.create_not( old_2_new[pNode0] ) : old_2_new[pNode0];
+    ntk_dest.create_po( new_po );
   }
 
   return ntk_dest;
