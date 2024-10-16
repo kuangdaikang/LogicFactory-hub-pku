@@ -144,31 +144,13 @@ NtkDest convert_cover( const NtkSrc& ntk_src )
         GATE   nor2   3  O=!(a+b);                       PIN * INV 1 999 1.0 0.0 1.0 0.0
         GATE   xor2   3  O=a^b;                          PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
         GATE   xnor2  3  O=!(a^b);                       PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-        GATE   mux21  2  O=a*b+a*!c+b*c;                 PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-        GATE   nmux21 2  O=!((a*b)+(a*!c)+(b*c));        PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   mux21  2  O=c*b + !c*a;                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
+        GATE   nmux21 2  O=!(c*b + !c*a);                PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
         GATE   nand3  2  O=!(a*b*c);                     PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
         GATE   nor3   2  O=!(a+b+c);                     PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
         GATE   aoi21  1  O=!((a*b)+c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
         GATE   oai21  1  O=!((a+b)*c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
     )";
-    // genlib_buffer += R"(
-    //     GATE   and2   3  O=a*b;                          PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-    //     GATE   nand2  3  O=!(a*b);                       PIN * INV 1 999 1.0 0.0 1.0 0.0
-    //     GATE   or2    3  O=a+b;                          PIN * NONINV 1 999 1.0 0.0 1.0 0.0
-    //     GATE   nor2   3  O=!(a+b);                       PIN * INV 1 999 1.0 0.0 1.0 0.0
-    //     GATE   xor2   3  O=a^b;                          PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   xnor2  3  O=!(a^b);                       PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   mux21  2  O=a*b+a*!c+b*c;                 PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   nmux21 2  O=!((a*b)+(a*!c)+(b*c));        PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   nand3  2  O=!(a*b*c);                     PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   nor3   2  O=!(a+b+c);                     PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   aoi21  1  O=!((a*b)+c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   oai21  1  O=!((a+b)*c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   axi21  1  O=!((a*b)^c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   xai21  1  O=!((a^b)*c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   oxi21  1  O=!((a+b)^c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    //     GATE   xoi21  1  O=!((a^b)+c);                   PIN * UNKNOWN 1 999 1.0 0.0 1.0 0.0
-    // )";
   }
   else
   {
