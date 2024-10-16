@@ -48,7 +48,8 @@ $ ninja
 
 
 # Getting Started
-- RUN with tcl
+- RUN with tcl \
+  before run this, you need to modify the datapath in the "demo/test.tcl" and  "config/layer_netlist/ieda/config_sky130.json".
 ```
 $ ./build/app/logicfactory -s "demo/test.tcl"
 ```
@@ -68,3 +69,17 @@ $ ./build/app/logicfactory
 --------------------------------------------
 % help
 ```
+
+# Acknowledgement
+- [yosys](https://github.com/YosysHQ/yosys)
+- [berkeley-abc](https://github.com/berkeley-abc/abc)
+- [epfl-lsils](https://github.com/lsils/lstools-showcase)
+- [iEDA](https://github.com/OSCC-Project/iEDA)
+
+# Q&A
+- slack \
+    [https://join.slack.com/t/open-logic-factory/shared_invite/zt-2sjpzqk1y-1SM9Xcx8CNTULq72l80H~w](https://join.slack.com/t/open-logic-factory/shared_invite/zt-2sjpzqk1y-1SM9Xcx8CNTULq72l80H~w)
+
+# Contact
+- email \
+    Liwei Ni: nlwmode at gmail dot com
