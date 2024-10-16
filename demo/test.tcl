@@ -1,23 +1,25 @@
 start
-anchor -set yosys
-read_aiger -file /workspace/LogicFactory/demo/b1_comb.aig
+anchor -tool yosys
+read_aiger -file /home/niliwei/dev/LogicFactory/demo/b1_comb.aig
 write_aiger -file test_b1_comb.arch.aig
 
 arch2logic
-ntktype -tool abc -type strash -ntk aig
+anchor -tool abc
+ntktype -tool abc -stat logic -type aig
+update -n
 
-anchor -set abc
 strash
 balance
 rewrite
-read_liberty -file /workspace/LogicFactory/techlib/clean/sky130.lib
+read_liberty -file /home/niliwei/dev/LogicFactory/techlib/clean/sky130.lib
 write_aiger -file test_b1_comb.logic.aig
 write_dot -file test_b1_comb.logic.dot
 map_asic
 write_verilog -file test_b1_comb.v
-anchor -set ieda
-config -file /workspace/LogicFactory/config/layer_netlist/ieda/config.json
+
+anchor -tool ieda
 logic2netlist
+config -file /home/niliwei/dev/LogicFactory/config/layer_netlist/ieda/config.json
 init
 sta
 floorplan
