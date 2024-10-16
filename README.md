@@ -1,6 +1,10 @@
 # LogicFactory
 
-![Framework](LogicFactory.svg "framework")
+LogicFactory is an open-source logic synthesis platform for integrated cross-tool flow.
+
+<div style="text-align: center;">
+    <img src="img/LogicFactory.svg" alt="Framework" style="width: 40%;">
+</div>
 
 # Build
 - method1: build with docker env (recommend)
@@ -69,6 +73,13 @@ $ ./build/app/logicfactory
 --------------------------------------------
 % help
 ```
+
+# Scheme
+Anchor-based tool and logic type location
+<div style="text-align: center;">
+    <img src="img/scheme.svg" alt="Framework" style="width: 100%;">
+    <img src="img/scheme-example.svg" alt="Framework" style="width: 100%;">
+</div>
 
 # Acknowledgement
 - [yosys](https://github.com/YosysHQ/yosys)
