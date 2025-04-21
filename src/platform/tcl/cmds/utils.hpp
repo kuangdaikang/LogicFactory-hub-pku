@@ -38,10 +38,12 @@ void setOptions( TclCmd* cmd, const std::vector<lfCmdOption> args )
       opt = new TclDoubleOption( arg.name.c_str(), 1, 0.0f );
     else if ( arg.type == "strvec" )
       opt = new TclStringListOption( arg.name.c_str(), 1, {} );
-    else if ( arg.type == "strvec" )
-      opt = new TclStringListOption( arg.name.c_str(), 1, {} );
-    else if ( arg.type == "strvec" )
-      opt = new TclStringListOption( arg.name.c_str(), 1, {} );
+    else if ( arg.type == "intvec" )
+      opt = new TclIntListOption( arg.name.c_str(), 1, {} );
+    else if ( arg.type == "dblvec" )
+      opt = new TclDoubleListOption( arg.name.c_str(), 1, {} );
+    // else if ( arg.type == "strvecvec" )
+    //   opt = new TclStringListListOption( arg.name.c_str(), 1, {} );
     else
     {
       std::cerr << "Unknown option type: " << arg.type << std::endl;
