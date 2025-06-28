@@ -1,0 +1,5 @@
+read_blif ./PAS_syn_cu1566532.blif
+techmap
+abc -liberty /rshome/sunan.zou/nas/PowerAwareSynthesis/netlist/gsc145nm.lib
+clean
+write_blif ./PAS_map_cu1566532

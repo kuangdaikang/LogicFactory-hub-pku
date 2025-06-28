@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/netlist.dir/netlist.cpp.o CMakeFiles/netlist.dir/power.cpp.o CMakeFiles/netlist.dir/feature.cpp.o CMakeFiles/netlist.dir/main.cpp.o CMakeFiles/netlist.dir/utility.cpp.o CMakeFiles/netlist.dir/wire.cpp.o CMakeFiles/netlist.dir/mapping/mapping.cpp.o CMakeFiles/netlist.dir/io.cpp.o -o netlist 

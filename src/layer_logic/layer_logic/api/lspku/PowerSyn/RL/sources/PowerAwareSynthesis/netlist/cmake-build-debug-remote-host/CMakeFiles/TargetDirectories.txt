@@ -1,0 +1,2 @@
+/home/zousunan/nas/PowerAwareSynthesis/netlist/cmake-build-debug-remote-host/CMakeFiles/rebuild_cache.dir
+/home/zousunan/nas/PowerAwareSynthesis/netlist/cmake-build-debug-remote-host/CMakeFiles/edit_cache.dir
