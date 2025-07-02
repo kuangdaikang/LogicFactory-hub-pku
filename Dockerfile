@@ -48,6 +48,7 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y \
 # python and distutils
 RUN apt-get update && apt-get install -y \
     python3.8 \
+    python3.8-dev \
     python3.8-distutils \
     python3-pip
 
@@ -62,6 +63,20 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 --slave /usr/bin/g++ g++ /usr/bin/g++-10
+
+# Anaconda3 installation
+ENV CONDA_DIR=/opt/conda
+ENV PATH="$CONDA_DIR/bin:$PATH"
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p $CONDA_DIR && \
+    rm ~/miniconda.sh && \
+    # Allow mamba installation
+    conda install -y mamba -n base -c conda-forge && \
+    # Clean up
+    conda clean -ya
+
+
 
 WORKDIR /workspace
 

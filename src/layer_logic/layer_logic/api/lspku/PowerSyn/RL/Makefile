@@ -12,7 +12,7 @@ install:
 
 clean:
 	@rm -rf $(BUILD_DIR)
-	@cd abc/ && $(MAKE) clean
+	@cd sources/PowerAwareSynthesis/netlist/abc && $(MAKE) clean
 	@conda env remove -n rlgym --yes
 
 .PHONY: all configure install clean

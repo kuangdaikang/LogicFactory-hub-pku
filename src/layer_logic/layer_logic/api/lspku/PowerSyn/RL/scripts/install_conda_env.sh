@@ -8,6 +8,10 @@ if ! command -v conda &> /dev/null; then
     exit 1
 fi
 
+
+# 设置PYTHONPATH指向系统Python3.8头文件（在创建环境前生效）
+export PYTHONPATH="/usr/include/python3.8:$PYTHONPATH"
+
 # 创建Conda环境（如果不存在）
 if ! conda env list | grep -q "rlgym"; then
     echo "创建Conda环境: rlgym"
