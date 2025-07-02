@@ -110,7 +110,6 @@ int registerCmds()
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicLutRewrite, "lut_rewrite" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicTechMapping, "tech_mapping" );
   LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicCalculatePower, "calculate_power" );
-  LF_MACOR_REGISTER_TCL_CMD( CmdLfLogicXMGRewrite, "xmgrw" );
 
   //////////////////////////////////////////////////////////
   // netlist
