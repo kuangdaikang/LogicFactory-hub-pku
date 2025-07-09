@@ -4,7 +4,7 @@ add_library(lf_logic INTERFACE)
 # 收集 layer_logic/api/lspku 目录下的所有 .cpp 文件
 file(GLOB_RECURSE LSPKU_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/layer_logic/api/lspku/FastEx/share/**/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/layer_logic/api/lspku/PowerSyn/share/**/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/layer_logic/api/lspku/PowerSyn/share/*.cpp"
 )
 
 # 打印收集到的文件数量和列表

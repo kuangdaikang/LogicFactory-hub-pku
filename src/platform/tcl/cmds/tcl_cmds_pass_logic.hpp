@@ -2871,7 +2871,10 @@ public:
 
     // 执行功耗计算流程
     try {
-        std::vector<double> power_results = PASyn::calculate_power_api(strOptionsValue["-input"], strOptionsValue["-tech_lib"],0);
+
+        std::string input = strOptionsValue["-input"];
+        std::string tech_lib = strOptionsValue["-tech_lib"];
+        std::vector<double> power_results = PASyn::calculate_power_api(input, tech_lib, 0);
 
         // 格式化输出内容
         std::stringstream output_ss;

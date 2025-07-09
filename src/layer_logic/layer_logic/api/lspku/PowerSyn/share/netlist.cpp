@@ -6,7 +6,7 @@
 
 #include <utility>
 
-std::string infix_to_prefix(std::string infix_exp) {
+std::string PASyn::infix_to_prefix(std::string infix_exp) {
     std::string prefix_exp;
     std::stack<char> s1, s2;
     std::reverse(infix_exp.begin(), infix_exp.end());
@@ -188,9 +188,9 @@ PASyn::Function::Function(int _num_input, const std::string &_function) {
         }
         return;
     }
-    std::vector<std::string> entries = split(_function, '\n');
+    std::vector<std::string> entries = PASyn::split(_function, '\n');
     for (auto &entry: entries) {
-        std::vector<std::string> _temp_str = split(entry);
+        std::vector<std::string> _temp_str = PASyn::split(entry);
         std::vector<int> inputs;
         for (char i: _temp_str[0])
             inputs.emplace_back(i == '1' ? 1 : (i == '0' ? 0 : -1));
@@ -215,7 +215,7 @@ PASyn::Function::Function(const std::vector<Cell_Input> &inputs, std::string _fu
         it++;
     }
 
-    std::string prefix_exp = infix_to_prefix(_function_str);
+    std::string prefix_exp = PASyn::infix_to_prefix(_function_str);
     std::vector<std::pair<std::vector<int>, bool>> _function;
     std::map<std::string, int> inputs_index;
     for (int i = 0; i < inputs.size(); i++) {
@@ -538,10 +538,10 @@ inline void generate_partial_index(std::map<int, int>& map, const std::vector<in
     b_vector.reserve(num_inputs);
     b_vector_slice.reserve(num_inputs);
     for(int i=0; i<end; i++) {
-        b_vector = int_to_bvector(i, num_inputs);
+        b_vector = PASyn::int_to_bvector(i, num_inputs);
         for(auto& entry: bit_index)
             b_vector_slice.emplace_back(b_vector[entry]);
-        map[i] = bvector_to_int(b_vector_slice);
+        map[i] = PASyn::bvector_to_int(b_vector_slice);
         b_vector_slice.clear();
     }
 }

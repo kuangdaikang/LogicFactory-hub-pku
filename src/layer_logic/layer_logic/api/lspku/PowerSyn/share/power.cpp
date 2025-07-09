@@ -5,7 +5,7 @@
 
 // Transform an integer to a binary vector representation
 // 5 -> 1 0 1
-std::vector<int> int_to_bvector(int n, unsigned int fix_length) {
+std::vector<int> PASyn::int_to_bvector(int n, unsigned int fix_length) {
     std::vector<int> result;
     while (n != 0) {
         result.emplace_back(n % 2);
@@ -18,7 +18,7 @@ std::vector<int> int_to_bvector(int n, unsigned int fix_length) {
     return result;
 }
 
-int bvector_to_int(const std::vector<int>& b_vector) {
+int PASyn::bvector_to_int(const std::vector<int>& b_vector) {
     int result = 0;
     for(auto& entry: b_vector) {
         result = result << 1;
@@ -109,8 +109,8 @@ void PASyn::switch_pre_process(PASyn::Technology &technology) {
 
             for (int i = 0; i < input_permutation; i++) {
                 for (int j = 0; j < input_permutation; j++) {
-                    std::vector<int> initial_vector = int_to_bvector(i, cell.second->inputs.size());
-                    std::vector<int> after_vector = int_to_bvector(j, cell.second->inputs.size());
+                    std::vector<int> initial_vector = PASyn::int_to_bvector(i, cell.second->inputs.size());
+                    std::vector<int> after_vector = PASyn::int_to_bvector(j, cell.second->inputs.size());
                     bool initial_on = is_on_set(function.function, initial_vector);
                     if (initial_on) {
                         deal_with_glitch_prop(cell.second, function, initial_vector, after_vector, glitch_10_propagate,
@@ -168,8 +168,8 @@ inline void calculate_switch_prob(double &rise_from_1, double &rise_from_0, doub
 
     for (int i = 0; i < input_permutation; i++) {
         for (int j = 0; j < input_permutation; j++) {
-            std::vector<int> initial_vector = int_to_bvector(i, cell->inputs.size());
-            std::vector<int> after_vector = int_to_bvector(j, cell->inputs.size());
+            std::vector<int> initial_vector = PASyn::int_to_bvector(i, cell->inputs.size());
+            std::vector<int> after_vector = PASyn::int_to_bvector(j, cell->inputs.size());
             initial_vector[pin_index] = false;
             after_vector[pin_index] = true;
             bool initial_on = is_on_set(function, initial_vector);
@@ -398,7 +398,7 @@ void PASyn::calculate_probability_1(Netlist &netlist) {
              */
             int input_permutation = 1 << int(now->functions[i].function.front().first.size());
             for(int j=0; j<input_permutation; j++) {
-                std::vector<int> input_vector = int_to_bvector(j, now->functions[i].function.front().first.size());
+                std::vector<int> input_vector = PASyn::int_to_bvector(j, now->functions[i].function.front().first.size());
                 if(is_on_set(now->functions[i].function, input_vector)) {
                     double _result = 1;
                     for(int k=0; k<input_vector.size(); k++)

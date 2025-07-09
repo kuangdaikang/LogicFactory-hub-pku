@@ -3,7 +3,7 @@
 //
 #include "netlist.h"
 
-std::vector<std::string> split(const std::string &str, char terminal) {
+std::vector<std::string> PASyn::split(const std::string &str, char terminal) {
     std::vector<std::string> split_str;
     std::string::size_type end_pos, start_pos;
     start_pos = str.find(terminal);
@@ -23,7 +23,7 @@ std::vector<std::string> split(const std::string &str, char terminal) {
 }
 
 
-std::string filter_string(const std::string &str, std::vector<char> dic) {
+std::string PASyn::filter_string(const std::string &str, std::vector<char> dic) {
     std::string new_str;
     for (auto &ch: str) {
         if (std::find(dic.begin(), dic.end(), ch) != dic.end())
@@ -55,7 +55,7 @@ void PASyn::read_blif(const std::string &file, Netlist &netlist, Technology *tec
             std::getline(fin, _temp_str);
             temp_str += _temp_str;
         }
-        std::vector<std::string> str = split(temp_str);
+        std::vector<std::string> str = PASyn::split(temp_str);
         if (str[0] == ".model")
             netlist.name = str[1];
         else if (str[0] == ".end")
@@ -102,11 +102,11 @@ void PASyn::read_blif(const std::string &file, Netlist &netlist, Technology *tec
                 auto input = netlist.has_node(*it);
                 if (input != nullptr) {
                     (input->num_fanout[0])++;
-                    input->outputs[0].emplace_back(*(split(*(str.end() - 1), '=').end() - 1));
+                    input->outputs[0].emplace_back(*(PASyn::split(*(str.end() - 1), '=').end() - 1));
                 } else {
                     Node *node = new Node(*it);
                     node->probability_1.emplace_back(-1);
-                    node->outputs.emplace_back(std::vector<std::string>(1, *(split(*(str.end() - 1), '=').end() - 1)));
+                    node->outputs.emplace_back(std::vector<std::string>(1, *(PASyn::split(*(str.end() - 1), '=').end() - 1)));
                     node->num_fanout.emplace_back(1);
                     netlist.add_node(node);
                 }
@@ -131,16 +131,16 @@ void PASyn::read_blif(const std::string &file, Netlist &netlist, Technology *tec
             Cell &cell = *technology->cells[str[1]];
             std::map<std::string, std::string> inputs_map;
             for (int i = 2; i <= cell.inputs.size() + 1; i++) {
-                std::vector<std::string> _temp_str = split(str[i], '=');
+                std::vector<std::string> _temp_str = PASyn::split(str[i], '=');
                 inputs_map[*(_temp_str.begin())] = *(_temp_str.end() - 1);
                 auto input = netlist.has_node(*(_temp_str.end() - 1));
                 if (input != nullptr) {
                     (input->num_fanout[0])++;
-                    input->outputs[0].emplace_back(*(split(*(str.end() - 1), '=').end() - 1));
+                    input->outputs[0].emplace_back(*(PASyn::split(*(str.end() - 1), '=').end() - 1));
                 } else {
                     Node *node = new Node(*(_temp_str.end() - 1));
                     node->probability_1.emplace_back(-1);
-                    node->outputs.emplace_back(std::vector<std::string>(1, *(split(*(str.end() - 1), '=').end() - 1)));
+                    node->outputs.emplace_back(std::vector<std::string>(1, *(PASyn::split(*(str.end() - 1), '=').end() - 1)));
                     node->num_fanout.emplace_back(1);
                     netlist.add_node(node);
                 }
@@ -158,7 +158,7 @@ void PASyn::read_blif(const std::string &file, Netlist &netlist, Technology *tec
                 node->probability_1 = std::vector<double>(1, -1);
                 node->cell_type = cell.name;
             } else {
-                node = new Node(*(split(*(str.end() - 1), '=').end() - 1), int(cell.inputs.size()),
+                node = new Node(*(PASyn::split(*(str.end() - 1), '=').end() - 1), int(cell.inputs.size()),
                                 std::vector<unsigned int>(1, 0), inputs,
                                 cell.functions, std::vector<double>(1, -1), cell.name);
                 netlist.add_node(node);
@@ -218,7 +218,7 @@ void input_look_up_table(std::ifstream &fin, PASyn::LookUpTable &look_up_table, 
                 std::getline(fin, _temp_string);
                 temp_str += _temp_string;
             }
-            temp_str = filter_string(temp_str, std::vector<char>{'\\', ',', '(', '"', ')', ';'});
+            temp_str = PASyn::filter_string(temp_str, std::vector<char>{'\\', ',', '(', '"', ')', ';'});
             std::stringstream sin(temp_str);
             for (int i = 0; i < num_index_1; i++) {
                 double temp_double;
@@ -233,7 +233,7 @@ void input_look_up_table(std::ifstream &fin, PASyn::LookUpTable &look_up_table, 
                 std::getline(fin, _temp_string);
                 temp_str += _temp_string;
             }
-            temp_str = filter_string(temp_str, std::vector<char>{'\\', ',', '(', '"', ')', ';'});
+            temp_str = PASyn::filter_string(temp_str, std::vector<char>{'\\', ',', '(', '"', ')', ';'});
             std::stringstream sin(temp_str);
             for (int i = 0; i < num_index_2; i++) {
                 double temp_double;
@@ -248,7 +248,7 @@ void input_look_up_table(std::ifstream &fin, PASyn::LookUpTable &look_up_table, 
                 std::getline(fin, _temp_string);
                 temp_str += _temp_string;
             }
-            temp_str = filter_string(temp_str, std::vector<char>{'\\', ',', '(', '"', ')', ';'});
+            temp_str = PASyn::filter_string(temp_str, std::vector<char>{'\\', ',', '(', '"', ')', ';'});
             std::stringstream sin(temp_str);
             for (int i = 0; i < num_index_1; i++) {
                 std::vector<double> value_index_i;
@@ -280,28 +280,28 @@ void input_timing(std::ifstream &fin, PASyn::Cell_Output &output) {
         } else if (temp_str == "}")
             break;
         else if (temp_str.find("cell_rise") != -1) {
-            std::vector<std::string> strings = split(*(split(temp_str, '_').end() - 1), 'x');
+            std::vector<std::string> strings = PASyn::split(*(PASyn::split(temp_str, '_').end() - 1), 'x');
             int index_1 = stoi(strings[0]), index_2 = stoi(strings[1]);
             fin >> temp_str; // for "{"
             PASyn::LookUpTable look_up_table{};
             input_look_up_table(fin, look_up_table, index_1, index_2);
             timing.look_up_tables["cell_rise"] = look_up_table;
         } else if (temp_str.find("rise_transition") != -1) {
-            std::vector<std::string> strings = split(*(split(temp_str, '_').end() - 1), 'x');
+            std::vector<std::string> strings = PASyn::split(*(PASyn::split(temp_str, '_').end() - 1), 'x');
             int index_1 = stoi(strings[0]), index_2 = stoi(strings[1]);
             fin >> temp_str; // for "{"
             PASyn::LookUpTable look_up_table{};
             input_look_up_table(fin, look_up_table, index_1, index_2);
             timing.look_up_tables["rise_transition"] = look_up_table;
         } else if (temp_str.find("cell_fall") != -1) {
-            std::vector<std::string> strings = split(*(split(temp_str, '_').end() - 1), 'x');
+            std::vector<std::string> strings = PASyn::split(*(PASyn::split(temp_str, '_').end() - 1), 'x');
             int index_1 = stoi(strings[0]), index_2 = stoi(strings[1]);
             fin >> temp_str; // for "{"
             PASyn::LookUpTable look_up_table{};
             input_look_up_table(fin, look_up_table, index_1, index_2);
             timing.look_up_tables["cell_fall"] = look_up_table;
         } else if (temp_str.find("fall_transition") != -1) {
-            std::vector<std::string> strings = split(*(split(temp_str, '_').end() - 1), 'x');
+            std::vector<std::string> strings = PASyn::split(*(PASyn::split(temp_str, '_').end() - 1), 'x');
             int index_1 = stoi(strings[0]), index_2 = stoi(strings[1]);
             fin >> temp_str; // for "{"
             PASyn::LookUpTable look_up_table{};
@@ -325,14 +325,14 @@ void input_internal_power(std::ifstream &fin, PASyn::Cell_Output &output) {
         } else if (temp_str == "}")
             break;
         else if (temp_str.find("rise_power") != -1) {
-            std::vector<std::string> strings = split(*(split(temp_str, '_').end() - 1), 'x');
+            std::vector<std::string> strings = PASyn::split(*(PASyn::split(temp_str, '_').end() - 1), 'x');
             int index_1 = stoi(strings[0]), index_2 = stoi(strings[1]);
             fin >> temp_str; // for "{"
             PASyn::LookUpTable look_up_table{};
             input_look_up_table(fin, look_up_table, index_1, index_2);
             internal_power.look_up_tables["rise_power"] = look_up_table;
         } else if (temp_str.find("fall_power") != -1) {
-            std::vector<std::string> strings = split(*(split(temp_str, '_').end() - 1), 'x');
+            std::vector<std::string> strings = PASyn::split(*(PASyn::split(temp_str, '_').end() - 1), 'x');
             int index_1 = stoi(strings[0]), index_2 = stoi(strings[1]);
             fin >> temp_str; // for "{"
             PASyn::LookUpTable look_up_table{};

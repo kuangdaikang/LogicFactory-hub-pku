@@ -349,10 +349,13 @@ namespace PASyn {
     void technology_mapping(Netlist &netlist, PASyn::Technology &technology);
 
     void technology_mapping_api(const std::string &input, const std::string &technology_input, const std::string &output);
+
+    std::vector<int> int_to_bvector(int n, unsigned int fix_length = 0);
+
+    int bvector_to_int(const std::vector<int> &b_vector);
+
+    std::vector<std::string> split(const std::string &str, char terminal = ' ');
+    std::string filter_string(const std::string &str, std::vector<char> dic);
+    std::string infix_to_prefix(std::string infix_exp);
 }
 
-std::vector<int> int_to_bvector(int n, unsigned int fix_length = 0);
-
-int bvector_to_int(const std::vector<int> &b_vector);
-
-std::vector<std::string> split(const std::string &str, char terminal = ' ');
