@@ -13,7 +13,9 @@ RUN apt-get install -y \
     curl \
     cmake \
     ninja-build \
-    git
+    git \
+    autoconf \
+    automake
 
 # toolkit related libraries
 RUN apt-get install -y \
@@ -80,6 +82,18 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
     conda install -y mamba -n base -c conda-forge && \
     # Clean up
     conda clean -ya
+
+
+# 安装 Kissat SAT 求解器
+RUN git clone https://github.com/arminbiere/kissat.git && \
+    cd kissat && \
+    ./configure && \
+    make -j$(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf kissat
+
+RUN kissat --version
 
 WORKDIR /workspace
 

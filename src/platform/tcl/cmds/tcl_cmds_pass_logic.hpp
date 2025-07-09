@@ -1502,20 +1502,20 @@ public:
 
         // 使用setOptions统一设置选项
         std::vector<lfCmdOption> options = {
-            { "-test_list", "Path to test circuit list file", "string", "" },
-            { "-result_log", "Path to result log file", "string", "" },
-            { "-agent_type", "Type of agent (PPO/greedy/random/anneal/abc_resyn)", "string", "PPO" },
-            { "-model", "Path to PPO model file (if agent_type=PPO)", "string", "" },
-            { "-fixed_mode", "Whether to use fixed iteration mode (0/1)", "int", "0" },
-            { "-result_dir", "Directory to save results", "string", "" },
-            { "-test_dir", "Directory containing test circuits", "string", "" },
-            { "-seq_length", "Maximum iterations per circuit", "int", "32" },
-            { "-converge_length", "Convergence threshold", "int", "32" },
-            { "-initial_t", "Initial temperature for annealing", "double", "100.0" },
-            { "-terminate_t", "Termination temperature for annealing", "double", "0.01" },
-            { "-cool_ratio", "Cooling ratio for annealing", "double", "0.2" },
-            { "-trace_dir", "Directory for trace files", "string", "" },
-            { "-trace_file", "Path to trace file", "string", "" }
+            { "-test_list", "", "string", "Path to test circuit list file" },
+            { "-result_log", "", "string", "Path to result log file" },
+            { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
+            { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
+            { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
+            { "-result_dir", "", "string", "Directory to save results" },
+            { "-test_dir", "", "string", "Directory containing test circuits" },
+            { "-seq_length", "", "int", "Maximum iterations per circuit" },
+            { "-converge_length", "", "int", "Convergence threshold" },
+            { "-initial_t", "", "double", "Initial temperature for annealing" },
+            { "-terminate_t", "", "double", "Termination temperature for annealing" },
+            { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
+            { "-trace_dir", "", "string", "Directory for trace files" },
+            { "-trace_file", "", "string", "Path to trace file" }
         };
         setOptions(this, options);
     }
@@ -1772,20 +1772,20 @@ public:
 
         // 使用setOptions统一设置选项
         std::vector<lfCmdOption> options = {
-            { "-test_list", "Path to test circuit list file", "string", "" },
-            { "-result_log", "Path to result log file", "string", "" },
-            { "-agent_type", "Type of agent (PPO/greedy/random/anneal/abc_resyn)", "string", "PPO" },
-            { "-model", "Path to PPO model file (if agent_type=PPO)", "string", "" },
-            { "-fixed_mode", "Whether to use fixed iteration mode (0/1)", "int", "0" },
-            { "-result_dir", "Directory to save results", "string", "" },
-            { "-test_dir", "Directory containing test circuits", "string", "" },
-            { "-seq_length", "Maximum iterations per circuit", "int", "32" },
-            { "-converge_length", "Convergence threshold", "int", "32" },
-            { "-initial_t", "Initial temperature for annealing", "double", "100.0" },
-            { "-terminate_t", "Termination temperature for annealing", "double", "0.01" },
-            { "-cool_ratio", "Cooling ratio for annealing", "double", "0.2" },
-            { "-trace_dir", "Directory for trace files", "string", "" },
-            { "-trace_file", "Path to trace file", "string", "" }
+            { "-test_list", "", "string", "Path to test circuit list file" },
+            { "-result_log", "", "string", "Path to result log file" },
+            { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
+            { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
+            { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
+            { "-result_dir", "", "string", "Directory to save results" },
+            { "-test_dir", "", "string", "Directory containing test circuits" },
+            { "-seq_length", "", "int", "Maximum iterations per circuit" },
+            { "-converge_length", "", "int", "Convergence threshold" },
+            { "-initial_t", "", "double", "Initial temperature for annealing" },
+            { "-terminate_t", "", "double", "Termination temperature for annealing" },
+            { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
+            { "-trace_dir", "", "string", "Directory for trace files" },
+            { "-trace_file", "", "string", "Path to trace file" }
         };
         setOptions(this, options);
     }
@@ -2049,12 +2049,12 @@ public:
 
     // 设置命令选项
     std::vector<lfCmdOption> options = {
-        { "-functions", "List of boolean functions (hex strings)", "string", "" },
-        { "-r", "Number of steps (r value)", "int", "1" },
-        { "-sat_output", "Path to save SAT CNF encoding", "string", "ditt_output.cnf" },
-        { "-circuit_output", "Path to save decoded circuit", "string", "ditt_circuit.blif" },
-        { "-solver", "SAT solver to use (kissat/cadical)", "string", "kissat" }
-    };
+    { "-functions", "", "string", "List of boolean functions (hex strings)" },
+    { "-r", "", "int", "Number of steps (r value)" },
+    { "-sat_output", "", "string", "Path to save SAT CNF encoding" },
+    { "-circuit_output", "", "string", "Path to save decoded circuit" },
+    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" }
+};
     setOptions(this, options);
   }
 
@@ -2167,12 +2167,12 @@ public:
 
     // 设置命令选项（与 MSV 类参数对应）
     std::vector<lfCmdOption> options = {
-        { "-functions", "List of boolean functions (hex strings, comma-separated)", "string", "" },
-        { "-r", "Number of synthesis steps (r value)", "int", "1" },
-        { "-sat_output", "Path to save SAT CNF encoding (.cnf)", "string", "msv_output.cnf" },
-        { "-circuit_output", "Path to save decoded circuit (.blif)", "string", "msv_circuit.blif" },
-        { "-solver", "SAT solver to use (kissat/cadical)", "string", "kissat" }
-    };
+    { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
+    { "-r", "", "int", "Number of synthesis steps (r value)" },
+    { "-sat_output", "", "string", "Path to save SAT CNF encoding (.cnf)" },
+    { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
+    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" }
+};
     setOptions(this, options);
   }
 
@@ -2289,12 +2289,12 @@ public:
 
     // 设置命令选项（与 SSV 类参数对应）
     std::vector<lfCmdOption> options = {
-        { "-functions", "List of boolean functions (hex strings, comma-separated)", "string", "" },
-        { "-r", "Number of synthesis steps (r value)", "int", "1" },
-        { "-sat_output", "Path to save SAT CNF encoding (.cnf)", "string", "ssv_output.cnf" },
-        { "-circuit_output", "Path to save decoded circuit (.blif)", "string", "ssv_circuit.blif" },
-        { "-solver", "SAT solver to use (kissat/cadical)", "string", "kissat" }
-    };
+    { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
+    { "-r", "", "int", "Number of synthesis steps (r value)" },
+    { "-sat_output", "", "string", "Path to save SAT CNF encoding (.cnf)" },
+    { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
+    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" }
+};
     setOptions(this, options);
   }
 
@@ -2410,18 +2410,18 @@ public:
 
     // 命令选项
     std::vector<lfCmdOption> options = {
-        { "-functions", "List of boolean functions (hex strings, comma-separated)", "string", "" },
-        { "-r", "Number of synthesis steps (r value)", "int", "1" },
-        { "-sub_r", "Number of sub-synthesis steps", "int", "1" },
-        { "-sub_n", "Number of inputs for sub-function", "int", "-1" },  // 默认自动计算
-        { "-similar_method", "Method to generate similar function (trunc/mute/mute_last/manual/random)", "string", "mute_last" },
-        { "-similar_option", "Option string for similar function generation", "string", "" },
-        { "-sat_output", "Path to save incremental SAT CNF encoding (.cnf)", "string", "ssv_incr_output.cnf" },
-        { "-circuit_output", "Path to save decoded circuit (.blif)", "string", "ssv_incr_circuit.blif" },
-        { "-solver", "SAT solver to use (kissat/cadical)", "string", "kissat" },
-        { "-num_decomposable", "Number of decomposable variables", "int", "0" },
-        { "-random_tt", "Random truth table for synthesis", "string", "" }
-    };
+    { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
+    { "-r", "", "int", "Number of synthesis steps (r value)" },
+    { "-sub_r", "", "int", "Number of sub-synthesis steps" },
+    { "-sub_n", "", "int", "Number of inputs for sub-function (默认自动计算)" },
+    { "-similar_method", "", "string", "Method to generate similar function (trunc/mute/mute_last/manual/random)" },
+    { "-similar_option", "", "string", "Option string for similar function generation" },
+    { "-sat_output", "", "string", "Path to save incremental SAT CNF encoding (.cnf)" },
+    { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
+    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" },
+    { "-num_decomposable", "", "int", "Number of decomposable variables" },
+    { "-random_tt", "", "string", "Random truth table for synthesis" }
+};
     setOptions(this, options);
   }
 
@@ -2551,12 +2551,12 @@ public:
 
     // 定义命令选项（与 generate_netlist_library_power 参数对应）
     std::vector<lfCmdOption> options = {
-      { "-output",       "string", "Output file path to save the generated netlist library", ""},
-      { "-num_inputs",   "int",    "Number of input variables for the boolean functions", ""},
-      { "-num_classes",  "int",    "Number of classes for input probability discretization", "" },
-      { "-average",      "bool",   "Whether to use average strategy (default: true)", "true"},
-      { "-start_index",  "int",    "Start index for processing functions (default: 0)", "0"},
-      { "-partition_size","int",   "Maximum number of functions to process (default: INT16_MAX)", std::to_string(INT16_MAX)}
+      { "-output",    "",   "string", "Output file path to save the generated netlist library"},
+      { "-num_inputs",  "", "int",    "Number of input variables for the boolean functions"},
+      { "-num_classes",  "", "int",    "Number of classes for input probability discretization"},
+      { "-average",      "", "bool",   "Whether to use average strategy (default: true)"},
+      { "-start_index",  "", "int",    "Start index for processing functions (default: 0)"},
+      { "-partition_size","", "int",   "Maximum number of functions to process (default: INT16_MAX)"}
     };
     setOptions(this, options);
   }
@@ -2650,12 +2650,11 @@ public:
 
     // 定义命令选项
     std::vector<lfCmdOption> options = {
-      { "-input",      "string", "Input BLIF file path (without .blif extension)", ""},
-      { "-lib",        "string", "Optimal library file path", ""},
-      { "-output_dir", "string", "Output directory for rewritten netlist", "" },
-      { "-input_dir",  "string", "Input directory for BLIF files", 
-        "../experiment/power/test_set/" }
-    };
+    { "-input", "", "string", "Input BLIF file path (without .blif extension)" },
+    { "-lib", "", "string", "Optimal library file path" },
+    { "-output_dir", "", "string", "Output directory for rewritten netlist" },
+    { "-input_dir", "", "string", "Input directory for BLIF files" }
+};
     setOptions(this, options);
   }
 
@@ -2754,10 +2753,10 @@ public:
 
     // 命令选项（与技术映射功能对应）
     std::vector<lfCmdOption> options = {
-        { "-input", "Input netlist file (.blif)", "string", "" },
-        { "-output", "Output mapped netlist file (.v for Verilog)", "string", "" },
-        { "-tech_lib", "Technology library file (.lib in Liberty format)", "string", "" }
-    };
+    { "-input", "", "string", "Input netlist file (.blif)" },
+    { "-output", "", "string", "Output mapped netlist file (.v for Verilog)" },
+    { "-tech_lib", "", "string", "Technology library file (.lib in Liberty format)" }
+};
     setOptions(this, options);
   }
 
@@ -2826,9 +2825,9 @@ public:
 
     // 命令选项（与功耗计算功能对应）
     std::vector<lfCmdOption> options = {
-        { "-input", "Input netlist file (.blif)", "string", "" },
-        { "-tech_lib", "Technology library file (.lib in Liberty format)", "string", "" },
-        { "-output", "Output file to save power results (optional, if not set print to console)", "string", "" }
+        { "-input", "", "string", "Input netlist file (.blif)" },
+        { "-tech_lib", "", "string", "Technology library file (.lib in Liberty format)" },
+        { "-output", "", "string", "Output file to save power results (optional, if not set print to console)" }
     };
     setOptions(this, options);
   }

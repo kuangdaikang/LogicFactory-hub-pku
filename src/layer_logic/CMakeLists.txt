@@ -8,10 +8,10 @@ file(GLOB_RECURSE LSPKU_SOURCES
 )
 
 # 打印收集到的文件数量和列表
-message(STATUS "Found ${LSPKU_SOURCES} LSPKU source files:")
-foreach(file ${LSPKU_SOURCES})
-    message(STATUS "  - ${file}")
-endforeach()
+# message(STATUS "Found ${LSPKU_SOURCES} LSPKU source files:")
+# foreach(file ${LSPKU_SOURCES})
+#    message(STATUS "  - ${file}")
+# endforeach()
 
 # 将收集的源文件添加到 lf_logic 库
 target_sources(lf_logic INTERFACE ${LSPKU_SOURCES})
