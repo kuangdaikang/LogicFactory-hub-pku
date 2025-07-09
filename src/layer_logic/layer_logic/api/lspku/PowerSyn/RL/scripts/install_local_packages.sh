@@ -56,4 +56,7 @@ cd ./sources/PowerAwareSynthesis/netlist/abc
 make -j 50
 cd - > /dev/null
 
+
+conda deactivate
+
 echo "=== 本地包安装完成（可编辑模式）==="

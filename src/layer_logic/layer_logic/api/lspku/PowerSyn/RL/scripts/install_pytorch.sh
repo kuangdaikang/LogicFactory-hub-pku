@@ -27,7 +27,6 @@ conda install -c conda-forge -y mpi4py
 # 最终验证
 echo "验证安装结果:"
 python -c "import torch; print(f'PyTorch版本: {torch.__version__}'); print(f'CUDA可用: {torch.cuda.is_available()}')"
-python -c "import torch_geometric; print(f'PyG版本: {torch_geometric.__version__}')"
 python -c "import mpi4py; print(f'mpi4py版本: {mpi4py.__version__}')"
 
 echo "=== 安装完成 ==="

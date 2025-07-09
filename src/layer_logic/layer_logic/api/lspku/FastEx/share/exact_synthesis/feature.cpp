@@ -3,6 +3,7 @@
 // Modified by zephyr on 2023/3/30.
 //
 
+#include <array>
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -12,6 +13,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include "../utility/utility.h"
 #include "exact.h"
 
 using namespace std;

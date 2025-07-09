@@ -1,5 +1,21 @@
 message("lf_logic.")
 add_library(lf_logic INTERFACE)
+
+# 收集 layer_logic/api/lspku 目录下的所有 .cpp 文件
+file(GLOB_RECURSE LSPKU_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/layer_logic/api/lspku/FastEx/share/**/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/layer_logic/api/lspku/PowerSyn/share/**/*.cpp"
+)
+
+# 打印收集到的文件数量和列表
+message(STATUS "Found ${LSPKU_SOURCES} LSPKU source files:")
+foreach(file ${LSPKU_SOURCES})
+    message(STATUS "  - ${file}")
+endforeach()
+
+# 将收集的源文件添加到 lf_logic 库
+target_sources(lf_logic INTERFACE ${LSPKU_SOURCES})
+
 target_link_libraries(lf_logic INTERFACE
     pugixml
     lorina

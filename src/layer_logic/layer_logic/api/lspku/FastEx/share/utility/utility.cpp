@@ -430,7 +430,7 @@ std::vector<bool> hex_to_binary(char hex) {
             return std::vector<bool>{true, true, true, true};
         default:
             std::cout << "Hexadecimal character not recognized: " << hex << "\n";
-            assert(false);
+            return std::vector<bool>{};
     }
 }
 

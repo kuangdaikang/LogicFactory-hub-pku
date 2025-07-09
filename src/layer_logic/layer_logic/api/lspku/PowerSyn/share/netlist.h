@@ -2,9 +2,6 @@
 // Created by zephyr on 2021/11/12.
 //
 
-#ifndef NETLIST_NETLIST_H
-#define NETLIST_NETLIST_H
-
 #include <cstdlib>
 #include <string>
 #include <sstream>
@@ -359,5 +356,3 @@ std::vector<int> int_to_bvector(int n, unsigned int fix_length = 0);
 int bvector_to_int(const std::vector<int> &b_vector);
 
 std::vector<std::string> split(const std::string &str, char terminal = ' ');
-
-#endif //NETLIST_NETLIST_H
