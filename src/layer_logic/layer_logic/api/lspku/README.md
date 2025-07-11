@@ -1,7 +1,37 @@
 # 逻辑综合工具 Tcl 命令文档
 
-### 概述
+## 概述
 本文档详细介绍了10个用于逻辑综合任务的Tcl命令，包括强化学习优化命令生成、精确综合方法、功耗驱动优化和功耗计算等功能。
+
+## 环境配置
+#### 1. 克隆代码库
+git clone https://github.com/Logic-Factory/LogicFactory.git
+
+#### 2. 进入目录并初始化子模块
+cd LogicFactory
+git submodule update --init --recursive
+
+#### 3. 构建 Docker 镜像
+docker build -t logic-factory:latest .
+
+#### 4. 运行容器（关键：添加 --gpus all 启用 GPU 访问, RL算子需要GPU支持）
+docker run -it --gpus all -v ../LogicFactory-hub:/workspace logic-factory:latest
+
+#### 5. 进入容器后，正常构建
+cd /workspace
+mkdir -p build && cd build
+cmake -G Ninja ..
+ninja
+
+#### 进入命令行界面 
+./build/app/logicfactory
+
+
+## 命令使用说明
+
+以下是10个逻辑综合与功耗分析命令的详细使用说明：
+
+注意：前两个RL命令需要先启动 rlgym 这一conda环境 
 
 ---
 
