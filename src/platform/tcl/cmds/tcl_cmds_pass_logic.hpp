@@ -1491,90 +1491,98 @@ public:
   }
 }; // class CmdLfLogicXMGResub
 
-
-//PKU
-class CmdLfLogicRLTestBasic : public TclCmd {
+// PKU
+class CmdLfLogicRLTestBasic : public TclCmd
+{
 public:
-    explicit CmdLfLogicRLTestBasic(const char* cmd_name) : TclCmd(cmd_name) {
-        // 命令描述：明确说明使用basic特征模式
-        this->set_description("RL test command with fixed 'basic' feature mode (obs_dim=14)");
-        this->set_domain("logic");
+  explicit CmdLfLogicRLTestBasic( const char* cmd_name ) : TclCmd( cmd_name )
+  {
+    // 命令描述：明确说明使用basic特征模式
+    this->set_description( "RL test command with fixed 'basic' feature mode (obs_dim=14)" );
+    this->set_domain( "logic" );
 
-        // 使用setOptions统一设置选项
-        std::vector<lfCmdOption> options = {
-            { "-test_list", "", "string", "Path to test circuit list file" },
-            { "-result_log", "", "string", "Path to result log file" },
-            { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
-            { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
-            { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
-            { "-result_dir", "", "string", "Directory to save results" },
-            { "-test_dir", "", "string", "Directory containing test circuits" },
-            { "-seq_length", "", "int", "Maximum iterations per circuit" },
-            { "-converge_length", "", "int", "Convergence threshold" },
-            { "-initial_t", "", "double", "Initial temperature for annealing" },
-            { "-terminate_t", "", "double", "Termination temperature for annealing" },
-            { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
-            { "-trace_dir", "", "string", "Directory for trace files" },
-            { "-trace_file", "", "string", "Path to trace file" }
-        };
-        setOptions(this, options);
+    // 使用setOptions统一设置选项
+    std::vector<lfCmdOption> options = {
+        { "-test_list", "", "string", "Path to test circuit list file" },
+        { "-result_log", "", "string", "Path to result log file" },
+        { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
+        { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
+        { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
+        { "-result_dir", "", "string", "Directory to save results" },
+        { "-test_dir", "", "string", "Directory containing test circuits" },
+        { "-seq_length", "", "int", "Maximum iterations per circuit" },
+        { "-converge_length", "", "int", "Convergence threshold" },
+        { "-initial_t", "", "double", "Initial temperature for annealing" },
+        { "-terminate_t", "", "double", "Termination temperature for annealing" },
+        { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
+        { "-trace_dir", "", "string", "Directory for trace files" },
+        { "-trace_file", "", "string", "Path to trace file" } };
+    setOptions( this, options );
+  }
+
+  ~CmdLfLogicRLTestBasic() override
+  {
+    if ( Py_IsInitialized() )
+    {
+      Py_Finalize();
     }
+  }
 
-    ~CmdLfLogicRLTestBasic() override {
-        if (Py_IsInitialized()) {
-            Py_Finalize();
-        }
-    }
+  unsigned check() override
+  {
+    // 检查必填参数
+    std::vector<std::string> essential = { "-test_list" };
+    unsigned check_result = checkEssentialOptions( this, essential );
+    if ( !check_result )
+      return 0;
+    return 1;
+  }
 
-    unsigned check() override {
-        // 检查必填参数
-        std::vector<std::string> essential = { "-test_list" };
-        unsigned check_result = checkEssentialOptions(this, essential);
-        if (!check_result) return 0;
-        return 1;
-    }
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
 
-    unsigned exec() override {
-        if (!check()) return 0;
+    // 提取命令选项值
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-        // 提取命令选项值
-        std::map<std::string, std::string> strOptionsValue;
-        std::map<std::string, bool> boolOptionsValue;
-        std::map<std::string, int> intOptionsValue;
-        std::map<std::string, double> doubleOptionsValue;
-        std::map<std::string, std::vector<std::string>> strvecOptionsValue;
-        std::map<std::string, std::vector<int>> intvecOptionsValue;
-        std::map<std::string, std::vector<double>> doublevecOptionsValue;
+    std::vector<std::string> strOptions = {
+        "-test_list", "-result_log", "-agent_type", "-model",
+        "-result_dir", "-test_dir", "-trace_dir", "-trace_file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {
+        "-fixed_mode", "-seq_length", "-converge_length" };
+    std::vector<std::string> doubleOptions = {
+        "-initial_t", "-terminate_t", "-cool_ratio" };
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-        std::vector<std::string> strOptions = { 
-            "-test_list", "-result_log", "-agent_type", "-model", 
-            "-result_dir", "-test_dir", "-trace_dir", "-trace_file"
-        };
-        std::vector<std::string> boolOptions = {};
-        std::vector<std::string> intOptions = { 
-            "-fixed_mode", "-seq_length", "-converge_length"
-        };
-        std::vector<std::string> doubleOptions = { 
-            "-initial_t", "-terminate_t", "-cool_ratio"
-        };
-        std::vector<std::string> strvecOptions = {};
-        std::vector<std::string> intvecOptions = {};
-        std::vector<std::string> doublevecOptions = {};
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions,
+                    strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
+                    strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      // 初始化Python
+      Py_Initialize();
+      if ( !Py_IsInitialized() )
+      {
+        std::cerr << "Failed to initialize Python" << std::endl;
+        return 0;
+      }
 
-        extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, 
-                       strvecOptions, intvecOptions, doublevecOptions,
-                       strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, 
-                       strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
-
-        // 初始化Python
-        Py_Initialize();
-        if (!Py_IsInitialized()) {
-            std::cerr << "Failed to initialize Python" << std::endl;
-            return 0;
-        }
-
-        // 构建Python代码（固定feature_mode=basic，obs_dim=14）
-        std::string python_code = R"(
+      // 构建Python代码（固定feature_mode=basic，obs_dim=14）
+      std::string python_code = R"(
 import gym
 from stable_baselines3 import PPO
 import copy
@@ -1715,136 +1723,153 @@ def main(arguments):
 # 传递参数并执行
 args = Namespace(
     test_list=")";
-        python_code += strOptionsValue["-test_list"] + R"(",
+      python_code += strOptionsValue["-test_list"] + R"(",
     result_log=")";
-        python_code += strOptionsValue["-result_log"] + R"(",
+      python_code += strOptionsValue["-result_log"] + R"(",
     agent_type=")";
-        python_code += strOptionsValue["-agent_type"] + R"(",
+      python_code += strOptionsValue["-agent_type"] + R"(",
     model_name=")";
-        python_code += strOptionsValue["-model"] + R"(",
+      python_code += strOptionsValue["-model"] + R"(",
     fixed_mode=")";
-        python_code += std::to_string(intOptionsValue["-fixed_mode"]) + R"(",
+      python_code += std::to_string( intOptionsValue["-fixed_mode"] ) + R"(",
     result_dir=")";
-        python_code += strOptionsValue["-result_dir"] + R"(",
+      python_code += strOptionsValue["-result_dir"] + R"(",
     test_dir=")";
-        python_code += strOptionsValue["-test_dir"] + R"(",
+      python_code += strOptionsValue["-test_dir"] + R"(",
     seq_length=")";
-        python_code += std::to_string(intOptionsValue["-seq_length"]) + R"(",
+      python_code += std::to_string( intOptionsValue["-seq_length"] ) + R"(",
     converge_length=")";
-        python_code += std::to_string(intOptionsValue["-converge_length"]) + R"(",
+      python_code += std::to_string( intOptionsValue["-converge_length"] ) + R"(",
     initial_t=")";
-        python_code += std::to_string(doubleOptionsValue["-initial_t"]) + R"(",
+      python_code += std::to_string( doubleOptionsValue["-initial_t"] ) + R"(",
     terminate_t=")";
-        python_code += std::to_string(doubleOptionsValue["-terminate_t"]) + R"(",
+      python_code += std::to_string( doubleOptionsValue["-terminate_t"] ) + R"(",
     cool_ratio=")";
-        python_code += std::to_string(doubleOptionsValue["-cool_ratio"]) + R"(",
+      python_code += std::to_string( doubleOptionsValue["-cool_ratio"] ) + R"(",
     trace_dir=")";
-        python_code += strOptionsValue["-trace_dir"] + R"(",
+      python_code += strOptionsValue["-trace_dir"] + R"(",
     trace_file=")";
-        python_code += strOptionsValue["-trace_file"] + R"("
+      python_code += strOptionsValue["-trace_file"] + R"("
 )
 
 main(args)
 )";
 
-        // 执行Python代码
-        PyRun_SimpleString(python_code.c_str());
+      // 执行Python代码
+      PyRun_SimpleString( python_code.c_str() );
 
-        // 检查Python执行错误
-        if (PyErr_Occurred()) {
-            PyErr_Print();
-            std::cerr << "Python code execution failed (basic feature mode)" << std::endl;
-            Py_Finalize();
-            return 0;
-        }
-
+      // 检查Python执行错误
+      if ( PyErr_Occurred() )
+      {
+        PyErr_Print();
+        std::cerr << "Python code execution failed (basic feature mode)" << std::endl;
         Py_Finalize();
-        return 1;
+        return 0;
+      }
+
+      Py_Finalize();
+      break;
     }
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
 };
 
-class CmdLfLogicRLTestGlitch : public TclCmd {
+class CmdLfLogicRLTestGlitch : public TclCmd
+{
 public:
-    explicit CmdLfLogicRLTestGlitch(const char* cmd_name) : TclCmd(cmd_name) {
-        // 命令描述：明确说明使用glitch特征模式
-        this->set_description("RL test command with fixed 'glitch' feature mode (obs_dim=89)");
-        this->set_domain("logic");
+  explicit CmdLfLogicRLTestGlitch( const char* cmd_name ) : TclCmd( cmd_name )
+  {
+    // 命令描述：明确说明使用glitch特征模式
+    this->set_description( "RL test command with fixed 'glitch' feature mode (obs_dim=89)" );
+    this->set_domain( "logic" );
 
-        // 使用setOptions统一设置选项
-        std::vector<lfCmdOption> options = {
-            { "-test_list", "", "string", "Path to test circuit list file" },
-            { "-result_log", "", "string", "Path to result log file" },
-            { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
-            { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
-            { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
-            { "-result_dir", "", "string", "Directory to save results" },
-            { "-test_dir", "", "string", "Directory containing test circuits" },
-            { "-seq_length", "", "int", "Maximum iterations per circuit" },
-            { "-converge_length", "", "int", "Convergence threshold" },
-            { "-initial_t", "", "double", "Initial temperature for annealing" },
-            { "-terminate_t", "", "double", "Termination temperature for annealing" },
-            { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
-            { "-trace_dir", "", "string", "Directory for trace files" },
-            { "-trace_file", "", "string", "Path to trace file" }
-        };
-        setOptions(this, options);
+    // 使用setOptions统一设置选项
+    std::vector<lfCmdOption> options = {
+        { "-test_list", "", "string", "Path to test circuit list file" },
+        { "-result_log", "", "string", "Path to result log file" },
+        { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
+        { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
+        { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
+        { "-result_dir", "", "string", "Directory to save results" },
+        { "-test_dir", "", "string", "Directory containing test circuits" },
+        { "-seq_length", "", "int", "Maximum iterations per circuit" },
+        { "-converge_length", "", "int", "Convergence threshold" },
+        { "-initial_t", "", "double", "Initial temperature for annealing" },
+        { "-terminate_t", "", "double", "Termination temperature for annealing" },
+        { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
+        { "-trace_dir", "", "string", "Directory for trace files" },
+        { "-trace_file", "", "string", "Path to trace file" } };
+    setOptions( this, options );
+  }
+
+  ~CmdLfLogicRLTestGlitch() override
+  {
+    if ( Py_IsInitialized() )
+    {
+      Py_Finalize();
     }
+  }
 
-    ~CmdLfLogicRLTestGlitch() override {
-        if (Py_IsInitialized()) {
-            Py_Finalize();
-        }
-    }
+  unsigned check() override
+  {
+    // 检查必填参数
+    std::vector<std::string> essential = { "-test_list" };
+    unsigned check_result = checkEssentialOptions( this, essential );
+    if ( !check_result )
+      return 0;
+    return 1;
+  }
 
-    unsigned check() override {
-        // 检查必填参数
-        std::vector<std::string> essential = { "-test_list" };
-        unsigned check_result = checkEssentialOptions(this, essential);
-        if (!check_result) return 0;
-        return 1;
-    }
+  unsigned exec() override
+  {
+    if ( !check() )
+      return 0;
 
-    unsigned exec() override {
-        if (!check()) return 0;
+    // 提取命令选项值
+    std::map<std::string, std::string> strOptionsValue;
+    std::map<std::string, bool> boolOptionsValue;
+    std::map<std::string, int> intOptionsValue;
+    std::map<std::string, double> doubleOptionsValue;
+    std::map<std::string, std::vector<std::string>> strvecOptionsValue;
+    std::map<std::string, std::vector<int>> intvecOptionsValue;
+    std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-        // 提取命令选项值
-        std::map<std::string, std::string> strOptionsValue;
-        std::map<std::string, bool> boolOptionsValue;
-        std::map<std::string, int> intOptionsValue;
-        std::map<std::string, double> doubleOptionsValue;
-        std::map<std::string, std::vector<std::string>> strvecOptionsValue;
-        std::map<std::string, std::vector<int>> intvecOptionsValue;
-        std::map<std::string, std::vector<double>> doublevecOptionsValue;
+    std::vector<std::string> strOptions = {
+        "-test_list", "-result_log", "-agent_type", "-model",
+        "-result_dir", "-test_dir", "-trace_dir", "-trace_file" };
+    std::vector<std::string> boolOptions = {};
+    std::vector<std::string> intOptions = {
+        "-fixed_mode", "-seq_length", "-converge_length" };
+    std::vector<std::string> doubleOptions = {
+        "-initial_t", "-terminate_t", "-cool_ratio" };
+    std::vector<std::string> strvecOptions = {};
+    std::vector<std::string> intvecOptions = {};
+    std::vector<std::string> doublevecOptions = {};
 
-        std::vector<std::string> strOptions = { 
-            "-test_list", "-result_log", "-agent_type", "-model", 
-            "-result_dir", "-test_dir", "-trace_dir", "-trace_file"
-        };
-        std::vector<std::string> boolOptions = {};
-        std::vector<std::string> intOptions = { 
-            "-fixed_mode", "-seq_length", "-converge_length"
-        };
-        std::vector<std::string> doubleOptions = { 
-            "-initial_t", "-terminate_t", "-cool_ratio"
-        };
-        std::vector<std::string> strvecOptions = {};
-        std::vector<std::string> intvecOptions = {};
-        std::vector<std::string> doublevecOptions = {};
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions,
+                    strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
+                    strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-        extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, 
-                       strvecOptions, intvecOptions, doublevecOptions,
-                       strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, 
-                       strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      // 初始化Python
+      Py_Initialize();
+      if ( !Py_IsInitialized() )
+      {
+        std::cerr << "Failed to initialize Python" << std::endl;
+        return 0;
+      }
 
-        // 初始化Python
-        Py_Initialize();
-        if (!Py_IsInitialized()) {
-            std::cerr << "Failed to initialize Python" << std::endl;
-            return 0;
-        }
-
-        // 构建Python代码（固定feature_mode=glitch，obs_dim=89）
-        std::string python_code = R"(
+      // 构建Python代码（固定feature_mode=glitch，obs_dim=89）
+      std::string python_code = R"(
 import gym
 from stable_baselines3 import PPO
 import copy
@@ -1985,77 +2010,81 @@ def main(arguments):
 # 传递参数并执行
 args = Namespace(
     test_list=")";
-        python_code += strOptionsValue["-test_list"] + R"(",
+      python_code += strOptionsValue["-test_list"] + R"(",
     result_log=")";
-        python_code += strOptionsValue["-result_log"] + R"(",
+      python_code += strOptionsValue["-result_log"] + R"(",
     agent_type=")";
-        python_code += strOptionsValue["-agent_type"] + R"(",
+      python_code += strOptionsValue["-agent_type"] + R"(",
     model_name=")";
-        python_code += strOptionsValue["-model"] + R"(",
+      python_code += strOptionsValue["-model"] + R"(",
     fixed_mode=")";
-        python_code += std::to_string(intOptionsValue["-fixed_mode"]) + R"(",
+      python_code += std::to_string( intOptionsValue["-fixed_mode"] ) + R"(",
     result_dir=")";
-        python_code += strOptionsValue["-result_dir"] + R"(",
+      python_code += strOptionsValue["-result_dir"] + R"(",
     test_dir=")";
-        python_code += strOptionsValue["-test_dir"] + R"(",
+      python_code += strOptionsValue["-test_dir"] + R"(",
     seq_length=")";
-        python_code += std::to_string(intOptionsValue["-seq_length"]) + R"(",
+      python_code += std::to_string( intOptionsValue["-seq_length"] ) + R"(",
     converge_length=")";
-        python_code += std::to_string(intOptionsValue["-converge_length"]) + R"(",
+      python_code += std::to_string( intOptionsValue["-converge_length"] ) + R"(",
     initial_t=")";
-        python_code += std::to_string(doubleOptionsValue["-initial_t"]) + R"(",
+      python_code += std::to_string( doubleOptionsValue["-initial_t"] ) + R"(",
     terminate_t=")";
-        python_code += std::to_string(doubleOptionsValue["-terminate_t"]) + R"(",
+      python_code += std::to_string( doubleOptionsValue["-terminate_t"] ) + R"(",
     cool_ratio=")";
-        python_code += std::to_string(doubleOptionsValue["-cool_ratio"]) + R"(",
+      python_code += std::to_string( doubleOptionsValue["-cool_ratio"] ) + R"(",
     trace_dir=")";
-        python_code += strOptionsValue["-trace_dir"] + R"(",
+      python_code += strOptionsValue["-trace_dir"] + R"(",
     trace_file=")";
-        python_code += strOptionsValue["-trace_file"] + R"("
+      python_code += strOptionsValue["-trace_file"] + R"("
 )
 
 main(args)
 )";
 
-        // 执行Python代码
-        PyRun_SimpleString(python_code.c_str());
+      // 执行Python代码
+      PyRun_SimpleString( python_code.c_str() );
 
-        // 检查Python执行错误
-        if (PyErr_Occurred()) {
-            PyErr_Print();
-            std::cerr << "Python code execution failed (glitch feature mode)" << std::endl;
-            Py_Finalize();
-            return 0;
-        }
-
+      // 检查Python执行错误
+      if ( PyErr_Occurred() )
+      {
+        PyErr_Print();
+        std::cerr << "Python code execution failed (glitch feature mode)" << std::endl;
         Py_Finalize();
-        return 1;
+        return 0;
+      }
+
+      Py_Finalize();
+      break;
     }
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
+  }
 };
-
-
 
 class CmdLfLogicDITT : public TclCmd
 {
 public:
-  explicit CmdLfLogicDITT(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicDITT( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Perform exact logic synthesis using DITT (Dynamic Integer Temporal Transformation) method";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 设置命令选项
     std::vector<lfCmdOption> options = {
-    { "-functions", "", "string", "List of boolean functions (hex strings)" },
-    { "-r", "", "int", "Number of steps (r value)" },
-    { "-sat_output", "", "string", "Path to save SAT CNF encoding" },
-    { "-circuit_output", "", "string", "Path to save decoded circuit" },
-    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" }
-};
-    setOptions(this, options);
+        { "-functions", "", "string", "List of boolean functions (hex strings)" },
+        { "-r", "", "int", "Number of steps (r value)" },
+        { "-sat_output", "", "string", "Path to save SAT CNF encoding" },
+        { "-circuit_output", "", "string", "Path to save decoded circuit" },
+        { "-solver", "", "string", "SAT solver to use (kissat/cadical)" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicDITT() override = default;
@@ -2063,12 +2092,12 @@ public:
   unsigned check() override
   {
     std::vector<std::string> essential = { "-functions" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
 
     // 提取命令选项值
@@ -2088,92 +2117,103 @@ public:
     std::vector<std::string> intvecOptions = {};
     std::vector<std::string> doublevecOptions = {};
 
-    extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
-                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    // 分割函数列表字符串
-    std::vector<exact::Boolean> func_strs = splitString(strOptionsValue["-functions"], ',');
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    // 执行DITT逻辑综合
-    try {
-        // 创建DITT对象
-        exact::Technology tech;
-        exact::DITT ditt(func_strs);
-        ditt.r = intOptionsValue["-r"];
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
 
-        // 编码为SAT问题
-        exact::Encoding encoding = ditt.encode(true);
+      // 分割函数列表字符串
+      std::vector<exact::Boolean> func_strs = splitString( strOptionsValue["-functions"], ',' );
+      // 创建DITT对象
+      exact::Technology tech;
+      exact::DITT ditt( func_strs );
+      ditt.r = intOptionsValue["-r"];
 
-        // 保存SAT编码
-        if (!strOptionsValue["-sat_output"].empty()) {
-            std::ofstream sat_file(strOptionsValue["-sat_output"]);
-            if (sat_file.is_open()) {
-                encoding.write_dimacs(sat_file);
-                sat_file.close();
-                std::cout << "SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
-            } else {
-                std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
-                return 0;
-            }
+      // 编码为SAT问题
+      exact::Encoding encoding = ditt.encode( true );
+
+      // 保存SAT编码
+      if ( !strOptionsValue["-sat_output"].empty() )
+      {
+        std::ofstream sat_file( strOptionsValue["-sat_output"] );
+        if ( sat_file.is_open() )
+        {
+          encoding.write_dimacs( sat_file );
+          sat_file.close();
+          std::cout << "SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
         }
-
-        // 调用SAT求解器
-        std::cout << "Running " << strOptionsValue["-solver"] << " for synthesis..." << std::endl;
-        auto [success, solution] = exact::synthesis(&ditt, strOptionsValue["-solver"].c_str(), std::cout);
-        if (!success) {
-            std::cerr << "Synthesis failed (no solution found)" << std::endl;
-            return 0;
+        else
+        {
+          std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
+          return 0;
         }
+      }
 
-        // 解码并保存电路
-        if (!strOptionsValue["-circuit_output"].empty()) {
-            ditt.decode(solution, strOptionsValue["-circuit_output"]);
-            std::cout << "Decoded circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
-        }
-
-        return 1;
-    } catch (const std::exception& e) {
-        std::cerr << "Exception during synthesis: " << e.what() << std::endl;
+      // 调用SAT求解器
+      std::cout << "Running " << strOptionsValue["-solver"] << " for synthesis..." << std::endl;
+      auto [success, solution] = exact::synthesis( &ditt, strOptionsValue["-solver"].c_str(), std::cout );
+      if ( !success )
+      {
+        std::cerr << "Synthesis failed (no solution found)" << std::endl;
         return 0;
+      }
+
+      // 解码并保存电路
+      if ( !strOptionsValue["-circuit_output"].empty() )
+      {
+        ditt.decode( solution, strOptionsValue["-circuit_output"] );
+        std::cout << "Decoded circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
+      }
+      break;
     }
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
   }
 
 private:
-    // 辅助函数：将逗号分隔的字符串分割为向量
-    std::vector<exact::Boolean> splitString(const std::string& str, char delimiter) {
-        std::vector<exact::Boolean> tokens;
-        std::string token;
-        std::istringstream tokenStream(str);
-        while (std::getline(tokenStream, token, delimiter)) {
-            if (!token.empty())  // 忽略空字符串（处理连续逗号的情况）
-                tokens.push_back(exact::Boolean(token));
-        }
-        return tokens;
+  // 辅助函数：将逗号分隔的字符串分割为向量
+  std::vector<exact::Boolean> splitString( const std::string& str, char delimiter )
+  {
+    std::vector<exact::Boolean> tokens;
+    std::string token;
+    std::istringstream tokenStream( str );
+    while ( std::getline( tokenStream, token, delimiter ) )
+    {
+      if ( !token.empty() ) // 忽略空字符串（处理连续逗号的情况）
+        tokens.push_back( exact::Boolean( token ) );
     }
+    return tokens;
+  }
 };
-
 
 class CmdLfLogicMSV : public TclCmd
 {
 public:
-  explicit CmdLfLogicMSV(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicMSV( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Perform exact logic synthesis using MSV (Multi-Stage Variable) method";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 设置命令选项（与 MSV 类参数对应）
     std::vector<lfCmdOption> options = {
-    { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
-    { "-r", "", "int", "Number of synthesis steps (r value)" },
-    { "-sat_output", "", "string", "Path to save SAT CNF encoding (.cnf)" },
-    { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
-    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" }
-};
-    setOptions(this, options);
+        { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
+        { "-r", "", "int", "Number of synthesis steps (r value)" },
+        { "-sat_output", "", "string", "Path to save SAT CNF encoding (.cnf)" },
+        { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
+        { "-solver", "", "string", "SAT solver to use (kissat/cadical)" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicMSV() override = default;
@@ -2182,12 +2222,12 @@ public:
   {
     // 检查必填选项
     std::vector<std::string> essential = { "-functions" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
 
     // 提取选项值到对应映射表
@@ -2209,93 +2249,104 @@ public:
     std::vector<std::string> doublevecOptions = {};
 
     // 提取选项值
-    extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
-                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     // 分割函数列表（逗号分隔的字符串→向量）
-    std::vector<exact::Boolean> func_strs = splitString(strOptionsValue["-functions"], ',');
+    std::vector<exact::Boolean> func_strs = splitString( strOptionsValue["-functions"], ',' );
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    // 执行 MSV 逻辑综合流程
-    try {
-        // 创建 MSV 对象
-        exact::Technology tech;
-        exact::MSV msv(func_strs);
-        msv.r = intOptionsValue["-r"];  // 设置步骤数
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      // 执行 MSV 逻辑综合流程
+      // 创建 MSV 对象
+      exact::Technology tech;
+      exact::MSV msv( func_strs );
+      msv.r = intOptionsValue["-r"]; // 设置步骤数
 
-        // 编码为 SAT 问题
-        exact::Encoding encoding = msv.encode(true);  // 保留变量注释
+      // 编码为 SAT 问题
+      exact::Encoding encoding = msv.encode( true ); // 保留变量注释
 
-        // 保存 SAT 编码文件（.cnf）
-        if (!strOptionsValue["-sat_output"].empty()) {
-            std::ofstream sat_file(strOptionsValue["-sat_output"]);
-            if (sat_file.is_open()) {
-                encoding.write_dimacs(sat_file);
-                sat_file.close();
-                std::cout << "SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
-            } else {
-                std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
-                return 0;
-            }
+      // 保存 SAT 编码文件（.cnf）
+      if ( !strOptionsValue["-sat_output"].empty() )
+      {
+        std::ofstream sat_file( strOptionsValue["-sat_output"] );
+        if ( sat_file.is_open() )
+        {
+          encoding.write_dimacs( sat_file );
+          sat_file.close();
+          std::cout << "SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
         }
-
-        // 调用 SAT 求解器进行综合
-        std::cout << "Running " << strOptionsValue["-solver"] << " for MSV synthesis..." << std::endl;
-        auto [success, solution] = exact::synthesis(&msv, strOptionsValue["-solver"].c_str(), std::cout);
-        if (!success) {
-            std::cerr << "MSV synthesis failed: no solution found" << std::endl;
-            return 0;
+        else
+        {
+          std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
+          return 0;
         }
+      }
 
-        // 解码 SAT 解为逻辑电路（.blif）
-        if (!strOptionsValue["-circuit_output"].empty()) {
-            msv.decode(solution, strOptionsValue["-circuit_output"]);
-            std::cout << "Decoded circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
-        }
-
-        return 1;  // 成功执行
-    } catch (const std::exception& e) {
-        std::cerr << "MSV synthesis error: " << e.what() << std::endl;
+      // 调用 SAT 求解器进行综合
+      std::cout << "Running " << strOptionsValue["-solver"] << " for MSV synthesis..." << std::endl;
+      auto [success, solution] = exact::synthesis( &msv, strOptionsValue["-solver"].c_str(), std::cout );
+      if ( !success )
+      {
+        std::cerr << "MSV synthesis failed: no solution found" << std::endl;
         return 0;
+      }
+
+      // 解码 SAT 解为逻辑电路（.blif）
+      if ( !strOptionsValue["-circuit_output"].empty() )
+      {
+        msv.decode( solution, strOptionsValue["-circuit_output"] );
+        std::cout << "Decoded circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
+      }
+
+      break;
     }
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
   }
 
 private:
-    // 辅助函数：将逗号分隔的字符串分割为向量
-    std::vector<exact::Boolean> splitString(const std::string& str, char delimiter) {
-        std::vector<exact::Boolean> tokens;
-        std::string token;
-        std::istringstream tokenStream(str);
-        while (std::getline(tokenStream, token, delimiter)) {
-            if (!token.empty())  // 忽略空字符串（处理连续逗号的情况）
-                tokens.push_back(exact::Boolean(token));
-        }
-        return tokens;
+  // 辅助函数：将逗号分隔的字符串分割为向量
+  std::vector<exact::Boolean> splitString( const std::string& str, char delimiter )
+  {
+    std::vector<exact::Boolean> tokens;
+    std::string token;
+    std::istringstream tokenStream( str );
+    while ( std::getline( tokenStream, token, delimiter ) )
+    {
+      if ( !token.empty() ) // 忽略空字符串（处理连续逗号的情况）
+        tokens.push_back( exact::Boolean( token ) );
     }
+    return tokens;
+  }
 };
-
-
 
 class CmdLfLogicSSV : public TclCmd
 {
 public:
-  explicit CmdLfLogicSSV(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicSSV( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Perform exact logic synthesis using SSV (Symmetric Stage Variable) method";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 设置命令选项（与 SSV 类参数对应）
     std::vector<lfCmdOption> options = {
-    { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
-    { "-r", "", "int", "Number of synthesis steps (r value)" },
-    { "-sat_output", "", "string", "Path to save SAT CNF encoding (.cnf)" },
-    { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
-    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" }
-};
-    setOptions(this, options);
+        { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
+        { "-r", "", "int", "Number of synthesis steps (r value)" },
+        { "-sat_output", "", "string", "Path to save SAT CNF encoding (.cnf)" },
+        { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
+        { "-solver", "", "string", "SAT solver to use (kissat/cadical)" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicSSV() override = default;
@@ -2304,12 +2355,12 @@ public:
   {
     // 检查必填选项（逻辑函数列表为必需参数）
     std::vector<std::string> essential = { "-functions" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
 
     // 提取选项值到对应映射表
@@ -2331,98 +2382,109 @@ public:
     std::vector<std::string> doublevecOptions = {};
 
     // 提取选项值
-    extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
-                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
     // 分割函数列表（逗号分隔的字符串→向量）
-    std::vector<exact::Boolean> func_strs = splitString(strOptionsValue["-functions"], ',');
+    std::vector<exact::Boolean> func_strs = splitString( strOptionsValue["-functions"], ',' );
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    // 执行 SSV 逻辑综合流程
-    try {
-        // 创建 SSV 对象
-        exact::Technology tech;
-        exact::SSV ssv(func_strs);
-        ssv.r = intOptionsValue["-r"];  // 设置步骤数
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      // 创建 SSV 对象
+      exact::Technology tech;
+      exact::SSV ssv( func_strs );
+      ssv.r = intOptionsValue["-r"]; // 设置步骤数
 
-        // 编码为 SAT 问题
-        exact::Encoding encoding = ssv.encode(true);  // 保留变量注释
+      // 编码为 SAT 问题
+      exact::Encoding encoding = ssv.encode( true ); // 保留变量注释
 
-        // 保存 SAT 编码文件（.cnf）
-        if (!strOptionsValue["-sat_output"].empty()) {
-            std::ofstream sat_file(strOptionsValue["-sat_output"]);
-            if (sat_file.is_open()) {
-                encoding.write_dimacs(sat_file);
-                sat_file.close();
-                std::cout << "SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
-            } else {
-                std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
-                return 0;
-            }
+      // 保存 SAT 编码文件（.cnf）
+      if ( !strOptionsValue["-sat_output"].empty() )
+      {
+        std::ofstream sat_file( strOptionsValue["-sat_output"] );
+        if ( sat_file.is_open() )
+        {
+          encoding.write_dimacs( sat_file );
+          sat_file.close();
+          std::cout << "SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
         }
-
-        // 调用 SAT 求解器进行综合
-        std::cout << "Running " << strOptionsValue["-solver"] << " for SSV synthesis..." << std::endl;
-        auto [success, solution] = synthesis(&ssv, strOptionsValue["-solver"].c_str(), std::cout);
-        if (!success) {
-            std::cerr << "SSV synthesis failed: no solution found" << std::endl;
-            return 0;
+        else
+        {
+          std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
+          return 0;
         }
+      }
 
-        // 解码 SAT 解为逻辑电路（.blif）
-        if (!strOptionsValue["-circuit_output"].empty()) {
-            ssv.decode(solution, strOptionsValue["-circuit_output"]);
-            std::cout << "Decoded circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
-        }
-
-        return 1;  // 成功执行
-    } catch (const std::exception& e) {
-        std::cerr << "SSV synthesis error: " << e.what() << std::endl;
+      // 调用 SAT 求解器进行综合
+      std::cout << "Running " << strOptionsValue["-solver"] << " for SSV synthesis..." << std::endl;
+      auto [success, solution] = synthesis( &ssv, strOptionsValue["-solver"].c_str(), std::cout );
+      if ( !success )
+      {
+        std::cerr << "SSV synthesis failed: no solution found" << std::endl;
         return 0;
+      }
+
+      // 解码 SAT 解为逻辑电路（.blif）
+      if ( !strOptionsValue["-circuit_output"].empty() )
+      {
+        ssv.decode( solution, strOptionsValue["-circuit_output"] );
+        std::cout << "Decoded circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
+      }
+
+      break;
     }
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
   }
 
 private:
-    // 辅助函数：将逗号分隔的字符串分割为向量
-    std::vector<exact::Boolean> splitString(const std::string& str, char delimiter) {
-        std::vector<exact::Boolean> tokens;
-        std::string token;
-        std::istringstream tokenStream(str);
-        while (std::getline(tokenStream, token, delimiter)) {
-            if (!token.empty())  // 忽略空字符串（处理连续逗号的情况）
-                tokens.push_back(exact::Boolean(token));
-        }
-        return tokens;
+  // 辅助函数：将逗号分隔的字符串分割为向量
+  std::vector<exact::Boolean> splitString( const std::string& str, char delimiter )
+  {
+    std::vector<exact::Boolean> tokens;
+    std::string token;
+    std::istringstream tokenStream( str );
+    while ( std::getline( tokenStream, token, delimiter ) )
+    {
+      if ( !token.empty() ) // 忽略空字符串（处理连续逗号的情况）
+        tokens.push_back( exact::Boolean( token ) );
     }
+    return tokens;
+  }
 };
-
 
 class CmdLfLogicSSVIncremental : public TclCmd
 {
 public:
-  explicit CmdLfLogicSSVIncremental(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicSSVIncremental( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Perform incremental exact logic synthesis using SSV_Incremental method";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 命令选项
     std::vector<lfCmdOption> options = {
-    { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
-    { "-r", "", "int", "Number of synthesis steps (r value)" },
-    { "-sub_r", "", "int", "Number of sub-synthesis steps" },
-    { "-sub_n", "", "int", "Number of inputs for sub-function (默认自动计算)" },
-    { "-similar_method", "", "string", "Method to generate similar function (trunc/mute/mute_last/manual/random)" },
-    { "-similar_option", "", "string", "Option string for similar function generation" },
-    { "-sat_output", "", "string", "Path to save incremental SAT CNF encoding (.cnf)" },
-    { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
-    { "-solver", "", "string", "SAT solver to use (kissat/cadical)" },
-    { "-num_decomposable", "", "int", "Number of decomposable variables" },
-    { "-random_tt", "", "string", "Random truth table for synthesis" }
-};
-    setOptions(this, options);
+        { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
+        { "-r", "", "int", "Number of synthesis steps (r value)" },
+        { "-sub_r", "", "int", "Number of sub-synthesis steps" },
+        { "-sub_n", "", "int", "Number of inputs for sub-function (默认自动计算)" },
+        { "-similar_method", "", "string", "Method to generate similar function (trunc/mute/mute_last/manual/random)" },
+        { "-similar_option", "", "string", "Option string for similar function generation" },
+        { "-sat_output", "", "string", "Path to save incremental SAT CNF encoding (.cnf)" },
+        { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
+        { "-solver", "", "string", "SAT solver to use (kissat/cadical)" },
+        { "-num_decomposable", "", "int", "Number of decomposable variables" },
+        { "-random_tt", "", "string", "Random truth table for synthesis" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicSSVIncremental() override = default;
@@ -2431,12 +2493,12 @@ public:
   {
     // 检查必填选项
     std::vector<std::string> essential = { "-functions", "-similar_method" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
 
     // 提取选项值到对应映射表
@@ -2449,8 +2511,8 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     // 定义选项类型分类
-    std::vector<std::string> strOptions = { "-functions", "-similar_method", "-similar_option", 
-                                           "-sat_output", "-circuit_output", "-solver", "-random_tt" };
+    std::vector<std::string> strOptions = { "-functions", "-similar_method", "-similar_option",
+                                            "-sat_output", "-circuit_output", "-solver", "-random_tt" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = { "-r", "-sub_r", "-sub_n", "-num_decomposable" };
     std::vector<std::string> doubleOptions = {};
@@ -2459,106 +2521,117 @@ public:
     std::vector<std::string> doublevecOptions = {};
 
     // 提取选项值
-    extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
-                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-    // 分割函数列表（逗号分隔的字符串→向量）
-    std::vector<std::string> func_strs = splitString(strOptionsValue["-functions"], ',');
-    std::vector<exact::Boolean> funcs;
-    for (const auto& s : func_strs) {
-        funcs.emplace_back(exact::Boolean(s));
-    }
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      // 分割函数列表（逗号分隔的字符串→向量）
+      std::vector<std::string> func_strs = splitString( strOptionsValue["-functions"], ',' );
+      std::vector<exact::Boolean> funcs;
+      for ( const auto& s : func_strs )
+      {
+        funcs.emplace_back( exact::Boolean( s ) );
+      }
 
-    // 执行 SSV 增量式逻辑综合流程
-    try {
-        // 创建 SSV_Incremental 对象
-        exact::SSV_Incremental ssv_incr(funcs, intOptionsValue["-sub_r"], intOptionsValue["-sub_n"]);
-        ssv_incr.r = intOptionsValue["-r"];  // 设置步骤数
+      // 创建 SSV_Incremental 对象
+      exact::SSV_Incremental ssv_incr( funcs, intOptionsValue["-sub_r"], intOptionsValue["-sub_n"] );
+      ssv_incr.r = intOptionsValue["-r"]; // 设置步骤数
 
-        // 设置相似函数（通过指定方法和选项）
-        char* similar_option = const_cast<char*>(strOptionsValue["-similar_option"].c_str());
-        ssv_incr.set_similar_function(
-            strOptionsValue["-similar_method"],
-            similar_option,
-            intOptionsValue["-num_decomposable"],
-            strOptionsValue["-random_tt"],
-            intOptionsValue["-sub_n"]
-        );
+      // 设置相似函数（通过指定方法和选项）
+      char* similar_option = const_cast<char*>( strOptionsValue["-similar_option"].c_str() );
+      ssv_incr.set_similar_function(
+          strOptionsValue["-similar_method"],
+          similar_option,
+          intOptionsValue["-num_decomposable"],
+          strOptionsValue["-random_tt"],
+          intOptionsValue["-sub_n"] );
 
-        // 生成增量式 SAT 编码
-        auto [encoding, sub_vars] = ssv_incr.incremental_encode(true);  // 带变量标记
+      // 生成增量式 SAT 编码
+      auto [encoding, sub_vars] = ssv_incr.incremental_encode( true ); // 带变量标记
 
-        // 保存 SAT 编码文件（.cnf）
-        if (!strOptionsValue["-sat_output"].empty()) {
-            std::ofstream sat_file(strOptionsValue["-sat_output"]);
-            if (sat_file.is_open()) {
-                encoding.write_dimacs(sat_file);
-                sat_file.close();
-                std::cout << "Incremental SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
-            } else {
-                std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
-                return 0;
-            }
+      // 保存 SAT 编码文件（.cnf）
+      if ( !strOptionsValue["-sat_output"].empty() )
+      {
+        std::ofstream sat_file( strOptionsValue["-sat_output"] );
+        if ( sat_file.is_open() )
+        {
+          encoding.write_dimacs( sat_file );
+          sat_file.close();
+          std::cout << "Incremental SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
         }
-
-        // 调用 SAT 求解器进行增量式综合
-        std::cout << "Running " << strOptionsValue["-solver"] << " for incremental SSV synthesis..." << std::endl;
-        auto [success, solution] = incremental_synthesis(&ssv_incr, strOptionsValue["-solver"].c_str(), std::cout);
-        if (!success) {
-            std::cerr << "Incremental SSV synthesis failed: no solution found" << std::endl;
-            return 0;
+        else
+        {
+          std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
+          return 0;
         }
+      }
 
-        // 解码 SAT 解为逻辑电路（.blif）
-        if (!strOptionsValue["-circuit_output"].empty()) {
-            ssv_incr.decode(solution, strOptionsValue["-circuit_output"]);
-            std::cout << "Decoded incremental circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
-        }
-
-        return 1;  // 成功执行
-    } catch (const std::exception& e) {
-        std::cerr << "Incremental SSV synthesis error: " << e.what() << std::endl;
+      // 调用 SAT 求解器进行增量式综合
+      std::cout << "Running " << strOptionsValue["-solver"] << " for incremental SSV synthesis..." << std::endl;
+      auto [success, solution] = incremental_synthesis( &ssv_incr, strOptionsValue["-solver"].c_str(), std::cout );
+      if ( !success )
+      {
+        std::cerr << "Incremental SSV synthesis failed: no solution found" << std::endl;
         return 0;
+      }
+
+      // 解码 SAT 解为逻辑电路（.blif）
+      if ( !strOptionsValue["-circuit_output"].empty() )
+      {
+        ssv_incr.decode( solution, strOptionsValue["-circuit_output"] );
+        std::cout << "Decoded incremental circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
+      }
+
+      break;
     }
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
   }
 
 private:
-    // 辅助函数：将逗号分隔的字符串分割为向量
-    std::vector<std::string> splitString(const std::string& str, char delimiter) {
-        std::vector<std::string> tokens;
-        std::string token;
-        std::istringstream tokenStream(str);
-        while (std::getline(tokenStream, token, delimiter)) {
-            if (!token.empty())  // 忽略空字符串（处理连续逗号的情况）
-                tokens.push_back(token);
-        }
-        return tokens;
+  // 辅助函数：将逗号分隔的字符串分割为向量
+  std::vector<std::string> splitString( const std::string& str, char delimiter )
+  {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream( str );
+    while ( std::getline( tokenStream, token, delimiter ) )
+    {
+      if ( !token.empty() ) // 忽略空字符串（处理连续逗号的情况）
+        tokens.push_back( token );
     }
+    return tokens;
+  }
 };
-
 
 class CmdLfLogicSSVPower : public TclCmd
 {
 public:
-  explicit CmdLfLogicSSVPower(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicSSVPower( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Perform power-driven exact logic synthesis using SSV_Power method";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 定义命令选项（与 generate_netlist_library_power 参数对应）
     std::vector<lfCmdOption> options = {
-      { "-output",    "",   "string", "Output file path to save the generated netlist library"},
-      { "-num_inputs",  "", "int",    "Number of input variables for the boolean functions"},
-      { "-num_classes",  "", "int",    "Number of classes for input probability discretization"},
-      { "-average",      "", "bool",   "Whether to use average strategy (default: true)"},
-      { "-start_index",  "", "int",    "Start index for processing functions (default: 0)"},
-      { "-partition_size","", "int",   "Maximum number of functions to process (default: INT16_MAX)"}
-    };
-    setOptions(this, options);
+        { "-output", "", "string", "Output file path to save the generated netlist library" },
+        { "-num_inputs", "", "int", "Number of input variables for the boolean functions" },
+        { "-num_classes", "", "int", "Number of classes for input probability discretization" },
+        { "-average", "", "bool", "Whether to use average strategy (default: true)" },
+        { "-start_index", "", "int", "Start index for processing functions (default: 0)" },
+        { "-partition_size", "", "int", "Maximum number of functions to process (default: INT16_MAX)" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicSSVPower() override = default;
@@ -2566,14 +2639,13 @@ public:
   unsigned check() override
   {
     std::vector<std::string> essential = { "-output", "-num_inputs", "-num_classes" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
-
 
     // 定义参数映射表
     std::map<std::string, std::string> strOptionsValue;
@@ -2595,67 +2667,60 @@ public:
 
     // 提取参数到映射表
     extractOptions(
-      this,
-      strOptions, boolOptions, intOptions, doubleOptions,
-      strvecOptions, intvecOptions, doublevecOptions,
-      strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
-      strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue
-    );
+        this,
+        strOptions, boolOptions, intOptions, doubleOptions,
+        strvecOptions, intvecOptions, doublevecOptions,
+        strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
+        strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    try {
-      // 从映射表获取参数
-      std::string output_file = strOptionsValue.at("-output");
-      int num_inputs = intOptionsValue.at("-num_inputs");
-      int num_classes = intOptionsValue.at("-num_classes");
-      bool average = boolOptionsValue.at("-average");
-      int start_index = intOptionsValue.at("-start_index");
-      int partition_size = intOptionsValue.at("-partition_size");
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      std::string output_file = strOptionsValue.at( "-output" );
+      int num_inputs = intOptionsValue.at( "-num_inputs" );
+      int num_classes = intOptionsValue.at( "-num_classes" );
+      bool average = boolOptionsValue.at( "-average" );
+      int start_index = intOptionsValue.at( "-start_index" );
+      int partition_size = intOptionsValue.at( "-partition_size" );
 
       // 调用核心函数
       exact::generate_netlist_library_power(
-        output_file,
-        num_inputs,
-        num_classes,
-        average,
-        start_index,
-        partition_size
-      );
-
-    } catch (const std::out_of_range& e) {
-      std::cerr << "Error: Missing required option - " << e.what() << std::endl;
-      return 1;
-    } catch (const std::invalid_argument& e) {
-      std::cerr << "Error: Invalid argument - " << e.what() << std::endl;
-      return 1;
-    } catch (const std::exception& e) {
-      std::cerr << "Error during execution - " << e.what() << std::endl;
-      return 1;
+          output_file,
+          num_inputs,
+          num_classes,
+          average,
+          start_index,
+          partition_size );
+      break;
     }
-
-    return 0;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
   }
 };
-
 
 class CmdLfLogicLutRewrite : public TclCmd
 {
 public:
-  explicit CmdLfLogicLutRewrite(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicLutRewrite( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     std::string description = "Perform LUT rewriting on netlist using optimal library";
-    this->set_description(description);
-    this->set_domain("logic");
+    this->set_description( description );
+    this->set_domain( "logic" );
 
     // 定义命令选项
     std::vector<lfCmdOption> options = {
-    { "-input", "", "string", "Input BLIF file path (without .blif extension)" },
-    { "-lib", "", "string", "Optimal library file path" },
-    { "-output_dir", "", "string", "Output directory for rewritten netlist" },
-    { "-input_dir", "", "string", "Input directory for BLIF files" }
-};
-    setOptions(this, options);
+        { "-input", "", "string", "Input BLIF file path (without .blif extension)" },
+        { "-lib", "", "string", "Optimal library file path" },
+        { "-output_dir", "", "string", "Output directory for rewritten netlist" },
+        { "-input_dir", "", "string", "Input directory for BLIF files" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicLutRewrite() override = default;
@@ -2664,12 +2729,13 @@ public:
   {
     // 检查必选选项
     std::vector<std::string> essential = { "-input", "-lib", "-output_dir" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check()) return 1;
+    if ( !check() )
+      return 1;
 
     // 定义参数映射表
     std::map<std::string, std::string> strOptionsValue;
@@ -2692,19 +2758,22 @@ public:
 
     // 提取参数到映射表
     extractOptions(
-      this,
-      strOptions, boolOptions, intOptions, doubleOptions,
-      strvecOptions, intvecOptions, doublevecOptions,
-      strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
-      strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue
-    );
+        this,
+        strOptions, boolOptions, intOptions, doubleOptions,
+        strvecOptions, intvecOptions, doublevecOptions,
+        strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
+        strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    try {
-      // 获取参数值
-      std::string input_name = strOptionsValue.at("-input");
-      std::string lib_path = strOptionsValue.at("-lib");
-      std::string output_dir = strOptionsValue.at("-output_dir");
-      std::string input_dir = strOptionsValue.at("-input_dir");
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
+
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      std::string input_name = strOptionsValue.at( "-input" );
+      std::string lib_path = strOptionsValue.at( "-lib" );
+      std::string output_dir = strOptionsValue.at( "-output_dir" );
+      std::string input_dir = strOptionsValue.at( "-input_dir" );
 
       // 构建完整路径
       std::string input_path = input_dir + input_name + ".blif";
@@ -2712,52 +2781,45 @@ public:
 
       // 加载网表
       NET::Netlist netlist;
-      NET::read_blif(input_path, netlist);
+      NET::read_blif( input_path, netlist );
       std::cout << "Finish netlist loading: " << input_path << std::endl;
 
       // 执行LUT重写
-      NET::lut_rewrite_power(netlist, lib_path);
+      NET::lut_rewrite_power( netlist, lib_path );
       std::cout << "Power-driven LUT rewriting completed" << std::endl;
 
       // 保存结果
-      NET::write_blif(output_path, netlist);
+      NET::write_blif( output_path, netlist );
       std::cout << "Rewritten netlist saved to: " << output_path << std::endl;
 
-    } catch (const std::out_of_range& e) {
-      std::cerr << "Error: Missing required option - " << e.what() << std::endl;
-      return 1;
-    } catch (const std::runtime_error& e) {
-      std::cerr << "Runtime error: " << e.what() << std::endl;
-      return 1;
-    } catch (const std::exception& e) {
-      std::cerr << "Unexpected error: " << e.what() << std::endl;
-      return 1;
+      break;
     }
-
-    return 0;
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1;
   }
 };
-
 
 class CmdLfLogicTechMapping : public TclCmd
 {
 public:
-  explicit CmdLfLogicTechMapping(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicTechMapping( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Perform technology mapping using cut enumeration and standard cell library";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 命令选项（与技术映射功能对应）
     std::vector<lfCmdOption> options = {
-    { "-input", "", "string", "Input netlist file (.blif)" },
-    { "-output", "", "string", "Output mapped netlist file (.v for Verilog)" },
-    { "-tech_lib", "", "string", "Technology library file (.lib in Liberty format)" }
-};
-    setOptions(this, options);
+        { "-input", "", "string", "Input netlist file (.blif)" },
+        { "-output", "", "string", "Output mapped netlist file (.v for Verilog)" },
+        { "-tech_lib", "", "string", "Technology library file (.lib in Liberty format)" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicTechMapping() override = default;
@@ -2766,12 +2828,12 @@ public:
   {
     // 检查必填选项
     std::vector<std::string> essential = { "-input", "-output", "-tech_lib" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
 
     // 提取选项值到对应映射表
@@ -2784,7 +2846,7 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     // 定义选项类型分类
-    std::vector<std::string> strOptions = { "-input", "-output", "-tech_lib"};
+    std::vector<std::string> strOptions = { "-input", "-output", "-tech_lib" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -2793,43 +2855,47 @@ public:
     std::vector<std::string> doublevecOptions = {};
 
     // 提取选项值
-    extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
-                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    // 执行技术映射流程
-    try {
-        // 执行技术映射核心逻辑
-        PASyn::technology_mapping_api(strOptionsValue["-input"], strOptionsValue["-tech_lib"],strOptionsValue["-output"]);
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-        std::cout << "Technology mapping completed successfully." << std::endl;
-        return 1;  // 成功执行
-    } catch (const std::exception& e) {
-        std::cerr << "Technology mapping error: " << e.what() << std::endl;
-        return 0;
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
+      // 执行技术映射核心逻辑
+      PASyn::technology_mapping_api( strOptionsValue["-input"], strOptionsValue["-tech_lib"], strOptionsValue["-output"] );
+
+      std::cout << "Technology mapping completed successfully." << std::endl;
+      break;
     }
-}
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1; // 成功执行
+  }
 };
-
 
 class CmdLfLogicCalculatePower : public TclCmd
 {
 public:
-  explicit CmdLfLogicCalculatePower(const char* cmd_name)
-      : TclCmd(cmd_name)
+  explicit CmdLfLogicCalculatePower( const char* cmd_name )
+      : TclCmd( cmd_name )
   {
     // 设置命令描述和域
     std::string description = "Calculate power consumption (static/dynamic/internal/wire) of a netlist";
-    this->set_description(description);
+    this->set_description( description );
     std::string domain = "logic";
-    this->set_domain(domain);
+    this->set_domain( domain );
 
     // 命令选项（与功耗计算功能对应）
     std::vector<lfCmdOption> options = {
         { "-input", "", "string", "Input netlist file (.blif)" },
         { "-tech_lib", "", "string", "Technology library file (.lib in Liberty format)" },
-        { "-output", "", "string", "Output file to save power results (optional, if not set print to console)" }
-    };
-    setOptions(this, options);
+        { "-output", "", "string", "Output file to save power results (optional, if not set print to console)" } };
+    setOptions( this, options );
   }
 
   ~CmdLfLogicCalculatePower() override = default;
@@ -2838,12 +2904,12 @@ public:
   {
     // 检查必填选项
     std::vector<std::string> essential = { "-input", "-tech_lib" };
-    return checkEssentialOptions(this, essential);
+    return checkEssentialOptions( this, essential );
   }
 
   unsigned exec() override
   {
-    if (!check())
+    if ( !check() )
       return 0;
 
     // 提取选项值到对应映射表
@@ -2865,55 +2931,59 @@ public:
     std::vector<std::string> doublevecOptions = {};
 
     // 提取选项值
-    extractOptions(this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
-                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue);
+    extractOptions( this, strOptions, boolOptions, intOptions, doubleOptions, strvecOptions, intvecOptions, doublevecOptions,
+                    strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue, strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
 
-    // 执行功耗计算流程
-    try {
+    auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
 
-        std::string input = strOptionsValue["-input"];
-        std::string tech_lib = strOptionsValue["-tech_lib"];
-        std::vector<double> power_results = PASyn::calculate_power_api(input, tech_lib, 0);
+    switch ( anchor_tool_domain )
+    {
+    case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
+    {
 
-        // 格式化输出内容
-        std::stringstream output_ss;
-        output_ss << "Power Consumption Breakdown:" << std::endl;
-        output_ss << "  Static Power:    " << power_results[0] << " W" << std::endl;
-        output_ss << "  Dynamic Power:   " << power_results[1] << " W" << std::endl;
-        output_ss << "  Internal Power:  " << power_results[2] << " W" << std::endl;
-        output_ss << "  Wire Power:      " << power_results[3] << " W" << std::endl;
-        output_ss << "  Total Power:     " << power_results[4] << " W" << std::endl;
+      std::string input = strOptionsValue["-input"];
+      std::string tech_lib = strOptionsValue["-tech_lib"];
+      std::vector<double> power_results = PASyn::calculate_power_api( input, tech_lib, 0 );
 
-        // 输出到文件或控制台
-        if (!strOptionsValue["-output"].empty()) {
-            // 保存到文件
-            std::ofstream output_file(strOptionsValue["-output"]);
-            if (!output_file.is_open()) {
-                std::cerr << "Failed to open output file: " << strOptionsValue["-output"] << std::endl;
-                return 0;
-            }
-            output_file << output_ss.str();
-            output_file.close();
-            std::cout << "Power results saved to: " << strOptionsValue["-output"] << std::endl;
-        } else {
-            // 打印到控制台
-            std::cout << output_ss.str() << std::endl;
+      // 格式化输出内容
+      std::stringstream output_ss;
+      output_ss << "Power Consumption Breakdown:" << std::endl;
+      output_ss << "  Static Power:    " << power_results[0] << " W" << std::endl;
+      output_ss << "  Dynamic Power:   " << power_results[1] << " W" << std::endl;
+      output_ss << "  Internal Power:  " << power_results[2] << " W" << std::endl;
+      output_ss << "  Wire Power:      " << power_results[3] << " W" << std::endl;
+      output_ss << "  Total Power:     " << power_results[4] << " W" << std::endl;
+
+      // 输出到文件或控制台
+      if ( !strOptionsValue["-output"].empty() )
+      {
+        // 保存到文件
+        std::ofstream output_file( strOptionsValue["-output"] );
+        if ( !output_file.is_open() )
+        {
+          std::cerr << "Failed to open output file: " << strOptionsValue["-output"] << std::endl;
+          return 0;
         }
+        output_file << output_ss.str();
+        output_file.close();
+        std::cout << "Power results saved to: " << strOptionsValue["-output"] << std::endl;
+      }
+      else
+      {
+        // 打印到控制台
+        std::cout << output_ss.str() << std::endl;
+      }
 
-        std::cout << "Power calculation completed successfully." << std::endl;
-        return 1;  // 成功执行
-    } catch (const std::exception& e) {
-        std::cerr << "Power calculation error: " << e.what() << std::endl;
-        return 0;
+      std::cout << "Power calculation completed successfully." << std::endl;
+      break;
     }
-}
+    default:
+      std::cerr << "Unsupported anchor domain, please use anchor to set the anchor!" << std::endl;
+      return 0;
+    }
+    return 1; // 成功执行
+  }
 };
-
-
 
 } // namespace tcl
 } // namespace lf
-
-
-
-
