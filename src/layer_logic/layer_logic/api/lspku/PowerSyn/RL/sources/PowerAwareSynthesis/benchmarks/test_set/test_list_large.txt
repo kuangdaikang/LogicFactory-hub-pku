@@ -1,4 +1,0 @@
-div.v
-sqrt.v
-multiplier.v
-voter.v

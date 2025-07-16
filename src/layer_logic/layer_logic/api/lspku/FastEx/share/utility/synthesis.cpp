@@ -16,7 +16,7 @@ exact::synthesis(exact::Encoder *encoder, const std::string &solver, std::ostrea
     while (true) {
         long double exe_time = 0;
         exact::Encoding encoding = encoder->encode(true);
-        std::string cnf = "../../temp/" + std::to_string(encoder->r) + "_" +
+        std::string cnf = "./test_case/share/" + std::to_string(encoder->r) + "_" +
                           std::to_string(getpid()) + ".cnf";
         std::ofstream fout(cnf);
         encoding.write_dimacs(fout);
@@ -55,7 +55,7 @@ std::pair<bool, std::vector<int>> exact::power_synthesis(exact::SSV_Power* encod
     //while (true) {
     long double exe_time = 0;
     exact::Encoding encoding = encoder->encode(true, input_probability, true);
-    std::string smt = "../../temp/" + std::to_string(encoder->r) + "_" +
+    std::string smt = "./test_case/share/" + std::to_string(encoder->r) + "_" +
                       std::to_string(getpid()) + ".smt2";
     //std::ofstream fout(smt);
     //encoding.write_smt2(fout, true);
@@ -73,7 +73,7 @@ std::pair<bool, std::vector<int>> exact::power_synthesis(exact::SSV_Power* encod
     //for(encoder->target_switching_probability = 1.0/encoder->num_classes; encoder->target_switching_probability < 1.0;encoder->target_switching_probability += 1.0/encoder->num_classes) {
     for(encoder->target_switching_probability = 1.0; encoder->target_switching_probability > 0.0; encoder->target_switching_probability -= 1.0/encoder->num_classes) {
         exact::Encoding _encoding = encoder->encode(true, input_probability, true);
-        std::string _smt = "../../temp/" + std::to_string(encoder->r) + "_" +
+        std::string _smt = "./test_case/share/" + std::to_string(encoder->r) + "_" +
                            std::to_string(getpid()) + ".smt2";
         std::ofstream _fout(_smt);
         _encoding.write_smt2(_fout, true);
@@ -158,7 +158,7 @@ std::pair<bool, std::vector<int>> exact::incremental_synthesis(exact::SSV_Increm
             increment_direct = true;
             added_r++;
         }
-        std::string cnf = "../../temp/" + std::to_string(round_count) + "_" +
+        std::string cnf = "./test_case/share/" + std::to_string(round_count) + "_" +
                           std::to_string(getpid()) + ".cnf";
         std::ofstream fout(cnf);
         encoding.write_dimacs(fout);

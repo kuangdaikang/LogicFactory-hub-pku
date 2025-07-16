@@ -4,6 +4,7 @@
 #include "netlist.h"
 #include "../utility/utility.h"
 
+
 std::string extract_truth_table(const NET::Function &function) {
     std::vector<bool> truth_table_vector;
     if (function.function[0].second) {
@@ -84,8 +85,8 @@ void initialize_signal_probability(NET::Netlist &netlist, std::vector<double> in
 void substitute_node(std::map<std::string, bool> &name_count,
                      std::map<std::pair<std::string, std::string>, NET::Netlist *> &optimal_library,
                      NET::Netlist &netlist, NET::Node *original_node, const std::string &truth_table) {
-    std::string label = "None";
-
+    std::string label = "5+5+5+5";
+    std::cout<<truth_table<<"\n";
     if (optimal_library[std::make_pair(truth_table, label)] == nullptr) {
         std::cout << truth_table << "?\n";
         return;
@@ -140,16 +141,19 @@ void substitute_node(std::map<std::string, bool> &name_count,
                      std::map<std::pair<std::string, std::string>, NET::Netlist *> &optimal_library,
                      NET::Netlist &netlist, NET::Node *original_node, const std::string &truth_table,
                      int num_stratifications) {
-    std::string label = std::to_string(
-            netlist.has_node(original_node->inputs[0])->signal_probability[0] / (1.0 / num_stratifications));
-    for (int i = 1; i < original_node->inputs.size(); i++) {
-        label += "+" + std::to_string(
-                netlist.has_node(original_node->inputs[i])->signal_probability[0] / (1.0 / num_stratifications));
+    // std::string label = std::to_string(
+    //         netlist.has_node(original_node->inputs[0])->signal_probability[0] / (1.0 / num_stratifications));
+    // for (int i = 1; i < original_node->inputs.size(); i++) {
+    //     label += "+" + std::to_string(
+    //             netlist.has_node(original_node->inputs[i])->signal_probability[0] / (1.0 / num_stratifications));
+    // }
+    std::string label = "5+5+5+5";
+    if (optimal_library[std::make_pair(truth_table, label)] == nullptr) {
+        //std::cout << truth_table << "?\n";
+        return;
     }
-    //std::string label = "5+5+5+5";
 
     NET::Netlist *sub_netlist = new NET::Netlist(*optimal_library[std::make_pair(truth_table, label)]);
-
     // rename and add new internal nodes
     for (auto node: sub_netlist->nodes) {
         if (std::find(sub_netlist->inputs.begin(), sub_netlist->inputs.end(), node) == sub_netlist->inputs.end() &&
@@ -245,7 +249,7 @@ void NET::lut_rewrite_power(Netlist &netlist, const std::string &library) {
     read_netlist_library(library, optimal_library);
 
     std::cout << "Finish library loading\n";
-    //initialize_signal_probability(netlist);
+    initialize_signal_probability(netlist);
     std::cout << "Finish signal probability initialization\n";
     std::map<std::string, bool> name_count;
     for (auto &node: netlist.nodes) {
@@ -254,15 +258,12 @@ void NET::lut_rewrite_power(Netlist &netlist, const std::string &library) {
 
     for (int i = 0; i < netlist.nodes.size(); i++) {
         Node *node = netlist.nodes[i];
-        //if(node == nullptr)
-        //    std::cout<<netlist.nodes[i]->name<<"\n";
-        //std::cout<<node->name<<" "<<i<<"\n";
         if (node->functions[0].type == -1 || node->inputs.size() < 4)
             continue;
 
         std::string truth_table = extract_truth_table(node->functions[0]);
-        //if(truth_table[0] > '7')
-        //    negate(truth_table);
+        if(truth_table[0] > '7')
+           negate(truth_table);
         substitute_node(name_count, optimal_library, netlist, node, truth_table, 20);
     }
 }

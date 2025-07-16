@@ -46,7 +46,13 @@
 #include "layer_logic/api/lspku/FastEx/share/power/power.h"
 #include "layer_logic/api/lspku/FastEx/share/utility/utility.h"
 #include "layer_logic/api/lspku/PowerSyn/share/netlist.h"
-#include <Python.h>
+
+
+#include <sstream>
+#include <cstdlib>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 namespace lf
 {
@@ -1504,29 +1510,12 @@ public:
     // 使用setOptions统一设置选项
     std::vector<lfCmdOption> options = {
         { "-test_list", "", "string", "Path to test circuit list file" },
-        { "-result_log", "", "string", "Path to result log file" },
-        { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
-        { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
-        { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
         { "-result_dir", "", "string", "Directory to save results" },
-        { "-test_dir", "", "string", "Directory containing test circuits" },
-        { "-seq_length", "", "int", "Maximum iterations per circuit" },
-        { "-converge_length", "", "int", "Convergence threshold" },
-        { "-initial_t", "", "double", "Initial temperature for annealing" },
-        { "-terminate_t", "", "double", "Termination temperature for annealing" },
-        { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
-        { "-trace_dir", "", "string", "Directory for trace files" },
-        { "-trace_file", "", "string", "Path to trace file" } };
+        { "-test_dir", "", "string", "Directory containing test circuits" }};
     setOptions( this, options );
   }
 
-  ~CmdLfLogicRLTestBasic() override
-  {
-    if ( Py_IsInitialized() )
-    {
-      Py_Finalize();
-    }
-  }
+  ~CmdLfLogicRLTestBasic() override = default;
 
   unsigned check() override
   {
@@ -1552,14 +1541,10 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = {
-        "-test_list", "-result_log", "-agent_type", "-model",
-        "-result_dir", "-test_dir", "-trace_dir", "-trace_file" };
+    std::vector<std::string> strOptions = {"-test_list", "-result_dir", "-test_dir" };
     std::vector<std::string> boolOptions = {};
-    std::vector<std::string> intOptions = {
-        "-fixed_mode", "-seq_length", "-converge_length" };
-    std::vector<std::string> doubleOptions = {
-        "-initial_t", "-terminate_t", "-cool_ratio" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
     std::vector<std::string> strvecOptions = {};
     std::vector<std::string> intvecOptions = {};
     std::vector<std::string> doublevecOptions = {};
@@ -1573,201 +1558,78 @@ public:
     {
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
     {
-      // 初始化Python
-      Py_Initialize();
-      if ( !Py_IsInitialized() )
+      // 获取Python脚本路径（假设位于固定位置）
+      std::string python_script = "./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/rl_test.py";
+
+      // 检查Python脚本是否存在
+      if ( access( python_script.c_str(), F_OK ) == -1 )
       {
-        std::cerr << "Failed to initialize Python" << std::endl;
+        std::cerr << "Python script not found: " << python_script << std::endl;
         return 0;
       }
 
-      // 构建Python代码（固定feature_mode=basic，obs_dim=14）
-      std::string python_code = R"(
-import gym
-from stable_baselines3 import PPO
-import copy
-import argparse
-
-
-class Namespace:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-
-def get_action(agent_type, obs=None, model=None, gym_env=None, temperatures=None, iter_info=None):
-    if agent_type == 'PPO':
-        assert model is not None and obs is not None
-        action, _ = model.predict(obs)
-        return action
-    elif agent_type == 'random':
-        assert gym_env is not None
-        return gym_env.action_space.sample()
-    elif agent_type == 'anneal':
-        assert temperatures is not None and gym_env is not None
-        env = copy.deepcopy(gym_env)
-        action = env.action_space.sample()
-        obs, reward, done, info = env.step(env.action_space.sample())
-        env.stop()
-        temperatures.current_t *= temperatures.cool_ratio
-        if reward > 0 or temperatures.current_t >= temperatures.terminate_t:
-            return action
-        else:
-            return -1
-    elif agent_type == 'greedy':
-        assert gym_env is not None
-        best_reward = float('-inf')
-        best_action = -1
-        for i in range(gym_env.action_space.n):
-            env = copy.deepcopy(gym_env)
-            obs, reward, done, info = env.step(i)
-            if reward > best_reward:
-                best_reward = reward
-                best_action = i
-            env.stop()
-        assert best_action != -1
-        return best_action
-    elif agent_type == 'abc_resyn':
-        assert iter_info is not None
-        a = [0, 1, 2, 0, 2, 0, 0, 1, 3, 0, 1, 2, 0, 4, 2, 0]
-        return a[(iter_info['current_iters'] + iter_info['current_unchanged_iters']) % 16]
-    else:
-        raise NotImplementedError
-
-
-def test_done(fixed_mode, iter_infos):
-    iter_infos['total_iters'] += 1
-    if fixed_mode:
-        iter_infos['current_iters'] += 1
-        if iter_infos['current_iters'] < iter_infos['max_iters']:
-            return False
-        else:
-            return True
-    else:
-        if iter_infos['current_reward'] <= 0:
-            iter_infos['current_unchanged_iters'] += 1
-        else:
-            iter_infos['current_unchanged_iters'] = 0
-            iter_infos['current_iters'] += 1
-        if iter_infos['current_unchanged_iters'] < iter_infos['converge_length']:
-            return False
-        else:
-            return True
-
-
-def main(arguments):
-    # 固定使用basic特征模式，观测维度=14
-    obs_dim = 14
-    feature_mode = "basic"
-    
-    fixed_mode = arguments.fixed_mode
-    result_dir = arguments.result_dir
-    result_log = arguments.result_log
-    model = arguments.model_name
-    test_dir = arguments.test_dir
-    test_list = arguments.test_list
-    seq_length = arguments.seq_length
-    converge_length = arguments.converge_length
-    temperatures = {'current_t': arguments.initial_t, 'terminate_t': arguments.terminate_t,
-                    'cool_ratio': arguments.cool_ratio}
-
-    env = gym.make('gym_genus:genus-v0', 
-                   lib_file="/rshome/daikang.kuang/PowerAwareSynthesis/netlist/gsc145nm.lib",
-                   feature_mode=feature_mode, 
-                   obs_dim=obs_dim)
-    model = PPO.load(model, device='cpu') if arguments.agent_type == 'PPO' else None
-    
-    with open(test_list, 'r') as file:
-        for line in file.readlines():
-            with open(result_log, 'a') as result:
-                env.setup(test_dir + '/' + line)
-                result.write(line + "\n")
-                obs, info = env.reset(return_info=True)
-                info_str = ""
-                for _ in info.values():
-                    info_str += str(_) + " "
-                result.write(info_str)
-                result.write('\n')
-                iter_infos = {'current_iters': 0, 'converge_length': converge_length, 'max_iters': seq_length,
-                              'current_reward': 0, 'current_unchanged_iters': 0, 'total_iters': 0}
-                while True:
-                    action = get_action(arguments.agent_type, obs=obs, model=model, gym_env=env,
-                                        temperatures=temperatures, iter_info=iter_infos)
-                    #print(action)
-                    if action == -1:
-                        continue
-                    obs, reward, done, info = env.step(action, arguments.trace_dir, iter_infos['total_iters'])
-                    if arguments.trace_file is not None:
-                        with open(arguments.trace_file, 'a') as trace:
-                            info_str = ""
-                            for _ in info.values():
-                                info_str += str(_) + " "
-                            trace.write(str(iter_infos['total_iters'])+" "+str(iter_infos['current_iters'])+" "+info_str+"\n")
-                            trace.close()
-                    iter_infos['current_reward'] = reward
-                    if test_done(fixed_mode, iter_infos):
-                        break
-                    print(iter_infos['current_iters'])
-                info_str = ""
-                for _ in info.values():
-                    info_str += str(_) + " "
-                result.write(info_str)
-                result.write('\n')
-                result.write('seq_length: ' + str(iter_infos['current_iters']))
-                result.write('\n')
-                if result_dir != "":
-                    env.write(result_dir + '/' + line)
-                env.stop()
-                result.close()
-        file.close()
-
-# 传递参数并执行
-args = Namespace(
-    test_list=")";
-      python_code += strOptionsValue["-test_list"] + R"(",
-    result_log=")";
-      python_code += strOptionsValue["-result_log"] + R"(",
-    agent_type=")";
-      python_code += strOptionsValue["-agent_type"] + R"(",
-    model_name=")";
-      python_code += strOptionsValue["-model"] + R"(",
-    fixed_mode=")";
-      python_code += std::to_string( intOptionsValue["-fixed_mode"] ) + R"(",
-    result_dir=")";
-      python_code += strOptionsValue["-result_dir"] + R"(",
-    test_dir=")";
-      python_code += strOptionsValue["-test_dir"] + R"(",
-    seq_length=")";
-      python_code += std::to_string( intOptionsValue["-seq_length"] ) + R"(",
-    converge_length=")";
-      python_code += std::to_string( intOptionsValue["-converge_length"] ) + R"(",
-    initial_t=")";
-      python_code += std::to_string( doubleOptionsValue["-initial_t"] ) + R"(",
-    terminate_t=")";
-      python_code += std::to_string( doubleOptionsValue["-terminate_t"] ) + R"(",
-    cool_ratio=")";
-      python_code += std::to_string( doubleOptionsValue["-cool_ratio"] ) + R"(",
-    trace_dir=")";
-      python_code += strOptionsValue["-trace_dir"] + R"(",
-    trace_file=")";
-      python_code += strOptionsValue["-trace_file"] + R"("
-)
-
-main(args)
-)";
-
-      // 执行Python代码
-      PyRun_SimpleString( python_code.c_str() );
-
-      // 检查Python执行错误
-      if ( PyErr_Occurred() )
+      // 创建临时shell脚本
+      char temp_sh_name[] = "./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/rl_test_basic_XXXXXX.sh";
+      int fd = mkstemps( temp_sh_name, 3 ); // 创建临时.sh文件
+      if ( fd == -1 )
       {
-        PyErr_Print();
-        std::cerr << "Python code execution failed (basic feature mode)" << std::endl;
-        Py_Finalize();
+        std::cerr << "Failed to create temporary shell script" << std::endl;
         return 0;
       }
 
-      Py_Finalize();
+      // 构建shell脚本内容
+      std::ostringstream sh_content;
+      sh_content << "#!/bin/bash\n\n";
+
+      // 激活conda环境
+      sh_content << "# Activate conda environment\n";
+      sh_content << "source \"/opt/conda/etc/profile.d/conda.sh\"\n";
+      sh_content << "conda activate rlgym\n\n";
+
+      // 添加Python执行命令及所有参数
+      sh_content << "# Execute Python script with parameters\n";
+      sh_content << "python \"" << python_script << "\" \\\n";
+      sh_content << "  --feature_mode \"" << "basic" << "\" \\\n";
+      sh_content << "  --test_list \"" << strOptionsValue["-test_list"] << "\" \\\n";
+      sh_content << "  --model_name \"" << "./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/model_basic.zip" << "\" \\\n";
+      sh_content << "  --result_dir \"" << strOptionsValue["-result_dir"] << "\" \\\n";
+      sh_content << "  --test_dir \"" << strOptionsValue["-test_dir"] << "\" \\\n";
+
+
+      sh_content << "# Deactivate conda environment\n";
+      sh_content << "conda deactivate\n\n";
+
+
+      sh_content << "# Capture exit status\n";
+      sh_content << "exit_code=$?\n";
+      sh_content << "exit $exit_code\n";
+
+      // 写入shell脚本内容
+      std::string sh_str = sh_content.str();
+      if ( write( fd, sh_str.c_str(), sh_str.size() ) != static_cast<ssize_t>( sh_str.size() ) )
+      {
+        std::cerr << "Failed to write shell script" << std::endl;
+        close( fd );
+        unlink( temp_sh_name );
+        return 0;
+      }
+      close( fd );
+
+      // 设置执行权限
+      chmod( temp_sh_name, S_IRWXU );
+
+      // 执行shell脚本
+      std::string command = temp_sh_name;
+      int status = system( command.c_str() );
+
+      // 清理临时文件
+      unlink( temp_sh_name );
+
+      if ( status != 0 )
+      {
+        std::cerr << "Script execution failed with status: " << status << std::endl;
+        return 0;
+      }
       break;
     }
     default:
@@ -1790,29 +1652,12 @@ public:
     // 使用setOptions统一设置选项
     std::vector<lfCmdOption> options = {
         { "-test_list", "", "string", "Path to test circuit list file" },
-        { "-result_log", "", "string", "Path to result log file" },
-        { "-agent_type", "", "string", "Type of agent (PPO/greedy/random/anneal/abc_resyn)" },
-        { "-model", "", "string", "Path to PPO model file (if agent_type=PPO)" },
-        { "-fixed_mode", "", "int", "Whether to use fixed iteration mode (0/1)" },
         { "-result_dir", "", "string", "Directory to save results" },
-        { "-test_dir", "", "string", "Directory containing test circuits" },
-        { "-seq_length", "", "int", "Maximum iterations per circuit" },
-        { "-converge_length", "", "int", "Convergence threshold" },
-        { "-initial_t", "", "double", "Initial temperature for annealing" },
-        { "-terminate_t", "", "double", "Termination temperature for annealing" },
-        { "-cool_ratio", "", "double", "Cooling ratio for annealing" },
-        { "-trace_dir", "", "string", "Directory for trace files" },
-        { "-trace_file", "", "string", "Path to trace file" } };
+        { "-test_dir", "", "string", "Directory containing test circuits" }};
     setOptions( this, options );
   }
 
-  ~CmdLfLogicRLTestGlitch() override
-  {
-    if ( Py_IsInitialized() )
-    {
-      Py_Finalize();
-    }
-  }
+  ~CmdLfLogicRLTestGlitch() override = default;
 
   unsigned check() override
   {
@@ -1838,14 +1683,10 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = {
-        "-test_list", "-result_log", "-agent_type", "-model",
-        "-result_dir", "-test_dir", "-trace_dir", "-trace_file" };
+    std::vector<std::string> strOptions = { "-test_list" , "-result_dir", "-test_dir" };
     std::vector<std::string> boolOptions = {};
-    std::vector<std::string> intOptions = {
-        "-fixed_mode", "-seq_length", "-converge_length" };
-    std::vector<std::string> doubleOptions = {
-        "-initial_t", "-terminate_t", "-cool_ratio" };
+    std::vector<std::string> intOptions = {};
+    std::vector<std::string> doubleOptions = {};
     std::vector<std::string> strvecOptions = {};
     std::vector<std::string> intvecOptions = {};
     std::vector<std::string> doublevecOptions = {};
@@ -1855,206 +1696,81 @@ public:
                     strOptionsValue, boolOptionsValue, intOptionsValue, doubleOptionsValue,
                     strvecOptionsValue, intvecOptionsValue, doublevecOptionsValue );
     auto anchor_tool_domain = lfAnchorINST->get_anchor_tool_domain();
-
     switch ( anchor_tool_domain )
     {
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
     {
-      // 初始化Python
-      Py_Initialize();
-      if ( !Py_IsInitialized() )
+      // 获取Python脚本路径（假设位于固定位置）
+      std::string python_script = "./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/rl_test.py";
+
+      // 检查Python脚本是否存在
+      if ( access( python_script.c_str(), F_OK ) == -1 )
       {
-        std::cerr << "Failed to initialize Python" << std::endl;
+        std::cerr << "Python script not found: " << python_script << std::endl;
         return 0;
       }
 
-      // 构建Python代码（固定feature_mode=glitch，obs_dim=89）
-      std::string python_code = R"(
-import gym
-from stable_baselines3 import PPO
-import copy
-import argparse
-
-
-class Namespace:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-
-def get_action(agent_type, obs=None, model=None, gym_env=None, temperatures=None, iter_info=None):
-    if agent_type == 'PPO':
-        assert model is not None and obs is not None
-        action, _ = model.predict(obs)
-        return action
-    elif agent_type == 'random':
-        assert gym_env is not None
-        return gym_env.action_space.sample()
-    elif agent_type == 'anneal':
-        assert temperatures is not None and gym_env is not None
-        env = copy.deepcopy(gym_env)
-        action = env.action_space.sample()
-        obs, reward, done, info = env.step(env.action_space.sample())
-        env.stop()
-        temperatures.current_t *= temperatures.cool_ratio
-        if reward > 0 or temperatures.current_t >= temperatures.terminate_t:
-            return action
-        else:
-            return -1
-    elif agent_type == 'greedy':
-        assert gym_env is not None
-        best_reward = float('-inf')
-        best_action = -1
-        for i in range(gym_env.action_space.n):
-            env = copy.deepcopy(gym_env)
-            obs, reward, done, info = env.step(i)
-            if reward > best_reward:
-                best_reward = reward
-                best_action = i
-            env.stop()
-        assert best_action != -1
-        return best_action
-    elif agent_type == 'abc_resyn':
-        assert iter_info is not None
-        a = [0, 1, 2, 0, 2, 0, 0, 1, 3, 0, 1, 2, 0, 4, 2, 0]
-        return a[(iter_info['current_iters'] + iter_info['current_unchanged_iters']) % 16]
-    else:
-        raise NotImplementedError
-
-
-def test_done(fixed_mode, iter_infos):
-    iter_infos['total_iters'] += 1
-    if fixed_mode:
-        iter_infos['current_iters'] += 1
-        if iter_infos['current_iters'] < iter_infos['max_iters']:
-            return False
-        else:
-            return True
-    else:
-        if iter_infos['current_reward'] <= 0:
-            iter_infos['current_unchanged_iters'] += 1
-        else:
-            iter_infos['current_unchanged_iters'] = 0
-            iter_infos['current_iters'] += 1
-        if iter_infos['current_unchanged_iters'] < iter_infos['converge_length']:
-            return False
-        else:
-            return True
-
-
-def main(arguments):
-    # 固定使用glitch特征模式，观测维度=89
-    obs_dim = 89
-    feature_mode = "glitch"
-    
-    fixed_mode = arguments.fixed_mode
-    result_dir = arguments.result_dir
-    result_log = arguments.result_log
-    model = arguments.model_name
-    test_dir = arguments.test_dir
-    test_list = arguments.test_list
-    seq_length = arguments.seq_length
-    converge_length = arguments.converge_length
-    temperatures = {'current_t': arguments.initial_t, 'terminate_t': arguments.terminate_t,
-                    'cool_ratio': arguments.cool_ratio}
-
-    env = gym.make('gym_genus:genus-v0', 
-                   lib_file="/rshome/daikang.kuang/PowerAwareSynthesis/netlist/gsc145nm.lib",
-                   feature_mode=feature_mode, 
-                   obs_dim=obs_dim)
-    model = PPO.load(model, device='cpu') if arguments.agent_type == 'PPO' else None
-    
-    with open(test_list, 'r') as file:
-        for line in file.readlines():
-            with open(result_log, 'a') as result:
-                env.setup(test_dir + '/' + line)
-                result.write(line + "\n")
-                obs, info = env.reset(return_info=True)
-                info_str = ""
-                for _ in info.values():
-                    info_str += str(_) + " "
-                result.write(info_str)
-                result.write('\n')
-                iter_infos = {'current_iters': 0, 'converge_length': converge_length, 'max_iters': seq_length,
-                              'current_reward': 0, 'current_unchanged_iters': 0, 'total_iters': 0}
-                while True:
-                    action = get_action(arguments.agent_type, obs=obs, model=model, gym_env=env,
-                                        temperatures=temperatures, iter_info=iter_infos)
-                    #print(action)
-                    if action == -1:
-                        continue
-                    obs, reward, done, info = env.step(action, arguments.trace_dir, iter_infos['total_iters'])
-                    if arguments.trace_file is not None:
-                        with open(arguments.trace_file, 'a') as trace:
-                            info_str = ""
-                            for _ in info.values():
-                                info_str += str(_) + " "
-                            trace.write(str(iter_infos['total_iters'])+" "+str(iter_infos['current_iters'])+" "+info_str+"\n")
-                            trace.close()
-                    iter_infos['current_reward'] = reward
-                    if test_done(fixed_mode, iter_infos):
-                        break
-                    print(iter_infos['current_iters'])
-                info_str = ""
-                for _ in info.values():
-                    info_str += str(_) + " "
-                result.write(info_str)
-                result.write('\n')
-                result.write('seq_length: ' + str(iter_infos['current_iters']))
-                result.write('\n')
-                if result_dir != "":
-                    env.write(result_dir + '/' + line)
-                env.stop()
-                result.close()
-        file.close()
-
-# 传递参数并执行
-args = Namespace(
-    test_list=")";
-      python_code += strOptionsValue["-test_list"] + R"(",
-    result_log=")";
-      python_code += strOptionsValue["-result_log"] + R"(",
-    agent_type=")";
-      python_code += strOptionsValue["-agent_type"] + R"(",
-    model_name=")";
-      python_code += strOptionsValue["-model"] + R"(",
-    fixed_mode=")";
-      python_code += std::to_string( intOptionsValue["-fixed_mode"] ) + R"(",
-    result_dir=")";
-      python_code += strOptionsValue["-result_dir"] + R"(",
-    test_dir=")";
-      python_code += strOptionsValue["-test_dir"] + R"(",
-    seq_length=")";
-      python_code += std::to_string( intOptionsValue["-seq_length"] ) + R"(",
-    converge_length=")";
-      python_code += std::to_string( intOptionsValue["-converge_length"] ) + R"(",
-    initial_t=")";
-      python_code += std::to_string( doubleOptionsValue["-initial_t"] ) + R"(",
-    terminate_t=")";
-      python_code += std::to_string( doubleOptionsValue["-terminate_t"] ) + R"(",
-    cool_ratio=")";
-      python_code += std::to_string( doubleOptionsValue["-cool_ratio"] ) + R"(",
-    trace_dir=")";
-      python_code += strOptionsValue["-trace_dir"] + R"(",
-    trace_file=")";
-      python_code += strOptionsValue["-trace_file"] + R"("
-)
-
-main(args)
-)";
-
-      // 执行Python代码
-      PyRun_SimpleString( python_code.c_str() );
-
-      // 检查Python执行错误
-      if ( PyErr_Occurred() )
+      // 创建临时shell脚本
+      char temp_sh_name[] = "./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/rl_test_glitch_XXXXXX.sh";
+      int fd = mkstemps( temp_sh_name, 3 ); // 创建临时.sh文件
+      if ( fd == -1 )
       {
-        PyErr_Print();
-        std::cerr << "Python code execution failed (glitch feature mode)" << std::endl;
-        Py_Finalize();
+        std::cerr << "Failed to create temporary shell script" << std::endl;
         return 0;
       }
 
-      Py_Finalize();
+      // 构建shell脚本内容
+      std::ostringstream sh_content;
+      sh_content << "#!/bin/bash\n\n";
+
+      // 激活conda环境
+      sh_content << "# Activate conda environment\n";
+      sh_content << "source \"/opt/conda/etc/profile.d/conda.sh\"\n";
+      sh_content << "conda activate rlgym\n\n";
+
+      // 添加Python执行命令及所有参数
+      sh_content << "# Execute Python script with parameters\n";
+      sh_content << "python \"" << python_script << "\" \\\n";
+      sh_content << "  --feature_mode \"" << "glitch" << "\" \\\n";
+      sh_content << "  --test_list \"" << strOptionsValue["-test_list"] << "\" \\\n";
+      sh_content << "  --model_name \"" << "./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/model_glitch.zip" << "\" \\\n";
+      sh_content << "  --result_dir \"" << strOptionsValue["-result_dir"] << "\" \\\n";
+      sh_content << "  --test_dir \"" << strOptionsValue["-test_dir"] << "\" \\\n";
+
+      sh_content << "# Deactivate conda environment\n";
+      sh_content << "conda deactivate\n\n";
+
+
+      sh_content << "# Capture exit status\n";
+      sh_content << "exit_code=$?\n";
+      sh_content << "exit $exit_code\n";
+
+      // 写入shell脚本内容
+      std::string sh_str = sh_content.str();
+      if ( write( fd, sh_str.c_str(), sh_str.size() ) != static_cast<ssize_t>( sh_str.size() ) )
+      {
+        std::cerr << "Failed to write shell script" << std::endl;
+        close( fd );
+        unlink( temp_sh_name );
+        return 0;
+      }
+      close( fd );
+
+      // 设置执行权限
+      chmod( temp_sh_name, S_IRWXU );
+
+      // 执行shell脚本
+      std::string command = temp_sh_name;
+      int status = system( command.c_str() );
+
+      // 清理临时文件
+      unlink( temp_sh_name );
+
+      if ( status != 0 )
+      {
+        std::cerr << "Script execution failed with status: " << status << std::endl;
+        return 0;
+      }
       break;
     }
     default:
@@ -2473,17 +2189,9 @@ public:
 
     // 命令选项
     std::vector<lfCmdOption> options = {
-        { "-functions", "", "string", "List of boolean functions (hex strings, comma-separated)" },
-        { "-r", "", "int", "Number of synthesis steps (r value)" },
-        { "-sub_r", "", "int", "Number of sub-synthesis steps" },
-        { "-sub_n", "", "int", "Number of inputs for sub-function (默认自动计算)" },
-        { "-similar_method", "", "string", "Method to generate similar function (trunc/mute/mute_last/manual/random)" },
-        { "-similar_option", "", "string", "Option string for similar function generation" },
-        { "-sat_output", "", "string", "Path to save incremental SAT CNF encoding (.cnf)" },
-        { "-circuit_output", "", "string", "Path to save decoded circuit (.blif)" },
-        { "-solver", "", "string", "SAT solver to use (kissat/cadical)" },
-        { "-num_decomposable", "", "int", "Number of decomposable variables" },
-        { "-random_tt", "", "string", "Random truth table for synthesis" } };
+        { "-num_inputs", "", "int", "" },
+        { "-input_file", "", "string", "" },
+        { "-output_file", "", "string", "" } };
     setOptions( this, options );
   }
 
@@ -2492,7 +2200,7 @@ public:
   unsigned check() override
   {
     // 检查必填选项
-    std::vector<std::string> essential = { "-functions", "-similar_method" };
+    std::vector<std::string> essential = { "-num_inputs", "-input_file", "-output_file" };
     return checkEssentialOptions( this, essential );
   }
 
@@ -2511,10 +2219,9 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     // 定义选项类型分类
-    std::vector<std::string> strOptions = { "-functions", "-similar_method", "-similar_option",
-                                            "-sat_output", "-circuit_output", "-solver", "-random_tt" };
+    std::vector<std::string> strOptions = { "-input_file", "-output_file" };
     std::vector<std::string> boolOptions = {};
-    std::vector<std::string> intOptions = { "-r", "-sub_r", "-sub_n", "-num_decomposable" };
+    std::vector<std::string> intOptions = { "-num_inputs" };
     std::vector<std::string> doubleOptions = {};
     std::vector<std::string> strvecOptions = {};
     std::vector<std::string> intvecOptions = {};
@@ -2529,62 +2236,36 @@ public:
     {
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
     {
-      // 分割函数列表（逗号分隔的字符串→向量）
-      std::vector<std::string> func_strs = splitString( strOptionsValue["-functions"], ',' );
-      std::vector<exact::Boolean> funcs;
-      for ( const auto& s : func_strs )
+      // 提取参数
+      int num_inputs = intOptionsValue["-num_inputs"];
+      std::string input_file = strOptionsValue["-input_file"];
+      std::string output_file = strOptionsValue["-output_file"];
+
+      std::ifstream fin( input_file );
+      assert( fin.is_open() );
+      std::string exp, hex, temp;
+
+      while ( fin >> hex >> temp >> exp >> temp )
       {
-        funcs.emplace_back( exact::Boolean( s ) );
+        std::ofstream fout( output_file, std::ios::app | std::ios::out );
+        // std::cout << "0x" << hex << "\n";
+        exact::Boolean func( hex );
+        std::vector<exact::Boolean> funcs = { func };
+
+        exact::SSV_Incremental ssv( funcs );
+        // char similar_option[100] = "01001";   //for mute
+        char similar_option[100] = "010"; // for mute_last
+        strcat( similar_option, exp.c_str() );
+        ssv.set_similar_function( "mute_last", similar_option );
+        std::cout << ssv.get_similar_function() << "\n";
+        exact::SSV_Incremental* encoder = &ssv;
+
+        encoder->r = num_inputs - 1;
+
+        auto result = incremental_synthesis( encoder, "kissat", fout );
+        fout.close();
       }
-
-      // 创建 SSV_Incremental 对象
-      exact::SSV_Incremental ssv_incr( funcs, intOptionsValue["-sub_r"], intOptionsValue["-sub_n"] );
-      ssv_incr.r = intOptionsValue["-r"]; // 设置步骤数
-
-      // 设置相似函数（通过指定方法和选项）
-      char* similar_option = const_cast<char*>( strOptionsValue["-similar_option"].c_str() );
-      ssv_incr.set_similar_function(
-          strOptionsValue["-similar_method"],
-          similar_option,
-          intOptionsValue["-num_decomposable"],
-          strOptionsValue["-random_tt"],
-          intOptionsValue["-sub_n"] );
-
-      // 生成增量式 SAT 编码
-      auto [encoding, sub_vars] = ssv_incr.incremental_encode( true ); // 带变量标记
-
-      // 保存 SAT 编码文件（.cnf）
-      if ( !strOptionsValue["-sat_output"].empty() )
-      {
-        std::ofstream sat_file( strOptionsValue["-sat_output"] );
-        if ( sat_file.is_open() )
-        {
-          encoding.write_dimacs( sat_file );
-          sat_file.close();
-          std::cout << "Incremental SAT encoding saved to: " << strOptionsValue["-sat_output"] << std::endl;
-        }
-        else
-        {
-          std::cerr << "Failed to open SAT output file: " << strOptionsValue["-sat_output"] << std::endl;
-          return 0;
-        }
-      }
-
-      // 调用 SAT 求解器进行增量式综合
-      std::cout << "Running " << strOptionsValue["-solver"] << " for incremental SSV synthesis..." << std::endl;
-      auto [success, solution] = incremental_synthesis( &ssv_incr, strOptionsValue["-solver"].c_str(), std::cout );
-      if ( !success )
-      {
-        std::cerr << "Incremental SSV synthesis failed: no solution found" << std::endl;
-        return 0;
-      }
-
-      // 解码 SAT 解为逻辑电路（.blif）
-      if ( !strOptionsValue["-circuit_output"].empty() )
-      {
-        ssv_incr.decode( solution, strOptionsValue["-circuit_output"] );
-        std::cout << "Decoded incremental circuit saved to: " << strOptionsValue["-circuit_output"] << std::endl;
-      }
+      fin.close();
 
       break;
     }
@@ -2593,21 +2274,6 @@ public:
       return 0;
     }
     return 1;
-  }
-
-private:
-  // 辅助函数：将逗号分隔的字符串分割为向量
-  std::vector<std::string> splitString( const std::string& str, char delimiter )
-  {
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream( str );
-    while ( std::getline( tokenStream, token, delimiter ) )
-    {
-      if ( !token.empty() ) // 忽略空字符串（处理连续逗号的情况）
-        tokens.push_back( token );
-    }
-    return tokens;
   }
 };
 
@@ -2625,6 +2291,7 @@ public:
 
     // 定义命令选项（与 generate_netlist_library_power 参数对应）
     std::vector<lfCmdOption> options = {
+        { "-input", "", "string", "Input file path" },
         { "-output", "", "string", "Output file path to save the generated netlist library" },
         { "-num_inputs", "", "int", "Number of input variables for the boolean functions" },
         { "-num_classes", "", "int", "Number of classes for input probability discretization" },
@@ -2638,7 +2305,7 @@ public:
 
   unsigned check() override
   {
-    std::vector<std::string> essential = { "-output", "-num_inputs", "-num_classes" };
+    std::vector<std::string> essential = { "-input", "-output", "-num_inputs", "-num_classes" };
     return checkEssentialOptions( this, essential );
   }
 
@@ -2657,7 +2324,7 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     // 分类定义选项类型
-    std::vector<std::string> strOptions = { "-output" };
+    std::vector<std::string> strOptions = { "-input", "-output" };
     std::vector<std::string> boolOptions = { "-average" };
     std::vector<std::string> intOptions = { "-num_inputs", "-num_classes", "-start_index", "-partition_size" };
     std::vector<std::string> doubleOptions = {};
@@ -2679,6 +2346,7 @@ public:
     {
     case lf::misc::E_LF_ANCHOR_TOOL::E_LF_ANCHOR_TOOL_LOGIC_LSILS:
     {
+      std::string input_file = strOptionsValue.at( "-input" );
       std::string output_file = strOptionsValue.at( "-output" );
       int num_inputs = intOptionsValue.at( "-num_inputs" );
       int num_classes = intOptionsValue.at( "-num_classes" );
@@ -2687,7 +2355,8 @@ public:
       int partition_size = intOptionsValue.at( "-partition_size" );
 
       // 调用核心函数
-      exact::generate_netlist_library_power(
+      exact::generate_netlist_library_power_new(
+          input_file,
           output_file,
           num_inputs,
           num_classes,
@@ -2943,8 +2612,9 @@ public:
 
       std::string input = strOptionsValue["-input"];
       std::string tech_lib = strOptionsValue["-tech_lib"];
+      std::cout << 1 << std::endl;
       std::vector<double> power_results = PASyn::calculate_power_api( input, tech_lib, 0 );
-
+      std::cout << 2 << std::endl;
       // 格式化输出内容
       std::stringstream output_ss;
       output_ss << "Power Consumption Breakdown:" << std::endl;

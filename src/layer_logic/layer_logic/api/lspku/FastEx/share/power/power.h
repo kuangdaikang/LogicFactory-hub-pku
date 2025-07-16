@@ -20,6 +20,8 @@ namespace exact {
 
     void generate_netlist_library_power(std::string const &, int num_inputs, int num_classes, bool average, int start_index, int partition_size);
 
+    void generate_netlist_library_power_new(std::string const &, std::string const &, int num_inputs, int num_classes, bool average, int start_index, int partition_size);
+
     std::pair<bool, std::vector<int>> power_synthesis(exact::SSV_Power*, const std::string&, std::ostream& out, std::vector<double>, bool average = true);
 }
 #endif //EXACT_SYNTHESIS_POWER_H

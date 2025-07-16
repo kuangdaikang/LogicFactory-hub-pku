@@ -15,17 +15,19 @@ git submodule update --init --recursive
 docker build -t logic-factory:latest .
 
 #### 4. 运行容器（关键：添加 --gpus all 启用 GPU 访问, RL算子需要GPU支持）
-docker run -it --gpus all -v ../LogicFactory-hub:/workspace logic-factory:latest
+docker run -it --gpus all -v ../LogicFactory-hub-pku:/workspace logic-factory:latest
 
 #### 5. 进入容器后，正常构建
 cd /workspace
 mkdir -p build && cd build
 cmake -G Ninja ..
-ninja
+ninja (or ninja > build.log 2>&1)
+ninja -k 0 > build.log 2>&1
 
 #### 进入命令行界面 
 ./build/app/logicfactory
 
+anchor set_domain lsils
 
 ## 命令使用说明
 

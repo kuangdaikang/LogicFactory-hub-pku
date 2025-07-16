@@ -49,6 +49,7 @@ dependencies:
   - xz=5.2.5=h7b6447c_0
   - zipp=3.6.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7b6447c_3
+  - swig
   - pip:
       - ale-py==0.7.4
       - astor==0.8.1

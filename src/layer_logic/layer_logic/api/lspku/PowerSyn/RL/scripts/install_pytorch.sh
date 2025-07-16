@@ -7,7 +7,7 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 
 # 确保环境存在并激活
 conda activate rlgym || {
-    echo "错误: 无法激活rlgym环境"
+    echo "error: 无法激活rlgym环境"
     exit 1
 }
 

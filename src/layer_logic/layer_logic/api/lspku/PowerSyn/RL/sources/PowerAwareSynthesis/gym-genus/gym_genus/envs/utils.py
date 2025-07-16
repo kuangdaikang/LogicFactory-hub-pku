@@ -3,9 +3,9 @@ import regex
 import os
 
 def get_feature(netlist, mode="normal"):
-    feature_file = './temp_feature_'+str(os.getpid())+'.txt'
+    feature_file = './test_case/share/temp_feature_'+str(os.getpid())+'.txt'
     if mode == "normal":
-        cmd = './get_feature '+netlist+' '+ feature_file
+        cmd = './src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/get_feature '+netlist+' '+ feature_file
         return_value = os.system(cmd)
         assert return_value == 0, "Error in getting feature"
         with open(feature_file, 'r') as file:
@@ -14,7 +14,7 @@ def get_feature(netlist, mode="normal"):
         # print(feature)
         return [float(x) for x in feature]
     elif mode == "glitch":
-        cmd = './get_feature_glitch '+netlist+' '+ feature_file
+        cmd = './src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/get_feature_glitch '+netlist+' '+ feature_file
         return_value = os.system(cmd)
         assert return_value == 0, "Error in getting feature"
         with open(feature_file, 'r') as file:
@@ -23,7 +23,7 @@ def get_feature(netlist, mode="normal"):
         # print(feature)
         return [float(x) for x in feature]
     elif mode == 'basic':
-        cmd = './get_feature_basic '+netlist+' '+ feature_file
+        cmd = './src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/get_feature_basic '+netlist+' '+ feature_file
         return_value = os.system(cmd)
         assert return_value == 0, "Error in getting feature"
         with open(feature_file, 'r') as file:
@@ -59,16 +59,16 @@ def get_power(file_name):
 
 
 def technology_mapping(input_file, technology, output_file):
-    generate_yosys_script(input_file, output_file, technology, 'yosys_script.ys')
+    generate_yosys_script(input_file, output_file, technology, './src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/yosys_script.ys')
     import os
-    os.system('yosys -q -s yosys_script.ys')
+    os.system('yosys -q -s ./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/yosys_script.ys')
 
 def get_power(file_name, liberty_file):
     import os
-    os.system('./get_power '+file_name+' '+liberty_file+' ./temp_power.txt')
-    with open('./temp_power.txt', 'r') as file:
+    os.system('./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/network/get_power '+file_name+' '+liberty_file+' ./test_case/share/temp_power.txt')
+    with open('./test_case/share/temp_power.txt', 'r') as file:
         line = file.readline().strip().split()
-    os.remove('./temp_power.txt')
+    os.remove('./test_case/share/temp_power.txt')
     return  float(line[0]), float(line[1]), float(line[2]), float(line[3]), float(line[4])
 
 def generate_yosys_script(in_file, out_file, liberty, script_file, trace_dir=None, num_iter=0):

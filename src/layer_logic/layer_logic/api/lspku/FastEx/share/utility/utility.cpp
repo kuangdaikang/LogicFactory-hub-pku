@@ -518,7 +518,7 @@ void exact::generate_netlist_library(std::string const &filename, int num_inputs
     std::string solver = "parkissat";
     std::string encoding_method = "SSV";
     std::string symmetry = "";
-    std::ifstream fin("../documents/" + std::to_string(num_inputs) + "input.txt");
+    std::ifstream fin("./test_case/documents/" + std::to_string(num_inputs) + "input.txt");
     assert(fin.is_open());
     std::string temp;
     std::vector<std::string> functions;

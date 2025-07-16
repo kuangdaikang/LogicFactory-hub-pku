@@ -3,6 +3,10 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Shanghai
 
+# 替换为阿里云镜像源
+RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
+
 RUN apt-get update && apt-get upgrade -y --no-install-recommends apt-utils
 
 # build essential
@@ -15,7 +19,9 @@ RUN apt-get install -y \
     ninja-build \
     git \
     autoconf \
-    automake
+    automake \
+    libcrypt-dev \
+    libc6-dev
 
 # toolkit related libraries
 RUN apt-get install -y \
@@ -78,6 +84,8 @@ ENV PATH="/usr/bin:/usr/sbin:/bin:/sbin:$CONDA_DIR/bin:/root/.cargo/bin"
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p $CONDA_DIR && \
     rm ~/miniconda.sh && \
+    $CONDA_DIR/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    $CONDA_DIR/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
     # Allow mamba installation
     conda install -y mamba -n base -c conda-forge && \
     # Clean up
@@ -89,7 +97,7 @@ RUN git clone https://github.com/arminbiere/kissat.git && \
     cd kissat && \
     ./configure && \
     make -j$(nproc) && \
-    make install && \
+    cp build/kissat /usr/bin/ && \
     cd .. && \
     rm -rf kissat
 

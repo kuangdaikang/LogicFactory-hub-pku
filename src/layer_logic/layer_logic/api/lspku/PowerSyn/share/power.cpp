@@ -529,6 +529,6 @@ std::vector<double> PASyn::calculate_power_api(std::string &input, std::string &
     Netlist netlist{};
     read_liberty(technology_input, technology);
     switch_pre_process(technology);
-    PASyn::read_blif(input, netlist);
+    PASyn::read_blif(input, netlist, &technology);
     return calculate_power(netlist, technology);
 }

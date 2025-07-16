@@ -33,7 +33,7 @@ class GenusEnv(gym.Env, utils.EzPickle):
         self.history_action = [-1 for _ in range(history_size)]
         self.history_reward = [2 for _ in range(history_size)]
         self.action_space = spaces.Discrete(action_dim)
-        self.log_file = './log_file'
+        self.log_file = './test_case/share/log_file'
         self.lib_file = lib_file
         self.feature_mode = feature_mode
         self.actions = {
@@ -162,14 +162,14 @@ class GenusEnv(gym.Env, utils.EzPickle):
         depth_index = tokens.index('lev') + 1
         depth = int(tokens[depth_index])
 
-        post_syn_file = "./PAS_syn_" + self.file_name + str(os.getpid())
+        post_syn_file = "./test_case/share/PAS_syn_" + self.file_name + str(os.getpid())
         t1 = time.clock()
         abc_write(self.abc, "verilog", post_syn_file + ".v")
         abc_write(self.abc, "blif", post_syn_file + ".blif")
         t2 = time.clock()
         #print('abc write_file is :%s ms' % ((t2 - t1) * 1000))
 
-        post_map_file = "./PAS_map_" + self.file_name + str(os.getpid())
+        post_map_file = "./test_case/share/PAS_map_" + self.file_name + str(os.getpid())
         technology_mapping(post_syn_file + ".blif", self.lib_file, post_map_file)
         # print(post_map_file, self.lib_file)
         leakage, switch, internal, wire, power = get_power(post_map_file, self.lib_file)
