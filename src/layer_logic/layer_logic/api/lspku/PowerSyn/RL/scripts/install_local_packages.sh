@@ -19,7 +19,7 @@ make ABC_USE_PIC=1 ABC_USE_NO_READLINE=1 libabc.so -j12
 cd - > /dev/null
 
 
-cd ./sources/PowerAwareSynthesis/netlist/abc/ABC-python || exit
+cd ./sources/PowerAwareSynthesis/netlist/abc/ABC-python
 LIBABC_PATH=$(readlink -f ../libabc.so)
 swig -python ABC.i
 gcc -fPIC $(python3-config --includes) \
@@ -35,14 +35,22 @@ cp -f _ABC.so /opt/conda/envs/rlgym/lib/python3.7/site-packages/
 cd - > /dev/null
 
 
-cd ./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/netlist/yosys
+conda deactivate
+
+cd ./sources/PowerAwareSynthesis/netlist/yosys
 make clean || true
 make config-gcc
 make -j12
-make install PREFIX="$CONDA_PREFIX"
+make install
+
+if ! echo "$PATH" | grep -q "/usr/local/bin"; then
+    echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+else
+    echo "/usr/local/bin 已在 PATH 中，无需重复添加"
+fi
 yosys --version
 cd - > /dev/null
 
-conda deactivate
 
 echo "=== 本地包安装完成（可编辑模式）==="
