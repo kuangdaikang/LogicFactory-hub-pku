@@ -1,5 +1,5 @@
-read_blif ./test_case/share/PAS_syn_adder27.blif
+read_blif ./test_case/share/PAS_syn_adder503.blif
 techmap
 abc -liberty ./src/layer_logic/layer_logic/api/lspku/PowerSyn/RL/sources/PowerAwareSynthesis/netlist/gsc145nm.lib
 clean
-write_blif ./test_case/share/PAS_map_adder27
+write_blif ./test_case/share/PAS_map_adder503

@@ -47,7 +47,6 @@
 #include "layer_logic/api/lspku/FastEx/share/utility/utility.h"
 #include "layer_logic/api/lspku/PowerSyn/share/netlist.h"
 
-
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>
@@ -1511,7 +1510,7 @@ public:
     std::vector<lfCmdOption> options = {
         { "-test_list", "", "string", "Path to test circuit list file" },
         { "-result_dir", "", "string", "Directory to save results" },
-        { "-test_dir", "", "string", "Directory containing test circuits" }};
+        { "-test_dir", "", "string", "Directory containing test circuits" } };
     setOptions( this, options );
   }
 
@@ -1541,7 +1540,7 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = {"-test_list", "-result_dir", "-test_dir" };
+    std::vector<std::string> strOptions = { "-test_list", "-result_dir", "-test_dir" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -1595,10 +1594,8 @@ public:
       sh_content << "  --result_dir \"" << strOptionsValue["-result_dir"] << "\" \\\n";
       sh_content << "  --test_dir \"" << strOptionsValue["-test_dir"] << "\" \\\n";
 
-
       sh_content << "# Deactivate conda environment\n";
       sh_content << "conda deactivate\n\n";
-
 
       sh_content << "# Capture exit status\n";
       sh_content << "exit_code=$?\n";
@@ -1653,7 +1650,7 @@ public:
     std::vector<lfCmdOption> options = {
         { "-test_list", "", "string", "Path to test circuit list file" },
         { "-result_dir", "", "string", "Directory to save results" },
-        { "-test_dir", "", "string", "Directory containing test circuits" }};
+        { "-test_dir", "", "string", "Directory containing test circuits" } };
     setOptions( this, options );
   }
 
@@ -1683,7 +1680,7 @@ public:
     std::map<std::string, std::vector<int>> intvecOptionsValue;
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
-    std::vector<std::string> strOptions = { "-test_list" , "-result_dir", "-test_dir" };
+    std::vector<std::string> strOptions = { "-test_list", "-result_dir", "-test_dir" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = {};
     std::vector<std::string> doubleOptions = {};
@@ -1739,7 +1736,6 @@ public:
 
       sh_content << "# Deactivate conda environment\n";
       sh_content << "conda deactivate\n\n";
-
 
       sh_content << "# Capture exit status\n";
       sh_content << "exit_code=$?\n";
@@ -2190,7 +2186,8 @@ public:
     // 命令选项
     std::vector<lfCmdOption> options = {
         { "-num_inputs", "", "int", "" },
-        { "-input_file", "", "string", "" },
+        { "-function", "", "string", "" },
+        { "-exp", "", "string", "" },
         { "-output_file", "", "string", "" } };
     setOptions( this, options );
   }
@@ -2200,7 +2197,7 @@ public:
   unsigned check() override
   {
     // 检查必填选项
-    std::vector<std::string> essential = { "-num_inputs", "-input_file", "-output_file" };
+    std::vector<std::string> essential = { "-num_inputs", "-function", "-output_file", "-exp" };
     return checkEssentialOptions( this, essential );
   }
 
@@ -2219,7 +2216,7 @@ public:
     std::map<std::string, std::vector<double>> doublevecOptionsValue;
 
     // 定义选项类型分类
-    std::vector<std::string> strOptions = { "-input_file", "-output_file" };
+    std::vector<std::string> strOptions = { "-function", "-output_file", "-exp" };
     std::vector<std::string> boolOptions = {};
     std::vector<std::string> intOptions = { "-num_inputs" };
     std::vector<std::string> doubleOptions = {};
@@ -2238,34 +2235,32 @@ public:
     {
       // 提取参数
       int num_inputs = intOptionsValue["-num_inputs"];
-      std::string input_file = strOptionsValue["-input_file"];
+      std::string hex = strOptionsValue["-function"];
       std::string output_file = strOptionsValue["-output_file"];
+      std::string exp = strOptionsValue["-exp"];
+      std::string temp;
 
-      std::ifstream fin( input_file );
-      assert( fin.is_open() );
-      std::string exp, hex, temp;
+      exact::Boolean func( hex );
+      std::vector<exact::Boolean> funcs = { func };
 
-      while ( fin >> hex >> temp >> exp >> temp )
+      exact::SSV_Incremental ssv( funcs );
+      // char similar_option[100] = "01001";   //for mute
+      char similar_option[100] = "010"; // for mute_last
+      strcat( similar_option, exp.c_str() );
+      ssv.set_similar_function( "mute_last", similar_option );
+      std::cout << ssv.get_similar_function() << "\n";
+      exact::SSV_Incremental* encoder = &ssv;
+
+      encoder->r = num_inputs - 1;
+
+      auto [success, solution] = incremental_synthesis( encoder, "kissat", std::cout );
+      if ( !success )
       {
-        std::ofstream fout( output_file, std::ios::app | std::ios::out );
-        // std::cout << "0x" << hex << "\n";
-        exact::Boolean func( hex );
-        std::vector<exact::Boolean> funcs = { func };
-
-        exact::SSV_Incremental ssv( funcs );
-        // char similar_option[100] = "01001";   //for mute
-        char similar_option[100] = "010"; // for mute_last
-        strcat( similar_option, exp.c_str() );
-        ssv.set_similar_function( "mute_last", similar_option );
-        std::cout << ssv.get_similar_function() << "\n";
-        exact::SSV_Incremental* encoder = &ssv;
-
-        encoder->r = num_inputs - 1;
-
-        auto result = incremental_synthesis( encoder, "kissat", fout );
-        fout.close();
+        std::cerr << "SSV_Incremental synthesis failed for function: " << hex << std::endl;
+        return 0;
       }
-      fin.close();
+      ssv.decode( solution, output_file );
+      std::cout << "Decoded circuit saved to: " << output_file << std::endl;
 
       break;
     }

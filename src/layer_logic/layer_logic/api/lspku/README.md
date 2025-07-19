@@ -51,7 +51,6 @@ anchor set_domain lsils
 ```tcl
 rl_gene_basic \
     -test_list "./test_case/RL_basic/test_set/test_list_small.txt" \
-    -model "./models/ppo_basic_model.pt" \
     -result_dir "./test_case/RL_basic/result" \
     -test_dir "./test_case/RL_basic/test_set"
 ```
@@ -143,15 +142,17 @@ ssv \
 | 参数名            | 类型    | 必填 | 描述                                      |
 |-------------------|---------|------|------------------------------------------|
 | `-num_inputs`     | 整数    | 是   | 布尔函数中的变量个数              |
-| `-input_file`     | 字符串  | 是   | 输入文件                                |
+| `-function`       | 字符串  | 是   | 单个布尔表达式                                |
+| `-exp`            | 字符串  | 是   | 对应的逻辑表达式                                |
 | `-output_file`    | 字符串  | 是   | 输出文件                              |
 
 **示例：**
 ```tcl
 ssv_incremental \
     -num_inputs 4 \
-    -input_file "./test_case/ssv_incremental/input.txt" \
-    -output_file "./test_case/ssv_incremental/output.txt"
+    -function "0001" \
+    -exp "&A&&BCD" \
+    -output_file "./test_case/ssv_incremental/output.blif"
 ```
 
 ---
